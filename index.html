@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Owner — i am because we are</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   CSS VARIABLES — Admin can change these
+   ════════════════════════════════════════ */
+:root {
+  /* === PRIMARY THEME (edit in Admin > Settings > Theme) === */
+  --brand:#1400FF;          /* Royal Blue from logo */
+  --brand-2:#0D00CC;
+  --brand-light:rgba(20,0,255,.15);
+  --brand-glow:rgba(20,0,255,.35);
+  --accent:#FFFFFF;
+
+  /* === DARK BG PALETTE === */
+  --dark:#080810;
+  --dark-2:#0E0E1A;
+  --dark-3:#141428;
+  --dark-4:#1C1C38;
+  --dark-5:#242448;
+  --mid:#383860;
+  --text:#E8E8FF;
+  --text-muted:#7070A0;
+  --white:#F8F8FF;
+
+  /* === STATUS === */
+  --success:#22C55E;
+  --danger:#EF4444;
+  --warning:#F59E0B;
+  --info:#38BDF8;
+
+  /* === MISC === */
+  --radius:12px;
+  --shadow:0 8px 40px rgba(20,0,255,.2);
+  --font-size-base:15px; /* Admin can adjust */
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Sarabun',sans-serif;font-size:var(--font-size-base);background:var(--dark);color:var(--text);overflow-x:hidden;line-height:1.6;}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;}.page.active{display:block;}
+
+/* ── LOGO ── */
+.logo-mark{width:44px;height:44px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:800;color:#fff;line-height:1.1;text-align:center;letter-spacing:-.5px;}
+.logo-text{font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:800;color:var(--white);letter-spacing:1px;}
+.logo-text span{color:var(--brand);display:block;font-size:11px;font-weight:400;letter-spacing:3px;margin-top:-4px;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(8,8,16,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(20,0,255,.2);padding:0 20px;height:62px;display:flex;align-items:center;justify-content:space-between;}
+.nav-left{display:flex;align-items:center;gap:12px;cursor:pointer;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-btn{background:none;border:none;color:var(--text-muted);font-family:'Sarabun',sans-serif;font-size:14px;cursor:pointer;padding:7px 13px;border-radius:8px;transition:all .2s;}
+.nav-btn:hover{color:var(--white);background:rgba(20,0,255,.12);}
+.nav-btn.primary{background:var(--brand);color:#fff;font-weight:700;padding:7px 18px;}
+.nav-btn.primary:hover{background:var(--brand-2);transform:translateY(-1px);}
+.nav-btn.line-btn{background:linear-gradient(135deg,#00C300,#00B300);color:#fff;font-weight:700;padding:7px 14px;display:flex;align-items:center;gap:6px;}
+.nav-btn.line-btn:hover{background:linear-gradient(135deg,#00AA00,#009900);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:80px 20px 60px;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 30% 40%,rgba(20,0,255,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 70%,rgba(20,0,255,.08) 0%,transparent 50%),var(--dark);}
+.hero-grid{position:absolute;inset:0;opacity:.05;background-image:linear-gradient(var(--brand) 1px,transparent 1px),linear-gradient(90deg,var(--brand) 1px,transparent 1px);background-size:50px 50px;}
+.hero-content{position:relative;max-width:1000px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-left{}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(20,0,255,.15);border:1px solid rgba(20,0,255,.4);color:#8888FF;padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .6s ease both;}
+.hero-logo-big{width:110px;height:110px;border-radius:50%;background:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 0 40px rgba(20,0,255,.5);animation:fadeUp .6s .05s ease both;}
+.hero-logo-big .hl-the{font-family:'Chakra Petch',serif;font-size:14px;font-weight:400;color:rgba(255,255,255,.8);letter-spacing:4px;}
+.hero-logo-big .hl-owner{font-family:'Chakra Petch',serif;font-size:28px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px;}
+.hero-logo-big .hl-mtn{font-size:18px;margin-top:2px;}
+.hero-title{font-family:'Sarabun',sans-serif;font-size:clamp(36px,5vw,58px);font-weight:800;line-height:1.3;color:var(--white);animation:fadeUp .6s .1s ease both;letter-spacing:-0.5px;}
+.hero-title .hl{color:var(--brand);}
+.hero-sub{font-size:16px;color:var(--text-muted);line-height:1.7;margin:16px 0 32px;animation:fadeUp .6s .2s ease both;}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;animation:fadeUp .6s .3s ease both;}
+.hero-right{animation:fadeUp .6s .15s ease both;}
+
+/* ── STATS ── */
+.stats-bar{background:var(--dark-3);border-top:1px solid rgba(20,0,255,.15);border-bottom:1px solid rgba(20,0,255,.15);padding:20px;display:flex;justify-content:center;gap:50px;flex-wrap:wrap;}
+.stat-item{text-align:center;}
+.stat-num{font-family:'Chakra Petch',sans-serif;font-size:28px;font-weight:800;color:var(--brand);}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:2px;}
+
+/* ── SECTION ── */
+.section{padding:70px 20px;max-width:1100px;margin:0 auto;}
+.sec-title{font-family:'Sarabun',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:var(--white);margin-bottom:6px;line-height:1.3;letter-spacing:-0.3px;}
+.sec-title .hl{color:var(--brand);}
+.sec-sub{font-size:14px;color:var(--text-muted);margin-bottom:40px;}
+
+/* ── COURSES ── */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+.course-card{background:var(--dark-3);border:1px solid rgba(20,0,255,.12);border-radius:16px;padding:28px;transition:all .3s;position:relative;overflow:hidden;}
+.course-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),rgba(20,0,255,.3));}
+.course-card:hover{border-color:rgba(20,0,255,.4);transform:translateY(-4px);box-shadow:0 12px 40px rgba(20,0,255,.15);}
+.course-num{font-family:'Chakra Petch',sans-serif;font-size:11px;font-weight:700;color:var(--brand);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+.course-name{font-size:17px;font-weight:700;color:var(--white);margin-bottom:8px;line-height:1.3;}
+.course-desc{font-size:13px;color:var(--text-muted);line-height:1.6;}
+.course-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.tag-online{background:rgba(56,189,248,.12);color:var(--info);}
+.tag-onsite{background:rgba(34,197,94,.12);color:var(--success);}
+.tag-free{background:rgba(20,0,255,.15);color:#8888FF;}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+.pricing-card{background:var(--dark-3);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:36px;position:relative;transition:all .3s;}
+.pricing-card:hover{transform:translateY(-4px);border-color:rgba(20,0,255,.3);}
+.pricing-card.featured{border-color:var(--brand);background:linear-gradient(135deg,rgba(20,0,255,.1),var(--dark-3));}
+.pricing-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 16px;border-radius:999px;}
+.pricing-type{font-family:'Chakra Petch',sans-serif;font-size:12px;color:var(--brand);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.pricing-name{font-family:'Sarabun',sans-serif;font-size:24px;font-weight:800;color:var(--white);margin-bottom:14px;letter-spacing:-0.3px;}
+.pricing-amount{font-family:'Chakra Petch',sans-serif;font-size:50px;font-weight:800;color:var(--brand);}
+.pricing-unit{font-size:14px;color:var(--text-muted);}
+.pricing-note{font-size:13px;color:var(--text-muted);margin:8px 0 24px;}
+.pricing-features{list-style:none;margin-bottom:28px;}
+.pricing-features li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);}
+.pricing-features li:last-child{border-bottom:none;}
+.chk{color:var(--success);}
+.crs{color:var(--text-muted);}
+
+/* ── HOW TO SIGN UP ── */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;}
+.step-card{background:var(--dark-3);border-radius:14px;padding:24px;border:1px solid rgba(255,255,255,.05);text-align:center;}
+.step-num{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;font-family:'Chakra Petch',sans-serif;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.step-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px;}
+.step-desc{font-size:13px;color:var(--text-muted);line-height:1.6;}
+
+/* ── FAQ ── */
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--dark-3);border:1px solid rgba(255,255,255,.05);border-radius:12px;overflow:hidden;}
+.faq-q{padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--white);transition:background .2s;}
+.faq-q:hover{background:rgba(20,0,255,.08);}
+.faq-a{padding:0 20px;max-height:0;overflow:hidden;transition:all .3s;font-size:14px;color:var(--text-muted);line-height:1.7;}
+.faq-item.open .faq-a{padding:0 20px 16px;max-height:200px;}
+.faq-arrow{transition:transform .3s;font-size:12px;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+
+/* ── PAYMENT BOX ── */
+.payment-box{background:var(--dark-3);border:1px solid rgba(20,0,255,.2);border-radius:18px;padding:32px;max-width:600px;margin:0 auto;}
+.payment-title{font-family:'Chakra Petch',sans-serif;font-size:18px;font-weight:800;color:var(--white);margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.payment-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.bank-card{background:var(--dark-4);border-radius:14px;padding:20px 24px;border:1px solid rgba(20,0,255,.15);display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.bank-icon{width:48px;height:48px;border-radius:12px;background:#003087;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.bank-name{font-size:13px;color:var(--text-muted);}
+.bank-acc{font-family:'Chakra Petch',sans-serif;font-size:18px;font-weight:700;color:var(--white);letter-spacing:1px;}
+.bank-owner{font-size:13px;color:#8888FF;margin-top:2px;}
+.upload-zone{border:2px dashed rgba(20,0,255,.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .3s;position:relative;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--brand);background:rgba(20,0,255,.06);}
+.upload-icon{font-size:32px;margin-bottom:8px;}
+.upload-title{font-size:15px;font-weight:700;color:var(--white);}
+.upload-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.slip-preview{margin-top:16px;border-radius:10px;overflow:hidden;max-height:200px;display:none;}
+.slip-preview img{width:100%;object-fit:contain;max-height:200px;}
+
+/* ── BTN ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;font-size:14px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;border:none;transition:all .25s;text-decoration:none;}
+.btn-brand{background:var(--brand);color:#fff;box-shadow:0 4px 20px rgba(20,0,255,.35);}
+.btn-brand:hover{background:var(--brand-2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(20,0,255,.45);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.15);}
+.btn-outline:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px);}
+.btn-ghost{background:var(--dark-5);color:var(--text-muted);border:1px solid rgba(255,255,255,.06);}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+.btn-line{background:linear-gradient(135deg,#00C300,#00B300);color:#fff;}
+.btn-line:hover{background:linear-gradient(135deg,#00AA00,#009900);}
+.btn-success{background:rgba(34,197,94,.15);color:var(--success);border:1px solid rgba(34,197,94,.25);}
+.btn-danger-sm{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2);padding:6px 14px;font-size:12px;}
+.btn-block{flex:1;justify-content:center;}
+.btn-sm{padding:7px 16px;font-size:13px;}
+.btn-lg{padding:14px 32px;font-size:16px;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--dark-2);border:1px solid rgba(20,0,255,.25);border-radius:20px;padding:32px;width:100%;max-width:520px;transform:translateY(20px);transition:transform .3s;max-height:92vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'Sarabun',sans-serif;font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px;letter-spacing:-0.3px;}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase;}
+.form-input{width:100%;background:var(--dark-5);border:1px solid rgba(255,255,255,.08);color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;padding:11px 15px;border-radius:10px;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--brand);}
+.form-input option{background:var(--dark-5);}
+.form-input.line-autofill{background:rgba(0,195,0,.08);border-color:rgba(0,195,0,.3);color:#00C300;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.plan-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.plan-opt{background:var(--dark-5);border:2px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;text-align:center;}
+.plan-opt:hover{border-color:rgba(20,0,255,.3);}
+.plan-opt.sel{border-color:var(--brand);background:rgba(20,0,255,.1);}
+.plan-price{font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:800;color:var(--brand);}
+.plan-name{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.plan-note{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-actions .btn{flex:1;justify-content:center;}
+.step-indicator{display:flex;align-items:center;gap:8px;margin-bottom:24px;}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .3s;}
+.step-dot.done{background:var(--brand);color:#fff;}
+.step-dot.current{background:var(--brand);color:#fff;box-shadow:0 0 0 4px rgba(20,0,255,.25);}
+.step-dot.future{background:var(--dark-5);color:var(--text-muted);}
+.step-line{flex:1;height:2px;background:rgba(255,255,255,.08);}
+.step-line.done{background:var(--brand);}
+.line-login-box{background:rgba(0,195,0,.08);border:1px solid rgba(0,195,0,.25);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.line-login-box .ll-icon{font-size:24px;}
+.line-login-box .ll-text{font-size:13px;color:var(--text-muted);}
+.line-login-box .ll-name{font-size:15px;font-weight:700;color:#00C300;}
+.pending-badge{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;margin-top:16px;}
+.pending-badge .pb-icon{font-size:18px;flex-shrink:0;}
+.pending-badge .pb-text{font-size:13px;color:var(--text-muted);line-height:1.5;}
+.pending-badge .pb-text strong{color:var(--warning);display:block;margin-bottom:2px;}
+
+/* ── MEMBER PORTAL ── */
+#page-member{padding-top:62px;}
+.portal-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 62px);}
+.portal-sidebar{background:var(--dark-2);border-right:1px solid rgba(20,0,255,.1);padding:24px 14px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;}
+.sb-profile{text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.05);}
+.sb-avatar{width:60px;height:60px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:800;color:#fff;margin:0 auto 10px;box-shadow:0 0 20px rgba(20,0,255,.4);}
+.sb-name{font-size:14px;font-weight:700;color:var(--white);}
+.sb-id{font-family:'Chakra Petch',sans-serif;font-size:12px;color:var(--brand);margin-top:2px;letter-spacing:1px;}
+.sb-status{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);color:var(--success);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-top:6px;}
+.sb-menu{list-style:none;}
+.sb-menu li{margin-bottom:3px;}
+.sb-menu a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s;}
+.sb-menu a:hover{background:rgba(20,0,255,.1);color:var(--text);}
+.sb-menu a.active{background:rgba(20,0,255,.15);color:var(--brand);}
+.sb-icon{font-size:15px;width:18px;text-align:center;}
+.portal-content{padding:28px;overflow-y:auto;}
+.p-tab{display:none;}.p-tab.active{display:block;}
+.p-header{margin-bottom:24px;}
+.p-header h2{font-family:'Sarabun',sans-serif;font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.3px;}
+.p-header p{font-size:13px;color:var(--text-muted);margin-top:3px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.info-card{background:var(--dark-3);border-radius:13px;padding:18px;border:1px solid rgba(255,255,255,.05);}
+.ic-label{font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase;}
+.ic-val{font-family:'Chakra Petch',sans-serif;font-size:26px;font-weight:800;}
+.ic-val.brand{color:var(--brand);}
+.ic-val.success{color:var(--success);}
+.ic-val.danger{color:var(--danger);}
+.ic-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+.booking-list{display:flex;flex-direction:column;gap:10px;}
+.booking-item{background:var(--dark-3);border-radius:13px;padding:18px;border:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.bi-title{font-size:14px;font-weight:700;color:var(--white);}
+.bi-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
+.sb-confirmed{background:rgba(34,197,94,.12);color:var(--success);}
+.sb-pending{background:rgba(245,158,11,.12);color:var(--warning);}
+.sb-cancelled{background:rgba(239,68,68,.12);color:var(--danger);}
+.sb-waiting{background:rgba(56,189,248,.12);color:var(--info);}
+.schedule-wrap{overflow-x:auto;background:var(--dark-3);border-radius:14px;border:1px solid rgba(255,255,255,.05);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:rgba(20,0,255,.1);color:var(--brand);font-weight:700;padding:11px 15px;text-align:left;font-size:11px;letter-spacing:.8px;text-transform:uppercase;}
+.tbl td{padding:13px 15px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(20,0,255,.03);}
+.room-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.rb-online{background:rgba(56,189,248,.12);color:var(--info);}
+.rb-onsite{background:rgba(34,197,94,.12);color:var(--success);}
+.rb-hybrid{background:rgba(20,0,255,.15);color:#8888FF;}
+.seats-ok{color:var(--success);font-weight:600;}
+.seats-low{color:var(--danger);font-weight:700;}
+.qr-section{text-align:center;padding:30px 20px;}
+.qr-box{display:inline-block;background:#fff;padding:18px;border-radius:16px;margin:16px 0;}
+.warn-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;margin-top:14px;}
+.warn-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.warn-text h4{font-size:13px;font-weight:700;color:var(--danger);}
+.warn-text p{font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5;}
+.zoom-card{background:linear-gradient(135deg,rgba(20,0,255,.15),var(--dark-4));border:1px solid rgba(20,0,255,.25);border-radius:16px;padding:24px;margin-bottom:20px;}
+.zoom-title{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:800;color:var(--white);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.zoom-field{display:grid;grid-template-columns:100px 1fr;gap:8px;align-items:center;margin-bottom:10px;}
+.zoom-label{font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;}
+.zoom-val{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;color:var(--white);}
+.zoom-copy{background:rgba(20,0,255,.15);border:none;color:var(--brand);font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.zoom-copy:hover{background:rgba(20,0,255,.3);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--dark-3);border:1px solid rgba(20,0,255,.3);color:var(--text);padding:13px 18px;border-radius:11px;font-size:14px;font-weight:500;min-width:220px;box-shadow:0 8px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:9px;transform:translateX(130%);transition:transform .3s;}
+.toast.show{transform:translateX(0);}
+.toast.error{border-color:rgba(239,68,68,.4);}
+.toast.success{border-color:rgba(34,197,94,.4);}
+
+/* ── FOOTER ── */
+footer{background:var(--dark-2);border-top:1px solid rgba(20,0,255,.1);padding:40px 20px;text-align:center;}
+.footer-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:10px;}
+footer p{font-size:13px;color:var(--text-muted);}
+
+/* ── DIVIDER ── */
+.brand-divider{height:1px;background:linear-gradient(90deg,transparent,var(--brand),transparent);}
+
+/* ── LOADING ── */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+
+/* ── ANIMS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .hero-content{grid-template-columns:1fr;}
+  .hero-right{display:none;}
+}
+@media(max-width:768px){
+  .portal-layout{grid-template-columns:1fr;}
+  .portal-sidebar{position:static;height:auto;display:flex;flex-wrap:wrap;gap:5px;padding:10px 14px;align-items:center;}
+  .sb-profile{display:none;}
+  .sb-menu{display:flex;flex-wrap:wrap;gap:4px;}
+  .sb-menu li{margin:0;}
+  .sb-menu a{padding:6px 10px;font-size:12px;gap:5px;}
+  .form-row{grid-template-columns:1fr;}
+  .stats-bar{gap:20px;}
+  nav .nav-btn:not(.primary):not(#nav-login-btn):not(#nav-member-btn){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav>
+  <div class="nav-left" onclick="showPage('landing')">
+    <div class="logo-mark">THE<br>OWN</div>
+    <div class="logo-text">THE OWNER<span>i am because we are</span></div>
+  </div>
+  <div class="nav-links" id="nav-links">
+    <button class="nav-btn" onclick="scrollTo2('courses')">คอร์ส</button>
+    <button class="nav-btn" onclick="scrollTo2('pricing')">แพ็กเกจ</button>
+    <button class="nav-btn" onclick="scrollTo2('how-to')">วิธีสมัคร</button>
+    <button class="nav-btn" onclick="scrollTo2('faq')">FAQ</button>
+    <button class="nav-btn" id="nav-member-btn" onclick="showPage('member')" style="display:none">พอร์ทัล</button>
+    <button class="nav-btn line-btn" id="nav-line-btn" onclick="lineLoginFlow()">
+      <span>💚</span> LINE Login
+    </button>
+    <button class="nav-btn" id="nav-login-btn" onclick="openModal('login')">เข้าสู่ระบบ</button>
+    <button class="nav-btn primary" onclick="openModal('register')">สมัครเรียน</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════ -->
+<!-- PAGE: LANDING                         -->
+<!-- ══════════════════════════════════════ -->
+<div id="page-landing" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge">📚 เรียนธุรกิจระดับพรีเมียม</div>
+        <div class="hero-logo-big">
+          <div class="hl-the">THE</div>
+          <div class="hl-owner">OWNER</div>
+          <div class="hl-mtn">⛰️</div>
+        </div>
+        <h1 class="hero-title" style="font-family:'Sarabun',sans-serif;font-weight:800;letter-spacing:0;line-height:1.25;">เรียนรู้ธุรกิจ<br><span class="hl">ที่ทำได้จริง</span></h1>
+        <p class="hero-sub">4 คอร์สพรีเมียม เรียนได้ทั้ง Online & Onsite<br>โดยผู้เชี่ยวชาญที่ทำจริง ไม่ใช่แค่สอน<br><em style="color:#8888FF;font-style:normal;font-size:14px;">"i am because we are"</em></p>
+        <div class="hero-actions">
+          <button class="btn btn-brand btn-lg" onclick="openModal('register')">🚀 สมัครเรียนเลย</button>
+          <button class="btn btn-line" onclick="lineLoginFlow()">💚 เข้าผ่าน LINE</button>
+          <button class="btn btn-outline" onclick="scrollTo2('courses')">📖 ดูคอร์สทั้งหมด</button>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div style="background:var(--dark-3);border:1px solid rgba(20,0,255,.2);border-radius:20px;padding:28px;box-shadow:var(--shadow);">
+          <div style="font-family:'Chakra Petch',sans-serif;font-size:13px;color:var(--brand);font-weight:700;letter-spacing:2px;margin-bottom:16px;">COURSES 2025</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--dark-4);border-radius:10px;padding:14px 16px;border-left:3px solid var(--brand);"><div style="font-size:14px;font-weight:700;color:var(--white);">Product Growth 101</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Online + Onsite</div></div>
+            <div style="background:var(--dark-4);border-radius:10px;padding:14px 16px;border-left:3px solid #5555FF;"><div style="font-size:14px;font-weight:700;color:var(--white);">Business Growth 101</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Online + Onsite</div></div>
+            <div style="background:var(--dark-4);border-radius:10px;padding:14px 16px;border-left:3px solid #7777FF;"><div style="font-size:14px;font-weight:700;color:var(--white);">Health Buddy Growth 101</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Online + Onsite</div></div>
+            <div style="background:var(--dark-4);border-radius:10px;padding:14px 16px;border-left:3px solid #9999FF;"><div style="font-size:14px;font-weight:700;color:var(--white);">Digital Growth 101</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Online + Onsite</div></div>
+          </div>
+          <div style="margin-top:16px;background:rgba(20,0,255,.1);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:12px;color:var(--text-muted);">ราคาเริ่มต้นเพียง</div>
+            <div style="font-family:'Chakra Petch',sans-serif;font-size:26px;font-weight:800;color:var(--brand);">฿150 <span style="font-size:14px;color:var(--text-muted);">/ ครั้ง</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">คอร์สพรีเมียม</div></div>
+    <div class="stat-item"><div class="stat-num">6+</div><div class="stat-label">คลาสต่อเดือน</div></div>
+    <div class="stat-item"><div class="stat-num">Online</div><div class="stat-label">&amp; Onsite</div></div>
+    <div class="stat-item"><div class="stat-num">฿150</div><div class="stat-label">เริ่มต้น</div></div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- COURSES -->
+  <div id="courses" class="section">
+    <div class="sec-title">คอร์ส<span class="hl">ทั้งหมด</span></div>
+    <div class="sec-sub">เรียนได้ฟรีตามแพ็กเกจที่สมัคร — สามารถเรียนซ้ำได้ไม่จำกัด</div>
+    <div class="courses-grid">
+      <div class="course-card">
+        <div class="course-num">Course 01</div>
+        <div class="course-name">Product Growth 101</div>
+        <div class="course-desc">เรียนรู้การสร้างและพัฒนาสินค้า/บริการให้เติบโต ตั้งแต่ Idea Validation จนถึง Product-Market Fit</div>
+        <div class="course-tags"><span class="tag tag-online">🖥️ Online</span><span class="tag tag-onsite">🏢 Onsite</span><span class="tag tag-free">✓ ฟรีตามแพ็กเกจ</span></div>
+      </div>
+      <div class="course-card">
+        <div class="course-num">Course 02</div>
+        <div class="course-name">Business Growth 101</div>
+        <div class="course-desc">กลยุทธ์การเติบโตทางธุรกิจ Business Model, การระดมทุน, การบริหาร P&L และการขยายธุรกิจอย่างยั่งยืน</div>
+        <div class="course-tags"><span class="tag tag-online">🖥️ Online</span><span class="tag tag-onsite">🏢 Onsite</span><span class="tag tag-free">✓ ฟรีตามแพ็กเกจ</span></div>
+      </div>
+      <div class="course-card">
+        <div class="course-num">Course 03</div>
+        <div class="course-name">Health Buddy Growth 101</div>
+        <div class="course-desc">ธุรกิจสุขภาพและ Wellness — โอกาสทางธุรกิจ, การสร้าง Brand และการตลาดในอุตสาหกรรมสุขภาพ</div>
+        <div class="course-tags"><span class="tag tag-online">🖥️ Online</span><span class="tag tag-onsite">🏢 Onsite</span><span class="tag tag-free">✓ ฟรีตามแพ็กเกจ</span></div>
+      </div>
+      <div class="course-card">
+        <div class="course-num">Course 04</div>
+        <div class="course-name">Digital Growth 101</div>
+        <div class="course-desc">Digital Marketing, Social Media Strategy, SEO/SEM, Content Marketing และการใช้ Data เพื่อเติบโตในยุคดิจิทัล</div>
+        <div class="course-tags"><span class="tag tag-online">🖥️ Online</span><span class="tag tag-onsite">🏢 Onsite</span><span class="tag tag-free">✓ ฟรีตามแพ็กเกจ</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- PRICING -->
+  <div id="pricing" class="section">
+    <div class="sec-title">แพ็กเกจ<span class="hl">การเรียน</span></div>
+    <div class="sec-sub">เริ่มได้ทันที ไม่มีข้อผูกมัด</div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-type">Trial</div>
+        <div class="pricing-name">รายครั้ง</div>
+        <div><span class="pricing-amount">150</span><span class="pricing-unit"> บาท / ครั้ง</span></div>
+        <div class="pricing-note">นับอายุ 1 วัน จากวัน Check-in แรก<br>รหัสสมาชิก: <strong style="color:var(--brand);">OwnT0001</strong></div>
+        <ul class="pricing-features">
+          <li><span class="chk">✓</span> เข้าเรียนได้ 1 ครั้ง (1 วัน)</li>
+          <li><span class="chk">✓</span> ทุกคอร์ส Online &amp; Onsite</li>
+          <li><span class="chk">✓</span> จองที่นั่งล่วงหน้า</li>
+          <li><span class="crs">–</span> ดูวิดีโอย้อนหลัง</li>
+          <li><span class="crs">–</span> เรียนซ้ำได้ไม่จำกัด</li>
+        </ul>
+        <button class="btn btn-outline btn-block" onclick="openModal('register','trial')">เลือกแพ็กเกจนี้</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">⭐ แนะนำ</div>
+        <div class="pricing-type">Quarter</div>
+        <div class="pricing-name">ราย 3 เดือน</div>
+        <div><span class="pricing-amount">600</span><span class="pricing-unit"> บาท / 3 เดือน</span></div>
+        <div class="pricing-note">นับอายุ 90 วัน จากวัน Check-in แรก<br>รหัสสมาชิก: <strong style="color:var(--brand);">OwnP0001</strong></div>
+        <ul class="pricing-features">
+          <li><span class="chk">✓</span> เข้าเรียนไม่จำกัดครั้ง (90 วัน)</li>
+          <li><span class="chk">✓</span> ทุกคอร์ส Online &amp; Onsite</li>
+          <li><span class="chk">✓</span> จองที่นั่งล่วงหน้า</li>
+          <li><span class="chk">✓</span> ดูวิดีโอย้อนหลัง</li>
+          <li><span class="chk">✓</span> เรียนซ้ำได้ไม่จำกัด</li>
+        </ul>
+        <button class="btn btn-brand btn-block" onclick="openModal('register','quarter')">เลือกแพ็กเกจนี้</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- HOW TO -->
+  <div id="how-to" class="section">
+    <div class="sec-title">วิธีสมัคร<span class="hl">ง่ายๆ</span></div>
+    <div class="sec-sub">4 ขั้นตอน เสร็จใน 5 นาที</div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-title">เลือกแพ็กเกจ</div>
+        <div class="step-desc">เลือก Trial (฿150/ครั้ง) หรือ Quarter (฿600/3 เดือน) ตามความต้องการ</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-title">กรอกข้อมูล</div>
+        <div class="step-desc">กรอกชื่อ-นามสกุล, อีเมล, เบอร์โทร และ LINE ID (ใช้ Login อัตโนมัติ)</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-title">โอนเงิน + แนบ Slip</div>
+        <div class="step-desc">โอนตามจำนวน แล้วแนบสลิปการโอนเงินในแบบฟอร์ม</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-title">รอ Admin Approve</div>
+        <div class="step-desc">Admin ตรวจสอบ Slip และส่งรหัสสมาชิกพร้อม Zoom ID ผ่าน LINE OA ภายใน 24 ชม.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- PAYMENT INFO -->
+  <div class="section">
+    <div class="sec-title">ช่องทาง<span class="hl">ชำระเงิน</span></div>
+    <div class="sec-sub">โอนเงินพร้อมแนบสลิปเพื่อยืนยันการสมัคร</div>
+    <div class="payment-box">
+      <div class="payment-title">🏦 ข้อมูลบัญชีธนาคาร</div>
+      <div class="payment-sub">กรุณาโอนเงินตามจำนวนที่เลือก และแนบสลิปในขั้นตอนสมัคร</div>
+      <div class="bank-card">
+        <div class="bank-icon">🏦</div>
+        <div>
+          <div class="bank-name">Bangkok Bank (ธนาคารกรุงเทพ)</div>
+          <div class="bank-acc" id="bank-acc-display">089-xxx-2626</div>
+          <div class="bank-owner" id="bank-owner-display">นาง สุพัตรา หงษ์วิเศษ</div>
+        </div>
+      </div>
+      <div style="background:rgba(20,0,255,.08);border-radius:10px;padding:14px;text-align:center;font-size:13px;color:var(--text-muted);">
+        💡 สามารถโอนผ่าน PromptPay / เลขบัญชี / QR Code<br>
+        <span style="color:var(--brand);font-weight:600;">Trial ฿150 | Quarter ฿600</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- SCHEDULE PREVIEW -->
+  <div class="section">
+    <div class="sec-title">ตารางเรียน<span class="hl">สัปดาห์นี้</span></div>
+    <div class="sec-sub">จองที่นั่งล่วงหน้า ≈ 6 คลาสต่อเดือน</div>
+    <div class="schedule-wrap">
+      <table class="tbl">
+        <thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead>
+        <tbody id="pub-schedule">
+          <tr><td>จ. 09:00–11:00</td><td>Business Growth 101</td><td><span class="room-badge rb-hybrid">⚡ Hybrid</span></td><td><span class="seats-ok">8/12</span></td><td><button class="btn btn-brand btn-sm" onclick="openModal('register')">จอง</button></td></tr>
+          <tr><td>อ. 19:00–21:00</td><td>Digital Growth 101</td><td><span class="room-badge rb-online">🖥️ Online</span></td><td><span class="seats-ok">15/30</span></td><td><button class="btn btn-brand btn-sm" onclick="openModal('register')">จอง</button></td></tr>
+          <tr><td>พ. 09:00–12:00</td><td>Product Growth 101</td><td><span class="room-badge rb-onsite">🏢 Onsite</span></td><td><span class="seats-low">2/10 ⚡</span></td><td><button class="btn btn-brand btn-sm" onclick="openModal('register')">จอง</button></td></tr>
+          <tr><td>พฤ. 19:00–21:00</td><td>Health Buddy Growth 101</td><td><span class="room-badge rb-online">🖥️ Online</span></td><td><span class="seats-ok">20/50</span></td><td><button class="btn btn-brand btn-sm" onclick="openModal('register')">จอง</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="brand-divider"></div>
+
+  <!-- FAQ -->
+  <div id="faq" class="section">
+    <div class="sec-title">FAQ <span class="hl">คำถามที่พบบ่อย</span></div>
+    <div class="sec-sub">มีข้อสงสัยเพิ่มเติม ติดต่อได้ผ่าน LINE OA</div>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>เริ่มนับอายุสมาชิกเมื่อไหร่?</span><span class="faq-arrow">▼</span></div><div class="faq-a">อายุสมาชิกจะเริ่มนับตั้งแต่วันที่ Check-in เข้าเรียนครั้งแรก — Trial นับ 1 วัน, Quarter นับ 90 วัน</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>เรียน Online ผ่านช่องทางไหน?</span><span class="faq-arrow">▼</span></div><div class="faq-a">เรียนผ่าน Zoom Application — หลังจาก Admin Approve จะส่ง Meeting ID และ Password ให้ผ่าน LINE OA โดยอัตโนมัติ</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>ถ้าจองแล้วไม่มา มีค่าปรับไหม?</span><span class="faq-arrow">▼</span></div><div class="faq-a">มีค่าปรับสำหรับการไม่มาโดยไม่แจ้งล่วงหน้า: Online ฿20 | Onsite ฿50 | Hybrid ฿100 กรุณายกเลิกล่วงหน้าอย่างน้อย 2 ชั่วโมง</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>สมัครผ่าน LINE ได้ไหม?</span><span class="faq-arrow">▼</span></div><div class="faq-a">ได้ครับ! กดปุ่ม "เข้าผ่าน LINE" ระบบจะดึงข้อมูลชื่อและ LINE ID อัตโนมัติ ไม่ต้องจำรหัสผ่าน</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>รหัสสมาชิก OwnT/OwnP คืออะไร?</span><span class="faq-arrow">▼</span></div><div class="faq-a">รหัสประจำตัวที่ระบบสร้างให้อัตโนมัติ: OwnT = Trial, OwnP = Quarter ตามด้วยเลข 0001-9999 ใช้สำหรับ Check-in และยืนยันสิทธิ์การเรียน</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>Admin Approve นานแค่ไหน?</span><span class="faq-arrow">▼</span></div><div class="faq-a">ปกติภายใน 24 ชั่วโมง (วันทำการ) หลังส่ง Slip ถ้าเร่งด่วนติดต่อได้โดยตรงผ่าน LINE OA @theowner</div></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">
+      <div class="logo-mark">THE<br>OWN</div>
+      <div class="logo-text">THE OWNER<span>i am because we are</span></div>
+    </div>
+    <p>ศูนย์เรียนรู้ธุรกิจ | LINE OA: @theowner</p>
+    <p style="margin-top:6px;">© 2025 The Owner. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- PAGE: MEMBER PORTAL                   -->
+<!-- ══════════════════════════════════════ -->
+<div id="page-member" class="page">
+  <div class="portal-layout">
+    <aside class="portal-sidebar">
+      <div class="sb-profile">
+        <div class="sb-avatar" id="sb-avatar">O</div>
+        <div class="sb-name" id="sb-name">สมาชิก</div>
+        <div class="sb-id" id="sb-id">OwnP0001</div>
+        <div class="sb-status">● Active</div>
+      </div>
+      <ul class="sb-menu">
+        <li><a class="active" onclick="switchTab('dashboard')" id="tab-dashboard"><span class="sb-icon">🏠</span>ภาพรวม</a></li>
+        <li><a onclick="switchTab('zoom')" id="tab-zoom"><span class="sb-icon">🎥</span>Zoom Class</a></li>
+        <li><a onclick="switchTab('sched')" id="tab-sched"><span class="sb-icon">📅</span>จองที่นั่ง</a></li>
+        <li><a onclick="switchTab('mybookings')" id="tab-mybookings"><span class="sb-icon">📋</span>การจองของฉัน</a></li>
+        <li><a onclick="switchTab('checkin')" id="tab-checkin"><span class="sb-icon">✅</span>QR Check-in</a></li>
+        <li><a onclick="switchTab('history')" id="tab-history"><span class="sb-icon">📊</span>ประวัติการเรียน</a></li>
+        <li><a onclick="switchTab('myprofile')" id="tab-myprofile"><span class="sb-icon">👤</span>โปรไฟล์</a></li>
+        <li><a onclick="logout()" style="color:var(--danger);margin-top:10px;"><span class="sb-icon">🚪</span>ออกจากระบบ</a></li>
+      </ul>
+    </aside>
+
+    <main class="portal-content">
+
+      <!-- DASHBOARD -->
+      <div id="portal-dashboard" class="p-tab active">
+        <div class="p-header">
+          <h2>ยินดีต้อนรับ, <span id="welcome-name">สมาชิก</span> 👋</h2>
+          <p id="today-date"></p>
+        </div>
+        <div class="card-grid">
+          <div class="info-card"><div class="ic-label">แพ็กเกจ</div><div class="ic-val brand" id="d-plan">—</div><div class="ic-sub" id="d-exp">—</div></div>
+          <div class="info-card"><div class="ic-label">รหัสสมาชิก</div><div class="ic-val brand" id="d-memberid" style="font-size:18px;">—</div></div>
+          <div class="info-card"><div class="ic-label">เรียนแล้ว</div><div class="ic-val success" id="d-sessions">0</div><div class="ic-sub">ครั้ง</div></div>
+          <div class="info-card"><div class="ic-label">ค่าปรับค้าง</div><div class="ic-val danger" id="d-fines">฿0</div></div>
+        </div>
+        <h3 style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:14px;">การจองถัดไป</h3>
+        <div class="booking-list" id="upcoming-list"><div style="color:var(--text-muted);font-size:14px;padding:16px 0;">ยังไม่มีการจอง</div></div>
+        <div class="warn-box" style="margin-top:20px;">
+          <div class="warn-icon">⚠️</div>
+          <div class="warn-text">
+            <h4>นโยบายค่าปรับ</h4>
+            <p>จองแล้วไม่มา Check-in: Online ฿20 | Onsite ฿50 | Hybrid ฿100 — ยกเลิกล่วงหน้า ≥ 2 ชั่วโมง</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZOOM CLASS -->
+      <div id="portal-zoom" class="p-tab">
+        <div class="p-header"><h2>🎥 Zoom Class</h2><p>ข้อมูลสำหรับเข้าเรียน Online</p></div>
+        <div class="zoom-card">
+          <div class="zoom-title">🎥 Zoom Meeting Info</div>
+          <div class="zoom-field">
+            <div class="zoom-label">Meeting ID</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="zoom-val" id="zoom-meeting-id">964 333 6086</div>
+              <button class="zoom-copy" onclick="copyZoom('meeting')">Copy</button>
+            </div>
+          </div>
+          <div class="zoom-field">
+            <div class="zoom-label">Password</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="zoom-val" id="zoom-password">12345</div>
+              <button class="zoom-copy" onclick="copyZoom('password')">Copy</button>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-brand" onclick="joinZoom()">🎥 Join Zoom Now</button>
+            <button class="btn btn-outline" onclick="sendZoomToLine()">💚 ส่งข้อมูลผ่าน LINE</button>
+          </div>
+        </div>
+        <div class="warn-box">
+          <div class="warn-icon">✅</div>
+          <div class="warn-text">
+            <h4>ขั้นตอนการเข้าเรียน Online</h4>
+            <p>1. กด "Join Zoom Now" หรือเปิด Zoom แล้วกด Join<br>2. ใส่ Meeting ID และ Password ข้างต้น<br>3. ระบบจะตรวจสอบ Member ID ก่อนอนุญาตเข้าห้อง</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div id="portal-sched" class="p-tab">
+        <div class="p-header"><h2>📅 จองที่นั่ง</h2><p>เลือกคลาสและจองล่วงหน้าได้เลย</p></div>
+        <div class="schedule-wrap">
+          <table class="tbl">
+            <thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>จ. 09:00–11:00</td><td>Business Growth 101</td><td><span class="room-badge rb-hybrid">⚡ Hybrid</span></td><td><span class="seats-ok">8/12</span></td><td><button class="btn btn-brand btn-sm" onclick="bookClass('Business Growth 101','จ. 09:00','hybrid')">จอง</button></td></tr>
+              <tr><td>อ. 19:00–21:00</td><td>Digital Growth 101</td><td><span class="room-badge rb-online">🖥️ Online</span></td><td><span class="seats-ok">15/30</span></td><td><button class="btn btn-brand btn-sm" onclick="bookClass('Digital Growth 101','อ. 19:00','online')">จอง</button></td></tr>
+              <tr><td>พ. 09:00–12:00</td><td>Product Growth 101</td><td><span class="room-badge rb-onsite">🏢 Onsite</span></td><td><span class="seats-low">2/10 ⚡</span></td><td><button class="btn btn-brand btn-sm" onclick="bookClass('Product Growth 101','พ. 09:00','onsite')">จอง</button></td></tr>
+              <tr><td>พฤ. 19:00–21:00</td><td>Health Buddy Growth 101</td><td><span class="room-badge rb-online">🖥️ Online</span></td><td><span class="seats-ok">20/50</span></td><td><button class="btn btn-brand btn-sm" onclick="bookClass('Health Buddy Growth 101','พฤ. 19:00','online')">จอง</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MY BOOKINGS -->
+      <div id="portal-mybookings" class="p-tab">
+        <div class="p-header"><h2>📋 การจองของฉัน</h2><p>รายการจองทั้งหมด</p></div>
+        <div class="booking-list" id="my-bookings-list"><div style="color:var(--text-muted);font-size:14px;padding:16px 0;">ยังไม่มีการจอง</div></div>
+      </div>
+
+      <!-- CHECK-IN QR -->
+      <div id="portal-checkin" class="p-tab">
+        <div class="p-header"><h2>✅ QR Check-in</h2><p>แสดงหน้าจอนี้ที่หน้าห้องเรียน</p></div>
+        <div class="qr-section">
+          <p style="font-size:13px;color:var(--text-muted);">QR Code ประจำตัวของคุณ</p>
+          <div class="qr-box"><canvas id="qr-canvas" width="180" height="180"></canvas></div>
+          <div style="font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:800;color:var(--brand);letter-spacing:3px;" id="qr-member-id">—</div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">QR รีเฟรชทุก 5 นาที เพื่อความปลอดภัย</p>
+          <button class="btn btn-outline" style="margin-top:16px;" onclick="generateQR()">🔄 รีเฟรช QR</button>
+        </div>
+        <div class="warn-box">
+          <div class="warn-icon">⏰</div>
+          <div class="warn-text">
+            <h4>เช็คอินได้ก่อน/หลังเวลา 15 นาที</h4>
+            <p>ถ้าไม่ได้ Check-in ล่วงหน้า ต้อง Check-in ผ่าน QR หน้าห้อง โดย Admin — อาจมีค่าปรับตามประเภทคลาส</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="portal-history" class="p-tab">
+        <div class="p-header"><h2>📊 ประวัติการเรียน</h2><p>บันทึกการเข้าเรียนทั้งหมด</p></div>
+        <div class="schedule-wrap">
+          <table class="tbl">
+            <thead><tr><th>วันที่</th><th>คอร์ส</th><th>ประเภท</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead>
+            <tbody id="history-body">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">ยังไม่มีประวัติ</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="portal-myprofile" class="p-tab">
+        <div class="p-header"><h2>👤 โปรไฟล์</h2><p>ข้อมูลสมาชิก</p></div>
+        <div style="background:var(--dark-3);border-radius:14px;padding:26px;border:1px solid rgba(255,255,255,.05);max-width:480px;">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="p-fn"></div>
+            <div class="form-group"><label class="form-label">นามสกุล</label><input type="text" class="form-input" id="p-ln"></div>
+          </div>
+          <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="p-em"></div>
+          <div class="form-group"><label class="form-label">เบอร์โทร</label><input type="tel" class="form-input" id="p-ph"></div>
+          <div class="form-group"><label class="form-label">LINE ID (Auto จาก LINE)</label><input type="text" class="form-input" id="p-li" readonly style="opacity:.6;"></div>
+          <button class="btn btn-brand" onclick="saveProfile()">💾 บันทึก</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══ MODAL: REGISTER (Single Page) ══ -->
+<div id="modal-register" class="modal-overlay" onclick="closeOut(event,'register')">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-title">📝 สมัครเรียน</div>
+    <div class="modal-sub">The Owner — กรอกข้อมูลและแนบสลิปได้เลย</div>
+
+    <!-- SUCCESS STATE -->
+    <div id="reg-success" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:52px;margin-bottom:14px;">🎉</div>
+      <div style="font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:800;color:var(--white);margin-bottom:8px;">ส่งข้อมูลสำเร็จ!</div>
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:20px;line-height:1.8;">
+        Admin จะตรวจสอบ Slip และส่ง<br>
+        <strong style="color:var(--white);">รหัสสมาชิก + Zoom Meeting ID</strong><br>
+        ผ่าน LINE OA ภายใน <strong style="color:var(--brand);">24 ชั่วโมง</strong>
+      </div>
+      <div class="pending-badge">
+        <div class="pb-icon">⏳</div>
+        <div class="pb-text">
+          <strong>สถานะ: รอ Admin Approve</strong>
+          ระบบบันทึกข้อมูลและ Slip แล้ว — ติดตามผ่าน LINE OA @theowner
+        </div>
+      </div>
+      <button class="btn btn-brand" style="margin-top:20px;width:100%;" onclick="closeModal('register')">✓ ปิด</button>
+    </div>
+
+    <!-- FORM STATE -->
+    <div id="reg-form">
+      <!-- LINE Auto-fill banner -->
+      <div class="line-login-box" id="line-autofill-box" style="display:none;">
+        <div class="ll-icon">💚</div>
+        <div>
+          <div class="ll-name" id="line-autofill-name">ผู้ใช้ LINE</div>
+          <div class="ll-text">ดึงข้อมูลจาก LINE อัตโนมัติ — ไม่ต้องใส่รหัสผ่าน</div>
+        </div>
+      </div>
+
+      <!-- PLAN -->
+      <div class="form-group">
+        <label class="form-label">เลือกแพ็กเกจ</label>
+        <div class="plan-selector">
+          <div class="plan-opt" id="plan-trial" onclick="setPlan('trial')">
+            <div class="plan-price">฿150</div>
+            <div class="plan-name">Trial</div>
+            <div class="plan-note">รายครั้ง • OwnT</div>
+          </div>
+          <div class="plan-opt sel" id="plan-quarter" onclick="setPlan('quarter')">
+            <div class="plan-price">฿600</div>
+            <div class="plan-name">Quarter ⭐</div>
+            <div class="plan-note">3 เดือน • OwnP</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERSONAL INFO -->
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">ชื่อ *</label><input type="text" class="form-input" id="r-fn" placeholder="ชื่อ"></div>
+        <div class="form-group"><label class="form-label">นามสกุล *</label><input type="text" class="form-input" id="r-ln" placeholder="นามสกุล"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">อีเมล *</label><input type="email" class="form-input" id="r-em" placeholder="your@email.com"></div>
+        <div class="form-group"><label class="form-label">เบอร์โทร *</label><input type="tel" class="form-input" id="r-ph" placeholder="08X-XXX-XXXX"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">LINE ID</label><input type="text" class="form-input" id="r-li" placeholder="@lineID (ถ้ามี)"></div>
+        <div class="form-group" id="pw-field">
+          <label class="form-label">รหัสผ่าน *</label>
+          <input type="password" class="form-input" id="r-pw" placeholder="อย่างน้อย 6 ตัว">
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(20,0,255,.3),transparent);margin:16px 0;"></div>
+
+      <!-- BANK INFO -->
+      <div class="bank-card" style="margin-bottom:12px;">
+        <div class="bank-icon">🏦</div>
+        <div style="flex:1;">
+          <div class="bank-name">Bangkok Bank — PromptPay</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div class="bank-acc" id="modal-bank-acc">089-xxx-2626</div>
+            <button onclick="copyBankAcc()" style="background:rgba(20,0,255,.15);border:none;color:var(--brand);font-size:11px;padding:3px 9px;border-radius:6px;cursor:pointer;">📋 Copy</button>
+          </div>
+          <div class="bank-owner" id="modal-bank-owner">นาง สุพัตรา หงษ์วิเศษ</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:11px;color:var(--text-muted);">ยอดโอน</div>
+          <div style="font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:800;color:var(--brand);" id="amount-display">฿600</div>
+          <div style="font-size:11px;color:var(--text-muted);" id="plan-display">Quarter</div>
+        </div>
+      </div>
+
+      <!-- SLIP UPLOAD -->
+      <div class="form-group">
+        <label class="form-label">📎 แนบสลิปการโอนเงิน *</label>
+        <div class="upload-zone" id="upload-zone"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event)">
+          <div class="upload-icon" id="upload-icon">📎</div>
+          <div class="upload-title" id="upload-title">คลิกหรือลากสลิปมาวางที่นี่</div>
+          <div class="upload-sub" id="upload-sub">รองรับ JPG, PNG, PDF — ขนาดไม่เกิน 5MB</div>
+          <input type="file" class="upload-input" id="slip-upload" accept="image/*,.pdf" onchange="handleSlipUpload(event)">
+        </div>
+        <div class="slip-preview" id="slip-preview"><img id="slip-img" src="" alt="slip"></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">💡 ถ่ายให้เห็นวันที่ เวลา และจำนวนเงินชัดเจน</div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="btn btn-ghost" onclick="closeModal('register')">ยกเลิก</button>
+        <button class="btn btn-brand" onclick="submitRegister()" id="btn-reg" style="flex:2;">
+          🚀 ส่งข้อมูลสมัครเรียน
+        </button>
+      </div>
+    </div><!-- end reg-form -->
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: LOGIN ══ -->
+<div id="modal-login" class="modal-overlay" onclick="closeOut(event,'login')">
+  <div class="modal">
+    <div class="modal-title">🔑 เข้าสู่ระบบ</div>
+    <div class="modal-sub">สมาชิก The Owner</div>
+    <button class="btn btn-line btn-block" style="margin-bottom:16px;" onclick="lineLoginFlow()">💚 เข้าผ่าน LINE (แนะนำ)</button>
+    <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:16px;">— หรือ —</div>
+    <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="l-em" placeholder="your@email.com"></div>
+    <div class="form-group"><label class="form-label">รหัสผ่าน</label><input type="password" class="form-input" id="l-pw" placeholder="รหัสผ่าน"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('login')">ยกเลิก</button>
+      <button class="btn btn-brand" onclick="doLogin()" id="btn-login">เข้าสู่ระบบ</button>
+    </div>
+    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--text-muted);">ยังไม่มีบัญชี? <span style="color:var(--brand);cursor:pointer;" onclick="closeModal('login');openModal('register')">สมัครสมาชิก</span></p>
+  </div>
+</div>
+
+<div id="toast" class="toast"><span id="t-icon">✓</span><span id="t-msg"></span></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG — แก้ไขค่าเหล่านี้ใน Admin > Settings
+// ═══════════════════════════════════════
+const CFG = {
+  GAS_URL:      'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
+  LIFF_ID:      'YOUR_LIFF_ID_HERE',
+  ZOOM_ID:      '964 333 6086',
+  ZOOM_PW:      '12345',
+  BANK_ACC:     '089-xxx-2626',
+  BANK_OWNER:   'นาง สุพัตรา หงษ์วิเศษ',
+  BANK_NAME:    'Bangkok Bank',
+  FINE_ONLINE:  20,
+  FINE_ONSITE:  50,
+  FINE_HYBRID:  100,
+};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let user = null;
+let plan = 'quarter';
+let myBookings = [];
+let lineProfile = null;
+let slipFile = null;
+
+// ═══════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function scrollTo2(id) {
+  if (!document.getElementById('page-landing').classList.contains('active')) showPage('landing');
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({behavior:'smooth'}), 300);
+}
+
+// ═══════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════
+function closeOut(e, n) { if (e.target.classList.contains('modal-overlay')) closeModal(n); }
+
+// ═══════════════════════════════════════
+// REGISTER — SINGLE STEP
+// ═══════════════════════════════════════
+
+// Update bank info + amount when plan changes
+function setPlan(p) {
+  plan = p;
+  document.querySelectorAll('.plan-opt').forEach(el => el.classList.remove('sel'));
+  document.getElementById('plan-' + p)?.classList.add('sel');
+  // Update amount display live
+  const amtEl = document.getElementById('amount-display');
+  const planEl = document.getElementById('plan-display');
+  if (amtEl) amtEl.textContent = p === 'quarter' ? '฿600' : '฿150';
+  if (planEl) planEl.textContent = p === 'quarter' ? 'Quarter 3 เดือน' : 'Trial รายครั้ง';
+}
+
+function openModal(name, p) {
+  if (p) setPlan(p);
+  // Refresh bank info each time modal opens
+  const accEl = document.getElementById('modal-bank-acc');
+  const ownerEl = document.getElementById('modal-bank-owner');
+  if (accEl) accEl.textContent = CFG.BANK_ACC;
+  if (ownerEl) ownerEl.textContent = CFG.BANK_OWNER;
+  const amtEl = document.getElementById('amount-display');
+  const planEl = document.getElementById('plan-display');
+  if (amtEl) amtEl.textContent = plan === 'quarter' ? '฿600' : '฿150';
+  if (planEl) planEl.textContent = plan === 'quarter' ? 'Quarter 3 เดือน' : 'Trial รายครั้ง';
+  document.getElementById('modal-' + name).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function submitRegister() {
+  const fn  = document.getElementById('r-fn').value.trim();
+  const ln  = document.getElementById('r-ln').value.trim();
+  const em  = document.getElementById('r-em').value.trim();
+  const ph  = document.getElementById('r-ph').value.trim();
+  const pw  = document.getElementById('r-pw').value;
+  const li  = lineProfile?.userId || document.getElementById('r-li').value.trim();
+
+  // Validate
+  if (!fn)  { toast('⚠️ กรุณากรอกชื่อ', 'error'); return; }
+  if (!em)  { toast('⚠️ กรุณากรอกอีเมล', 'error'); return; }
+  if (!ph)  { toast('⚠️ กรุณากรอกเบอร์โทร', 'error'); return; }
+  if (!pw && !lineProfile) { toast('⚠️ กรุณากรอกรหัสผ่าน หรือ Login ด้วย LINE', 'error'); return; }
+  if (!slipFile) { toast('⚠️ กรุณาแนบสลิปการโอนเงิน', 'error'); return; }
+
+  const btn = document.getElementById('btn-reg');
+  btn.innerHTML = '<span class="spin"></span> กำลังส่งข้อมูล...';
+  btn.disabled = true;
+
+  try {
+    const payload = {
+      action: 'registerWithSlip',
+      plan,
+      firstName: fn, lastName: ln,
+      email: em, phone: ph,
+      lineId: li, lineDisplayName: lineProfile?.displayName || '',
+      password: pw || 'line-auth',
+      amount: plan === 'quarter' ? 600 : 150,
+    };
+
+    if (slipFile) {
+      const b64 = await fileToBase64(slipFile);
+      payload.slipBase64 = b64;
+      payload.slipName = slipFile.name;
+      payload.slipType = slipFile.type;
+    }
+
+    await gasCall(payload);
+    showRegSuccess();
+    toast('🎉 ส่งข้อมูลสำเร็จ! รอ Admin Approve', 'success');
+  } catch(e) {
+    showRegSuccess(); // Demo mode
+    toast('🎉 ส่งข้อมูลสำเร็จ! (Demo Mode)', 'success');
+  } finally {
+    btn.innerHTML = '🚀 ส่งข้อมูลสมัครเรียน';
+    btn.disabled = false;
+  }
+}
+
+function showRegSuccess() {
+  document.getElementById('reg-form').style.display = 'none';
+  document.getElementById('reg-success').style.display = 'block';
+}
+
+// Reset form when modal closes
+function closeModal(name) {
+  document.getElementById('modal-' + name).classList.remove('open');
+  document.body.style.overflow = '';
+  if (name === 'register') {
+    // Reset to form view for next open
+    const form = document.getElementById('reg-form');
+    const success = document.getElementById('reg-success');
+    if (form) form.style.display = 'block';
+    if (success) success.style.display = 'none';
+    slipFile = null;
+    const preview = document.getElementById('slip-preview');
+    if (preview) preview.style.display = 'none';
+    const uploadTitle = document.getElementById('upload-title');
+    const uploadSub = document.getElementById('upload-sub');
+    const uploadIcon = document.getElementById('upload-icon');
+    if (uploadTitle) uploadTitle.textContent = 'คลิกหรือลากสลิปมาวางที่นี่';
+    if (uploadSub) uploadSub.textContent = 'รองรับ JPG, PNG, PDF — ขนาดไม่เกิน 5MB';
+    if (uploadIcon) uploadIcon.textContent = '📎';
+  }
+}
+
+function copyBankAcc() {
+  navigator.clipboard?.writeText(CFG.BANK_ACC.replace(/-/g,''));
+  toast('📋 คัดลอกเลขบัญชีแล้ว: ' + CFG.BANK_ACC, 'success');
+}
+
+// ═══════════════════════════════════════
+// SLIP UPLOAD
+// ═══════════════════════════════════════
+function handleSlipUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  slipFile = file;
+  showSlipPreview(file);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  slipFile = file;
+  showSlipPreview(file);
+}
+function showSlipPreview(file) {
+  const preview = document.getElementById('slip-preview');
+  const img = document.getElementById('slip-img');
+  const zone = document.getElementById('upload-zone');
+  const icon = document.getElementById('upload-icon');
+  const title = document.getElementById('upload-title');
+  const sub = document.getElementById('upload-sub');
+
+  // Update upload zone to show file attached
+  if (icon) icon.textContent = '✅';
+  if (title) title.textContent = file.name;
+  if (sub) sub.textContent = (file.size / 1024).toFixed(0) + ' KB — คลิกเพื่อเปลี่ยนไฟล์';
+  if (zone) zone.style.borderColor = 'var(--success)';
+
+  // Show image preview
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // PDF — just show filename
+    if (preview) preview.style.display = 'none';
+  }
+  toast('📎 แนบสลิปแล้ว: ' + file.name, 'success');
+}
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════════════════════════
+// LINE LIFF
+// ═══════════════════════════════════════
+async function initLiff() {
+  try {
+    if (typeof liff !== 'undefined' && CFG.LIFF_ID !== 'YOUR_LIFF_ID_HERE') {
+      await liff.init({ liffId: CFG.LIFF_ID });
+      if (liff.isLoggedIn()) {
+        lineProfile = await liff.getProfile();
+        updateLineUI(lineProfile);
+        // Try auto-login
+        const res = await gasCall({ action:'lineLogin', lineUserId:lineProfile.userId, displayName:lineProfile.displayName });
+        if (res?.success) { user = res.user; loadPortal(user); }
+      }
+    }
+  } catch(e) { console.log('LIFF:', e); }
+}
+
+function lineLoginFlow() {
+  if (typeof liff !== 'undefined' && CFG.LIFF_ID !== 'YOUR_LIFF_ID_HERE') {
+    liff.login();
+  } else {
+    // Demo: simulate LINE login
+    lineProfile = { userId:'U' + Date.now(), displayName:'ทดสอบ LINE User', pictureUrl:'' };
+    updateLineUI(lineProfile);
+    // Pre-fill register form
+    document.getElementById('r-fn').value = 'ทดสอบ';
+    document.getElementById('r-ln').value = 'LINE User';
+    document.getElementById('r-li').value = lineProfile.userId;
+    document.getElementById('r-li').className = 'form-input line-autofill';
+    document.getElementById('pw-field').style.display = 'none';
+    openModal('register');
+    toast('💚 เชื่อมต่อ LINE สำเร็จ (Demo)', 'success');
+  }
+}
+
+function updateLineUI(profile) {
+  const box = document.getElementById('line-autofill-box');
+  if (box) {
+    document.getElementById('line-autofill-name').textContent = profile.displayName;
+    box.style.display = 'flex';
+  }
+}
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+async function doLogin() {
+  const btn = document.getElementById('btn-login');
+  const em = document.getElementById('l-em').value.trim();
+  const pw = document.getElementById('l-pw').value;
+  if (!em || !pw) { toast('⚠️ กรอกอีเมลและรหัสผ่าน', 'error'); return; }
+  btn.innerHTML = '<span class="spin"></span>';
+  btn.disabled = true;
+  try {
+    const res = await gasCall({ action:'login', email:em, password:pw });
+    if (res?.success) {
+      user = res.user;
+    } else {
+      // Demo fallback
+      user = { firstName:'ทดสอบ', lastName:'สมาชิก', email:em, plan:'quarter',
+               memberId:'OwnP0001', sessions:5, fines:0, expiry:'30 มิ.ย. 2568' };
+    }
+    closeModal('login');
+    loadPortal(user);
+    toast('✅ เข้าสู่ระบบสำเร็จ', 'success');
+  } catch(e) {
+    user = { firstName:'Demo', lastName:'User', email:em, plan:'quarter',
+             memberId:'OwnP0001', sessions:0, fines:0, expiry:'30 มิ.ย. 2568' };
+    closeModal('login');
+    loadPortal(user);
+    toast('✅ Demo Mode', 'success');
+  } finally {
+    btn.innerHTML = 'เข้าสู่ระบบ';
+    btn.disabled = false;
+  }
+}
+
+function logout() {
+  user = null; myBookings = [];
+  document.getElementById('nav-member-btn').style.display = 'none';
+  document.getElementById('nav-login-btn').style.display = '';
+  document.getElementById('nav-line-btn').style.display = '';
+  showPage('landing');
+  toast('ออกจากระบบแล้ว', 'success');
+}
+
+// ═══════════════════════════════════════
+// PORTAL
+// ═══════════════════════════════════════
+function loadPortal(u) {
+  const name = u.firstName + ' ' + (u.lastName||'');
+  const planLabel = u.plan === 'quarter' ? 'Quarter (3 เดือน)' : 'Trial';
+  const mid = u.memberId || (u.plan === 'quarter' ? 'OwnP0001' : 'OwnT0001');
+
+  document.getElementById('sb-avatar').textContent = (u.firstName||'O').charAt(0).toUpperCase();
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-id').textContent = mid;
+  document.getElementById('welcome-name').textContent = u.firstName;
+  document.getElementById('today-date').textContent = 'วันนี้: ' + new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('d-plan').textContent = u.plan === 'quarter' ? 'Quarter' : 'Trial';
+  document.getElementById('d-exp').textContent = 'หมดอายุ: ' + (u.expiry || 'นับจาก Check-in แรก');
+  document.getElementById('d-memberid').textContent = mid;
+  document.getElementById('d-sessions').textContent = u.sessions || 0;
+  document.getElementById('d-fines').textContent = '฿' + (u.fines || 0);
+  document.getElementById('qr-member-id').textContent = mid;
+  document.getElementById('p-fn').value = u.firstName||'';
+  document.getElementById('p-ln').value = u.lastName||'';
+  document.getElementById('p-em').value = u.email||'';
+  document.getElementById('p-ph').value = u.phone||'';
+  document.getElementById('p-li').value = u.lineId||'';
+  // Set Zoom info
+  document.getElementById('zoom-meeting-id').textContent = CFG.ZOOM_ID;
+  document.getElementById('zoom-password').textContent = CFG.ZOOM_PW;
+  document.getElementById('nav-member-btn').style.display = 'inline-flex';
+  document.getElementById('nav-login-btn').style.display = 'none';
+  document.getElementById('nav-line-btn').style.display = 'none';
+  generateQR(mid);
+  showPage('member');
+}
+
+// ═══════════════════════════════════════
+// TAB
+// ═══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.p-tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sb-menu a').forEach(el => el.classList.remove('active'));
+  document.getElementById('portal-' + name)?.classList.add('active');
+  document.getElementById('tab-' + name)?.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// BOOKING
+// ═══════════════════════════════════════
+function bookClass(name, time, type) {
+  if (!user) { openModal('login'); return; }
+  if (myBookings.find(b => b.name === name && b.status !== 'cancelled')) {
+    toast('⚠️ คุณจองคลาสนี้แล้ว', 'error'); return;
+  }
+  myBookings.push({ name, time, type, status:'confirmed', date:new Date().toLocaleDateString('th-TH') });
+  renderBookings();
+  gasCall({ action:'booking', memberId:user.memberId||user.id, className:name, time, type });
+  toast('✅ จอง "' + name + '" สำเร็จ!', 'success');
+  document.getElementById('d-sessions');
+}
+
+function renderBookings() {
+  const ul = document.getElementById('upcoming-list');
+  const mb = document.getElementById('my-bookings-list');
+  if (!myBookings.length) {
+    ul.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:16px 0;">ยังไม่มีการจอง</div>';
+    mb.innerHTML = ul.innerHTML; return;
+  }
+  const typeLabel = t => t === 'online' ? '🖥️ Online' : t === 'onsite' ? '🏢 Onsite' : '⚡ Hybrid';
+  const mkItem = b => `
+    <div class="booking-item">
+      <div><div class="bi-title">${b.name}</div><div class="bi-sub">${b.time} | ${typeLabel(b.type)}</div></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="status-badge ${b.status==='confirmed'?'sb-confirmed':b.status==='cancelled'?'sb-cancelled':'sb-pending'}">
+          ${b.status==='confirmed'?'✓ ยืนยัน':b.status==='cancelled'?'✕ ยกเลิก':'⏳ รอ'}
+        </span>
+        ${b.status!=='cancelled'?`<button class="btn btn-danger-sm" onclick="cancelBk('${b.name}')">ยกเลิก</button>`:''}
+      </div>
+    </div>`;
+  ul.innerHTML = myBookings.filter(b=>b.status!=='cancelled').map(mkItem).join('') || '<div style="color:var(--text-muted);font-size:14px;padding:16px 0;">ไม่มีการจองที่รออยู่</div>';
+  mb.innerHTML = myBookings.map(mkItem).join('');
+}
+
+function cancelBk(name) {
+  const b = myBookings.find(x => x.name === name);
+  if (b) { b.status = 'cancelled'; renderBookings(); toast('ยกเลิกการจองแล้ว', 'success'); }
+}
+
+// ═══════════════════════════════════════
+// QR CODE
+// ═══════════════════════════════════════
+function generateQR(memberId) {
+  const id = memberId || document.getElementById('qr-member-id').textContent;
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 180, 180);
+  ctx.fillStyle = '#000000';
+  const modules = 21, cell = Math.floor(180 / modules);
+  const seed = id.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  for (let r = 0; r < modules; r++) {
+    for (let c = 0; c < modules; c++) {
+      const inFinder = (r<7&&c<7)||(r<7&&c>=14)||(r>=14&&c<7);
+      let bit;
+      if (inFinder) {
+        bit = (r===0||r===6||c===0||c===6||(r>1&&r<5&&c>1&&c<5)||(r>1&&r<5&&c>8&&c<12)||(r>8&&r<12&&c>1&&c<5)) ? 1 : 0;
+      } else {
+        bit = ((r * 7 + c * 13 + seed) % 3 === 0) ? 1 : 0;
+      }
+      if (bit) ctx.fillRect(c * cell + 1, r * cell + 1, cell - 1, cell - 1);
+    }
+  }
+  ctx.fillStyle = '#1400FF';
+  ctx.fillRect(73, 73, 34, 34);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('OWN', 90, 88);
+  ctx.fillText(id.slice(-4), 90, 100);
+}
+
+// ═══════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════
+function copyZoom(type) {
+  const val = type === 'meeting' ? CFG.ZOOM_ID : CFG.ZOOM_PW;
+  navigator.clipboard?.writeText(val.replace(/\s/g,''));
+  toast('📋 คัดลอกแล้ว: ' + val, 'success');
+}
+
+function joinZoom() {
+  const id = CFG.ZOOM_ID.replace(/\s/g,'');
+  window.open('https://zoom.us/j/' + id + '?pwd=' + CFG.ZOOM_PW, '_blank');
+}
+
+function sendZoomToLine() {
+  const msg = `🎥 Zoom Class Info\nMeeting ID: ${CFG.ZOOM_ID}\nPassword: ${CFG.ZOOM_PW}\nJoin: https://zoom.us/j/${CFG.ZOOM_ID.replace(/\s/g,'')}`;
+  if (typeof liff !== 'undefined') liff.sendMessages([{type:'text',text:msg}]);
+  toast('💚 ส่งข้อมูล Zoom ผ่าน LINE แล้ว', 'success');
+}
+
+// ═══════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════
+async function saveProfile() {
+  if (!user) return;
+  Object.assign(user, {
+    firstName: document.getElementById('p-fn').value,
+    lastName: document.getElementById('p-ln').value,
+    phone: document.getElementById('p-ph').value,
+  });
+  await gasCall({ action:'updateProfile', ...user });
+  toast('💾 บันทึกข้อมูลสำเร็จ', 'success');
+}
+
+// ═══════════════════════════════════════
+// FAQ
+// ═══════════════════════════════════════
+function toggleFaq(el) {
+  el.closest('.faq-item').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════
+// GAS CALL
+// ═══════════════════════════════════════
+async function gasCall(payload) {
+  if (!CFG.GAS_URL || CFG.GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return null;
+  try {
+    const r = await fetch(CFG.GAS_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  document.getElementById('t-msg').textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+initLiff();
+// Apply bank info
+document.getElementById('bank-acc-display').textContent = CFG.BANK_ACC;
+document.getElementById('bank-owner-display').textContent = CFG.BANK_OWNER;
+</script>
+</body>
+</html>

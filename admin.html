@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Owner — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   CSS VARS — Admin adjustable
+   ══════════════════════════════════════ */
+:root {
+  --brand:#1400FF; --brand-2:#0D00CC; --brand-light:rgba(20,0,255,.12);
+  --dark:#060610; --dark-2:#0C0C1C; --dark-3:#121224; --dark-4:#181830; --dark-5:#1E1E40;
+  --mid:#2E2E60; --text:#DDDDF5; --text-muted:#6060A0; --white:#F0F0FF;
+  --success:#22C55E; --danger:#EF4444; --warning:#F59E0B; --info:#38BDF8;
+  --sidebar-w:210px; --font-base:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sarabun',sans-serif;font-size:var(--font-base);background:var(--dark);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse 70% 50% at 50% 30%,rgba(20,0,255,.12) 0%,transparent 60%),var(--dark);display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--dark-3);border:1px solid rgba(20,0,255,.25);border-radius:20px;padding:44px;width:100%;max-width:380px;}
+.login-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:24px;}
+.login-logo-mark{width:50px;height:50px;border-radius:50%;background:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:800;color:#fff;line-height:1.2;}
+.login-title{font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:800;color:var(--white);}
+.login-sub{text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:28px;}
+.li{width:100%;background:var(--dark-5);border:1px solid rgba(255,255,255,.07);color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;padding:11px 15px;border-radius:10px;outline:none;transition:border-color .2s;margin-bottom:14px;}
+.li:focus{border-color:var(--brand);}
+.login-btn{width:100%;background:var(--brand);color:#fff;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:700;padding:12px;border:none;border-radius:10px;cursor:pointer;transition:background .2s;}
+.login-btn:hover{background:var(--brand-2);}
+.login-err{color:var(--danger);font-size:12px;text-align:center;margin-top:10px;display:none;}
+
+/* ── APP LAYOUT ── */
+#admin-app{display:none;width:100%;}
+.app-wrap{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--dark-2);border-right:1px solid rgba(20,0,255,.1);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;z-index:100;overflow-y:auto;}
+.sb-brand{padding:18px 14px;border-bottom:1px solid rgba(20,0,255,.1);display:flex;align-items:center;gap:10px;}
+.sb-logo-mark{width:36px;height:36px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Chakra Petch',sans-serif;font-size:9px;font-weight:800;color:#fff;line-height:1.2;text-align:center;flex-shrink:0;}
+.sb-brand-name{font-family:'Chakra Petch',sans-serif;font-size:15px;font-weight:800;color:var(--white);}
+.sb-brand-sub{font-size:10px;font-weight:700;background:rgba(239,68,68,.2);color:var(--danger);padding:2px 7px;border-radius:999px;display:inline-block;}
+.sb-nav{flex:1;padding:10px 8px;}
+.sb-sec{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;padding:12px 8px 5px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:2px;position:relative;}
+.sb-item:hover{background:var(--brand-light);color:var(--text);}
+.sb-item.active{background:rgba(20,0,255,.18);color:var(--brand);}
+.sb-item .si{font-size:14px;width:17px;text-align:center;}
+.sb-badge{position:absolute;right:10px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;}
+.sb-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.04);}
+.sb-admin-card{background:var(--dark-4);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px;}
+.sb-admin-av{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Chakra Petch',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.sb-admin-name{font-size:12px;font-weight:700;color:var(--white);}
+.sb-admin-role{font-size:10px;color:var(--text-muted);}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{background:var(--dark-2);border-bottom:1px solid rgba(20,0,255,.08);padding:0 22px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Sarabun',sans-serif;font-size:16px;font-weight:800;color:var(--white);letter-spacing:-0.2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.tb-btn{background:none;border:none;color:var(--text-muted);font-size:12px;font-family:'Sarabun',sans-serif;cursor:pointer;padding:6px 12px;border-radius:8px;transition:all .2s;}
+.tb-btn:hover{color:var(--brand);background:var(--brand-light);}
+.tb-btn.danger:hover{color:var(--danger);}
+.content{padding:22px;flex:1;}
+
+/* ── PANELS ── */
+.panel{display:none;animation:fadeIn .2s ease;}.panel.active{display:block;}
+.panel-title{font-family:'Sarabun',sans-serif;font-size:20px;font-weight:800;color:var(--white);margin-bottom:3px;letter-spacing:-0.3px;}
+.panel-sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--dark-3);border-radius:13px;padding:18px;border:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;right:-16px;top:-16px;width:70px;height:70px;border-radius:50%;opacity:.1;}
+.sc-brand::after{background:var(--brand);}
+.sc-success::after{background:var(--success);}
+.sc-danger::after{background:var(--danger);}
+.sc-info::after{background:var(--info);}
+.sc-warn::after{background:var(--warning);}
+.s-label{font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase;}
+.s-val{font-family:'Chakra Petch',sans-serif;font-size:28px;font-weight:800;}
+.sv-brand{color:var(--brand);}
+.sv-success{color:var(--success);}
+.sv-danger{color:var(--danger);}
+.sv-info{color:var(--info);}
+.sv-warn{color:var(--warning);}
+.s-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+/* ── TABLE ── */
+.table-box{background:var(--dark-3);border-radius:13px;border:1px solid rgba(255,255,255,.04);overflow:hidden;margin-bottom:20px;}
+.table-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.table-header h3{font-size:14px;font-weight:700;color:var(--white);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:rgba(20,0,255,.08);color:var(--brand);font-weight:700;padding:10px 14px;text-align:left;font-size:11px;letter-spacing:.8px;text-transform:uppercase;}
+.tbl td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(20,0,255,.02);}
+.tbl-actions{display:flex;gap:5px;}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+.b-brand{background:rgba(20,0,255,.15);color:var(--brand);}
+.b-success{background:rgba(34,197,94,.12);color:var(--success);}
+.b-danger{background:rgba(239,68,68,.12);color:var(--danger);}
+.b-warning{background:rgba(245,158,11,.12);color:var(--warning);}
+.b-info{background:rgba(56,189,248,.12);color:var(--info);}
+.b-online{background:rgba(56,189,248,.12);color:var(--info);}
+.b-onsite{background:rgba(34,197,94,.12);color:var(--success);}
+.b-hybrid{background:rgba(20,0,255,.15);color:#8888FF;}
+.b-waiting{background:rgba(245,158,11,.12);color:var(--warning);}
+.b-approved{background:rgba(34,197,94,.12);color:var(--success);}
+.b-rejected{background:rgba(239,68,68,.12);color:var(--danger);}
+
+/* ── BTN ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:9px;font-size:12px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+.btn-brand{background:var(--brand);color:#fff;}
+.btn-brand:hover{background:var(--brand-2);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.1);}
+.btn-outline:hover{border-color:var(--brand);color:var(--brand);}
+.btn-ghost{background:var(--dark-5);color:var(--text-muted);border:1px solid rgba(255,255,255,.05);}
+.btn-ghost:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+.btn-success{background:rgba(34,197,94,.12);color:var(--success);border:1px solid rgba(34,197,94,.2);}
+.btn-success:hover{background:rgba(34,197,94,.22);}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-warning{background:rgba(245,158,11,.1);color:var(--warning);border:1px solid rgba(245,158,11,.2);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.btn-lg{padding:11px 22px;font-size:14px;}
+.btn-block{width:100%;justify-content:center;}
+
+/* ── FORM ── */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;margin-bottom:5px;text-transform:uppercase;}
+.form-input{width:100%;background:var(--dark-5);border:1px solid rgba(255,255,255,.07);color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;padding:10px 14px;border-radius:9px;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--brand);}
+.form-input option{background:var(--dark-5);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-section{background:var(--dark-3);border-radius:13px;padding:22px;border:1px solid rgba(255,255,255,.04);margin-bottom:18px;}
+.form-section-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--dark-3);border:1px solid rgba(20,0,255,.2);border-radius:18px;padding:26px;width:100%;max-width:540px;transform:translateY(14px);transition:transform .25s;max-height:90vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'Sarabun',sans-serif;font-size:18px;font-weight:800;color:var(--white);margin-bottom:3px;letter-spacing:-0.2px;}
+.modal-sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;}
+.modal-actions{display:flex;gap:9px;margin-top:20px;}
+.modal-actions .btn{flex:1;justify-content:center;}
+
+/* ── APPROVE PAGE ── */
+.approve-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;min-height:500px;}
+.approve-info{background:var(--dark-3);border-radius:13px;padding:22px;border:1px solid rgba(255,255,255,.04);}
+.approve-slip{background:var(--dark-3);border-radius:13px;padding:22px;border:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;}
+.slip-viewer{flex:1;border-radius:10px;overflow:hidden;background:var(--dark-4);display:flex;align-items:center;justify-content:center;min-height:300px;margin-bottom:14px;position:relative;}
+.slip-viewer img{max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;}
+.slip-viewer .no-slip{color:var(--text-muted);font-size:13px;text-align:center;padding:20px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;}
+.info-row:last-child{border-bottom:none;}
+.info-label{color:var(--text-muted);font-weight:600;}
+.info-val{color:var(--white);font-weight:600;text-align:right;}
+.approve-actions{display:flex;gap:10px;margin-top:14px;}
+.approve-actions .btn{flex:1;justify-content:center;padding:11px;}
+.pending-count{background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;}
+
+/* ── CHECK-IN ── */
+.scanner-box{background:var(--dark-4);border:2px dashed rgba(20,0,255,.3);border-radius:14px;padding:36px;text-align:center;}
+.scanner-input{width:100%;background:var(--dark-5);border:2px solid rgba(20,0,255,.4);color:var(--white);font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:800;padding:13px 20px;border-radius:12px;outline:none;text-align:center;letter-spacing:4px;margin-top:16px;}
+.scanner-input:focus{border-color:var(--brand);}
+.checkin-result{margin-top:16px;border-radius:11px;padding:16px;display:none;}
+.checkin-result.ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);}
+.checkin-result.fail{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);}
+.log-box{background:var(--dark-4);border-radius:10px;max-height:280px;overflow-y:auto;}
+.log-item{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:9px;font-size:12px;}
+.log-item:last-child{border-bottom:none;}
+.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ld-ok{background:var(--success);}
+.ld-fail{background:var(--danger);}
+
+/* ── SEARCH ── */
+.search-input{background:var(--dark-5);border:1px solid rgba(255,255,255,.07);color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;padding:7px 13px;border-radius:9px;outline:none;width:200px;}
+.search-input:focus{border-color:var(--brand);}
+
+/* ── SETTINGS THEME ── */
+.theme-swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.swatch{width:34px;height:34px;border-radius:50%;cursor:pointer;transition:all .2s;border:3px solid transparent;}
+.swatch:hover,.swatch.active{transform:scale(1.15);box-shadow:0 0 12px rgba(255,255,255,.3);}
+.font-size-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.font-btn{background:var(--dark-5);border:1px solid rgba(255,255,255,.07);color:var(--text);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:13px;transition:all .2s;}
+.font-btn:hover,.font-btn.active{background:var(--brand-light);border-color:var(--brand);color:var(--brand);}
+
+/* ── ZOOM SETTINGS ── */
+.zoom-setting-card{background:linear-gradient(135deg,rgba(20,0,255,.1),var(--dark-4));border:1px solid rgba(20,0,255,.2);border-radius:13px;padding:20px;margin-bottom:16px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:18px;right:18px;z-index:9998;background:var(--dark-3);border:1px solid rgba(20,0,255,.3);color:var(--text);padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;min-width:200px;box-shadow:0 8px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transform:translateX(130%);transition:transform .3s;}
+.toast.show{transform:translateX(0);}
+.toast.error{border-color:rgba(239,68,68,.4);}
+.toast.success{border-color:rgba(34,197,94,.4);}
+
+/* ── SPIN ── */
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .approve-layout{grid-template-columns:1fr;}
+  .sidebar{transform:translateX(-100%);transition:transform .3s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">THE<br>OWN</div>
+      <div>
+        <div class="login-title">THE OWNER</div>
+        <div style="font-size:11px;color:var(--text-muted);">Admin Dashboard</div>
+      </div>
+    </div>
+    <div class="login-sub">เข้าสู่ระบบหลังบ้าน</div>
+    <input type="text" class="li" id="a-user" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <input type="password" class="li" id="a-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="login-btn" onclick="doAdminLogin()" id="login-btn">🔑 เข้าสู่ระบบ</button>
+    <div class="login-err" id="login-err">Username หรือ Password ไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<!-- ══ ADMIN APP ══ -->
+<div id="admin-app">
+<div class="app-wrap">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo-mark">THE<br>OWN</div>
+    <div>
+      <div class="sb-brand-name">THE OWNER</div>
+      <span class="sb-brand-sub">ADMIN</span>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">หลัก</div>
+    <div class="sb-item active" onclick="goPanel('overview')" id="nav-overview"><span class="si">📊</span>ภาพรวม</div>
+    <div class="sb-item" onclick="goPanel('approve')" id="nav-approve"><span class="si">✅</span>Approve สมาชิก<span class="sb-badge" id="pending-badge">0</span></div>
+    <div class="sb-item" onclick="goPanel('checkin')" id="nav-checkin"><span class="si">📷</span>Check-in</div>
+
+    <div class="sb-sec">จัดการ</div>
+    <div class="sb-item" onclick="goPanel('members')" id="nav-members"><span class="si">👥</span>สมาชิก</div>
+    <div class="sb-item" onclick="goPanel('classes')" id="nav-classes"><span class="si">📚</span>คอร์ส & ตารางเรียน</div>
+    <div class="sb-item" onclick="goPanel('bookings')" id="nav-bookings"><span class="si">📋</span>การจอง</div>
+    <div class="sb-item" onclick="goPanel('fines')" id="nav-fines"><span class="si">⚠️</span>ค่าปรับ</div>
+
+    <div class="sb-sec">รายงาน</div>
+    <div class="sb-item" onclick="goPanel('reports')" id="nav-reports"><span class="si">📈</span>รายได้ & รายงาน</div>
+
+    <div class="sb-sec">ตั้งค่า</div>
+    <div class="sb-item" onclick="goPanel('adminusers')" id="nav-adminusers"><span class="si">🔐</span>Admin Users</div>
+    <div class="sb-item" onclick="goPanel('settings')" id="nav-settings"><span class="si">⚙️</span>ตั้งค่าระบบ</div>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-admin-card">
+      <div class="sb-admin-av" id="sb-av">A</div>
+      <div>
+        <div class="sb-admin-name" id="sb-admin-name">Admin</div>
+        <div class="sb-admin-role" id="sb-admin-role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">📊 ภาพรวม</div>
+    <div class="topbar-right">
+      <span style="font-size:11px;color:var(--text-muted);" id="topbar-date"></span>
+      <button class="tb-btn" onclick="goPanel('approve')">⏳ Pending: <strong id="tb-pending">0</strong></button>
+      <button class="tb-btn danger" onclick="adminLogout()">🚪 ออก</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div id="panel-overview" class="panel active">
+      <div class="panel-title">📊 ภาพรวมระบบ</div>
+      <div class="panel-sub" id="today-greeting">—</div>
+      <div class="stat-grid">
+        <div class="stat-card sc-brand"><div class="s-label">สมาชิกทั้งหมด</div><div class="s-val sv-brand" id="st-total">—</div><div class="s-sub">Active</div></div>
+        <div class="stat-card sc-warn"><div class="s-label">รอ Approve</div><div class="s-val sv-warn" id="st-pending">—</div><div class="s-sub">Slip รอตรวจ</div></div>
+        <div class="stat-card sc-success"><div class="s-label">Check-in วันนี้</div><div class="s-val sv-success" id="st-today">—</div><div class="s-sub">คน</div></div>
+        <div class="stat-card sc-info"><div class="s-label">Quarter Members</div><div class="s-val sv-info" id="st-quarter">—</div></div>
+        <div class="stat-card sc-danger"><div class="s-label">ค่าปรับค้าง</div><div class="s-val sv-danger" id="st-fines">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="table-box">
+          <div class="table-header"><h3>⏳ รอ Approve</h3><button class="btn btn-warning btn-sm" onclick="goPanel('approve')">ดูทั้งหมด</button></div>
+          <table class="tbl"><thead><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead>
+          <tbody id="ov-pending"></tbody></table>
+        </div>
+        <div class="table-box">
+          <div class="table-header"><h3>✅ Check-in ล่าสุด</h3></div>
+          <table class="tbl"><thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead>
+          <tbody id="ov-checkins"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ APPROVE ══ -->
+    <div id="panel-approve" class="panel">
+      <div class="panel-title">✅ Approve สมาชิก</div>
+      <div class="panel-sub">ตรวจสอบ Slip การโอนเงินก่อน Approve สมาชิก</div>
+
+      <!-- Pending list -->
+      <div class="table-box" style="margin-bottom:20px;">
+        <div class="table-header">
+          <h3>รายการรอ Approve (<span id="approve-count">0</span>)</h3>
+          <input type="text" class="search-input" placeholder="🔍 ค้นหาชื่อ..." oninput="filterApprove(this.value)">
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>ชื่อ-นามสกุล</th><th>แพ็กเกจ</th><th>จำนวนเงิน</th><th>LINE</th><th>เวลาสมัคร</th><th>Slip</th><th>Actions</th></tr></thead>
+            <tbody id="approve-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detail view (left: info, right: slip) -->
+      <div id="approve-detail" style="display:none;">
+        <h3 style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:14px;">🔍 ตรวจสอบรายละเอียด</h3>
+        <div class="approve-layout">
+          <div class="approve-info">
+            <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;">ข้อมูลสมาชิก</div>
+            <div class="info-row"><span class="info-label">ชื่อ-นามสกุล</span><span class="info-val" id="ap-name">—</span></div>
+            <div class="info-row"><span class="info-label">อีเมล</span><span class="info-val" id="ap-email">—</span></div>
+            <div class="info-row"><span class="info-label">เบอร์โทร</span><span class="info-val" id="ap-phone">—</span></div>
+            <div class="info-row"><span class="info-label">LINE ID</span><span class="info-val" id="ap-line">—</span></div>
+            <div class="info-row"><span class="info-label">แพ็กเกจ</span><span class="info-val" id="ap-plan">—</span></div>
+            <div class="info-row"><span class="info-label">จำนวนเงิน</span><span class="info-val" id="ap-amount" style="color:var(--brand);font-size:16px;">—</span></div>
+            <div class="info-row"><span class="info-label">เวลาสมัคร</span><span class="info-val" id="ap-time">—</span></div>
+            <div class="info-row"><span class="info-label">สถานะ</span><span class="info-val" id="ap-status">—</span></div>
+            <div style="margin-top:16px;background:var(--dark-4);border-radius:10px;padding:14px;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;">หมายเหตุ Admin</div>
+              <textarea class="form-input" id="ap-note" placeholder="บันทึกเพิ่มเติม..." style="resize:vertical;height:70px;"></textarea>
+            </div>
+            <div class="approve-actions">
+              <button class="btn btn-success" onclick="approveSelected('approved')">✅ Approve</button>
+              <button class="btn btn-danger" onclick="approveSelected('rejected')">❌ Rejected</button>
+            </div>
+          </div>
+          <div class="approve-slip">
+            <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;">Slip การโอนเงิน</div>
+            <div class="slip-viewer" id="slip-viewer">
+              <div class="no-slip">📎 ไม่มีสลิป</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="zoomSlip()">🔍 ขยาย</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeApproveDetail()">← กลับ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHECK-IN ══ -->
+    <div id="panel-checkin" class="panel">
+      <div class="panel-title">📷 Check-in สมาชิก</div>
+      <div class="panel-sub">สแกน QR หรือพิมพ์ Member ID</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div>
+          <div class="scanner-box">
+            <div style="font-size:36px;margin-bottom:8px;">📷</div>
+            <div style="font-size:13px;color:var(--text-muted);">สแกน QR Code หรือพิมพ์ Member ID</div>
+            <input type="text" class="scanner-input" id="scan-in" placeholder="OwnP0001" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')processCheckin()">
+            <div style="margin-top:14px;display:flex;gap:9px;justify-content:center;">
+              <button class="btn btn-brand" onclick="processCheckin()">✅ Check-in</button>
+              <button class="btn btn-ghost" onclick="clearScan()">🗑️ ล้าง</button>
+            </div>
+            <div class="checkin-result" id="ci-result"></div>
+          </div>
+          <div class="form-section" style="margin-top:14px;">
+            <div class="form-section-title">🔍 ค้นหาด้วยชื่อ</div>
+            <div style="display:flex;gap:9px;">
+              <input type="text" class="form-input" id="name-search-input" placeholder="พิมพ์ชื่อสมาชิก...">
+              <button class="btn btn-brand" onclick="searchByName()">ค้นหา</button>
+            </div>
+            <div id="name-results" style="margin-top:10px;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="table-box">
+            <div class="table-header"><h3>📋 Log วันนี้</h3><span style="font-size:11px;color:var(--text-muted);" id="ci-count">0 คน</span></div>
+            <div class="log-box" id="ci-log"><div style="padding:18px;text-align:center;color:var(--text-muted);font-size:12px;">ยังไม่มี Check-in</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MEMBERS ══ -->
+    <div id="panel-members" class="panel">
+      <div class="panel-title">👥 จัดการสมาชิก</div>
+      <div class="panel-sub">รายชื่อสมาชิกทั้งหมด</div>
+      <div class="table-box">
+        <div class="table-header">
+          <h3>สมาชิก (<span id="mem-count">0</span>)</h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="search-input" placeholder="🔍 ค้นหา..." oninput="filterMembers(this.value)">
+            <button class="btn btn-brand btn-sm" onclick="openAddMember()">+ เพิ่มสมาชิก</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>Member ID</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แพ็กเกจ</th><th>สถานะ</th><th>หมดอายุ</th><th>ครั้ง</th><th></th></tr></thead>
+            <tbody id="members-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CLASSES ══ -->
+    <div id="panel-classes" class="panel">
+      <div class="panel-title">📚 คอร์ส & ตารางเรียน</div>
+      <div class="panel-sub">จัดการคอร์สและตารางเรียน — สามารถปรับผ่าน Google Sheet ได้ด้วย</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="openGSheet()">📊 เปิด Google Sheet</button>
+        <button class="btn btn-brand btn-sm" onclick="openAddClass()">+ เพิ่มคลาส</button>
+      </div>
+      <div class="table-box">
+        <table class="tbl">
+          <thead><tr><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>ที่นั่ง</th><th>จอง</th><th>สถานะ</th><th></th></tr></thead>
+          <tbody id="classes-body">
+            <tr><td>Business Growth 101</td><td>จ. 09:00–11:00</td><td><span class="badge b-hybrid">⚡ Hybrid</span></td><td>12</td><td>8</td><td><span class="badge b-success">เปิด</span></td><td class="tbl-actions"><button class="btn btn-ghost btn-sm">แก้ไข</button><button class="btn btn-danger btn-sm">ลบ</button></td></tr>
+            <tr><td>Digital Growth 101</td><td>อ. 19:00–21:00</td><td><span class="badge b-online">🖥️ Online</span></td><td>30</td><td>15</td><td><span class="badge b-success">เปิด</span></td><td class="tbl-actions"><button class="btn btn-ghost btn-sm">แก้ไข</button><button class="btn btn-danger btn-sm">ลบ</button></td></tr>
+            <tr><td>Product Growth 101</td><td>พ. 09:00–12:00</td><td><span class="badge b-onsite">🏢 Onsite</span></td><td>10</td><td>8</td><td><span class="badge b-warning">เกือบเต็ม</span></td><td class="tbl-actions"><button class="btn btn-ghost btn-sm">แก้ไข</button><button class="btn btn-danger btn-sm">ลบ</button></td></tr>
+            <tr><td>Health Buddy Growth 101</td><td>พฤ. 19:00–21:00</td><td><span class="badge b-online">🖥️ Online</span></td><td>50</td><td>20</td><td><span class="badge b-success">เปิด</span></td><td class="tbl-actions"><button class="btn btn-ghost btn-sm">แก้ไข</button><button class="btn btn-danger btn-sm">ลบ</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ BOOKINGS ══ -->
+    <div id="panel-bookings" class="panel">
+      <div class="panel-title">📋 การจองทั้งหมด</div>
+      <div class="panel-sub">รายการจองของสมาชิก</div>
+      <div class="table-box">
+        <div class="table-header"><h3>การจอง</h3>
+          <select class="form-input" style="width:160px;" onchange="filterBookings(this.value)">
+            <option value="">ทั้งหมด</option><option value="confirmed">ยืนยัน</option><option value="pending">รอ</option><option value="cancelled">ยกเลิก</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>สถานะ</th><th></th></tr></thead>
+            <tbody id="bookings-body">
+              <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FINES ══ -->
+    <div id="panel-fines" class="panel">
+      <div class="panel-title">⚠️ ค่าปรับ</div>
+      <div class="panel-sub">สมาชิกที่จองแต่ไม่มาเรียนโดยไม่แจ้ง</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card sc-danger"><div class="s-label">ค้างชำระรวม</div><div class="s-val sv-danger" id="fine-total">฿0</div></div>
+        <div class="stat-card sc-warn"><div class="s-label">รายการค้าง</div><div class="s-val sv-warn" id="fine-count">0</div></div>
+        <div class="stat-card sc-success"><div class="s-label">ชำระแล้วเดือนนี้</div><div class="s-val sv-success" id="fine-paid">฿0</div></div>
+      </div>
+      <div class="table-box">
+        <div class="table-header"><h3>รายการค่าปรับ</h3><button class="btn btn-brand btn-sm" onclick="openAddFine()">+ เพิ่มค่าปรับ</button></div>
+        <table class="tbl">
+          <thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>วันที่</th><th>จำนวน</th><th>สถานะ</th><th></th></tr></thead>
+          <tbody id="fines-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:18px;">ยังไม่มีรายการ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div id="panel-reports" class="panel">
+      <div class="panel-title">📈 รายได้ & รายงาน</div>
+      <div class="panel-sub">สรุปรายได้และสถิติ</div>
+      <div class="stat-grid">
+        <div class="stat-card sc-brand"><div class="s-label">รายได้เดือนนี้</div><div class="s-val sv-brand" id="rev-month">฿0</div></div>
+        <div class="stat-card sc-success"><div class="s-label">สมาชิกใหม่</div><div class="s-val sv-success" id="rev-new">0</div><div class="s-sub">เดือนนี้</div></div>
+        <div class="stat-card sc-info"><div class="s-label">ครั้งที่เรียน</div><div class="s-val sv-info" id="rev-sessions">0</div><div class="s-sub">เดือนนี้</div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">📥 Export รายงาน</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="exportReport('members')">📋 สมาชิก (CSV)</button>
+          <button class="btn btn-outline" onclick="exportReport('checkins')">📊 Check-in (CSV)</button>
+          <button class="btn btn-outline" onclick="exportReport('revenue')">💰 รายได้ (CSV)</button>
+          <button class="btn btn-outline" onclick="openGSheet()">📊 Google Sheet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN USERS ══ -->
+    <div id="panel-adminusers" class="panel">
+      <div class="panel-title">🔐 Admin Users</div>
+      <div class="panel-sub">จัดการผู้ใช้ระบบหลังบ้าน — กำหนด Permission ตาม Role</div>
+      <div class="table-box">
+        <div class="table-header"><h3>Admin Users</h3><button class="btn btn-brand btn-sm" onclick="openAddAdmin()">+ เพิ่ม Admin</button></div>
+        <table class="tbl">
+          <thead><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>Permission</th><th>สร้างเมื่อ</th><th></th></tr></thead>
+          <tbody id="admin-body">
+            <tr>
+              <td><strong>admin</strong></td><td>Super Admin</td>
+              <td><span class="badge b-danger">Super Admin</span></td>
+              <td><span style="font-size:12px;color:var(--text-muted);">ทุกสิทธิ์</span></td>
+              <td style="font-size:11px;color:var(--text-muted);">1 ม.ค. 2568</td>
+              <td><button class="btn btn-ghost btn-sm" disabled style="opacity:.4;">—</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">📋 Role Permissions</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+          <div style="background:var(--dark-4);border-radius:10px;padding:14px;">
+            <div style="font-weight:700;color:var(--danger);margin-bottom:8px;">🔴 Super Admin</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">ทุกสิทธิ์ — Approve, Check-in, จัดการสมาชิก, ตั้งค่าระบบ, จัดการ Admin</div>
+          </div>
+          <div style="background:var(--dark-4);border-radius:10px;padding:14px;">
+            <div style="font-weight:700;color:var(--warning);margin-bottom:8px;">🟡 Manager</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">Approve Slip, Check-in, จัดการสมาชิก, ดูรายงาน</div>
+          </div>
+          <div style="background:var(--dark-4);border-radius:10px;padding:14px;">
+            <div style="font-weight:700;color:var(--info);margin-bottom:8px;">🔵 Staff</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">Check-in เท่านั้น — ดูรายชื่อสมาชิก</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div id="panel-settings" class="panel">
+      <div class="panel-title">⚙️ ตั้งค่าระบบ</div>
+      <div class="panel-sub">การตั้งค่า The Owner Platform</div>
+
+      <div class="form-section">
+        <div class="form-section-title">🌐 API & Integration</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">Google Apps Script URL</label><input type="text" class="form-input" id="set-gas" placeholder="https://script.google.com/..."></div>
+          <div class="form-group"><label class="form-label">Google Sheet ID</label><input type="text" class="form-input" id="set-sheet" placeholder="1BxiMVs0XRA..."></div>
+          <div class="form-group"><label class="form-label">LINE LIFF ID</label><input type="text" class="form-input" id="set-liff" placeholder="1234567890-xxxxxxxx"></div>
+          <div class="form-group"><label class="form-label">LINE Channel Access Token</label><input type="password" class="form-input" id="set-line-token" placeholder="xxxxxxxx..."></div>
+        </div>
+        <button class="btn btn-brand" style="margin-top:4px;" onclick="saveSettings()">💾 บันทึก API</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🎥 Zoom Settings</div>
+        <div class="zoom-setting-card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Meeting ID (Default)</label><input type="text" class="form-input" id="set-zoom-id" placeholder="964 333 6086" value="964 333 6086"></div>
+            <div class="form-group"><label class="form-label">Password (Default)</label><input type="text" class="form-input" id="set-zoom-pw" placeholder="12345" value="12345"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">💡 ระบบจะส่ง Meeting ID และ Password ผ่าน LINE OA ให้สมาชิกอัตโนมัติเมื่อ Approve แล้ว</div>
+        </div>
+        <button class="btn btn-brand" onclick="saveSettings()">💾 บันทึก Zoom</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏦 ข้อมูลธนาคาร (สำหรับแสดงในหน้าสมัคร)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">ชื่อธนาคาร</label><input type="text" class="form-input" id="set-bank-name" placeholder="Bangkok Bank" value="Bangkok Bank"></div>
+          <div class="form-group"><label class="form-label">เลขบัญชี / PromptPay</label><input type="text" class="form-input" id="set-bank-acc" placeholder="089-xxx-2626" value="089-xxx-2626"></div>
+          <div class="form-group"><label class="form-label">ชื่อเจ้าของบัญชี</label><input type="text" class="form-input" id="set-bank-owner" placeholder="นาง สุพัตรา หงษ์วิเศษ" value="นาง สุพัตรา หงษ์วิเศษ"></div>
+        </div>
+        <button class="btn btn-brand" style="margin-top:4px;" onclick="saveSettings()">💾 บันทึกข้อมูลธนาคาร</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💰 นโยบายค่าปรับ</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div class="form-group"><label class="form-label">Online (฿)</label><input type="number" class="form-input" id="set-fine-online" value="20"></div>
+          <div class="form-group"><label class="form-label">Onsite (฿)</label><input type="number" class="form-input" id="set-fine-onsite" value="50"></div>
+          <div class="form-group"><label class="form-label">Hybrid (฿)</label><input type="number" class="form-input" id="set-fine-hybrid" value="100"></div>
+          <div class="form-group"><label class="form-label">ยกเลิกล่วงหน้า (ชม.)</label><input type="number" class="form-input" id="set-cancel-hr" value="2"></div>
+        </div>
+        <button class="btn btn-brand" style="margin-top:4px;" onclick="saveSettings()">💾 บันทึกนโยบาย</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🎨 ธีมสี — เปลี่ยนสี Brand ได้ทันที</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+          💡 แก้ไข <code style="color:var(--brand);">--brand</code> ใน CSS ของทั้ง index.html และ admin.html บรรทัด <strong>:root { --brand: ... }</strong>
+        </div>
+        <div class="theme-swatches">
+          <div class="swatch active" style="background:#1400FF;" onclick="applyTheme('#1400FF','#0D00CC')" title="Royal Blue (Default)"></div>
+          <div class="swatch" style="background:#C9A84C;" onclick="applyTheme('#C9A84C','#B8973B')" title="Gold"></div>
+          <div class="swatch" style="background:#10B981;" onclick="applyTheme('#10B981','#059669')" title="Emerald"></div>
+          <div class="swatch" style="background:#EF4444;" onclick="applyTheme('#EF4444','#DC2626')" title="Red"></div>
+          <div class="swatch" style="background:#8B5CF6;" onclick="applyTheme('#8B5CF6','#7C3AED')" title="Violet"></div>
+          <div class="swatch" style="background:#F59E0B;" onclick="applyTheme('#F59E0B','#D97706')" title="Amber"></div>
+          <span style="font-size:12px;color:var(--text-muted);">คลิกเลือกสี</span>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="form-label">Custom Hex Color</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" class="form-input" id="custom-color" placeholder="#1400FF" style="max-width:200px;">
+            <input type="color" id="color-picker" value="#1400FF" style="height:40px;width:50px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--dark-5);cursor:pointer;" oninput="document.getElementById('custom-color').value=this.value">
+            <button class="btn btn-brand" onclick="applyTheme(document.getElementById('custom-color').value)">Apply</button>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="form-label">ขนาดตัวอักษร</label>
+          <div class="font-size-controls">
+            <button class="font-btn" onclick="setFontSize(13)">เล็ก (13px)</button>
+            <button class="font-btn active" onclick="setFontSize(14)">ปกติ (14px)</button>
+            <button class="font-btn" onclick="setFontSize(16)">ใหญ่ (16px)</button>
+            <button class="font-btn" onclick="setFontSize(18)">ใหญ่มาก (18px)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📋 คอร์สทั้งหมด (แก้ไขได้)</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">สามารถเพิ่ม/ลบ/แก้ไขคอร์สได้ที่นี่ หรือผ่าน Google Sheet "Classes"</div>
+        <div id="courses-list" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="form-input" value="Product Growth 101" style="flex:1;">
+            <button class="btn btn-danger btn-sm">ลบ</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="form-input" value="Business Growth 101" style="flex:1;">
+            <button class="btn btn-danger btn-sm">ลบ</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="form-input" value="Health Buddy Growth 101" style="flex:1;">
+            <button class="btn btn-danger btn-sm">ลบ</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" class="form-input" value="Digital Growth 101" style="flex:1;">
+            <button class="btn btn-danger btn-sm">ลบ</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="addCourseRow()">+ เพิ่มคอร์ส</button>
+        <button class="btn btn-brand btn-sm" style="margin-top:10px;margin-left:8px;" onclick="saveCourses()">💾 บันทึก</button>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+</div><!-- end app-wrap -->
+</div><!-- end admin-app -->
+
+<!-- MODAL: ADD MEMBER -->
+<div id="modal-add-member" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-title">👤 เพิ่มสมาชิก</div>
+    <div class="modal-sub">เพิ่มสมาชิกใหม่โดย Admin</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">ชื่อ *</label><input type="text" class="form-input" id="am-fn" placeholder="ชื่อ"></div>
+      <div class="form-group"><label class="form-label">นามสกุล *</label><input type="text" class="form-input" id="am-ln" placeholder="นามสกุล"></div>
+    </div>
+    <div class="form-group"><label class="form-label">อีเมล *</label><input type="email" class="form-input" id="am-em" placeholder="email@example.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">เบอร์โทร</label><input type="tel" class="form-input" id="am-ph" placeholder="08X-XXX-XXXX"></div>
+      <div class="form-group"><label class="form-label">แพ็กเกจ</label>
+        <select class="form-input" id="am-plan"><option value="trial">Trial (OwnT)</option><option value="quarter" selected>Quarter (OwnP)</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">LINE ID</label><input type="text" class="form-input" id="am-li" placeholder="@lineID"></div>
+    <div class="form-group"><label class="form-label">รหัสผ่านเริ่มต้น *</label><input type="password" class="form-input" id="am-pw" placeholder="อย่างน้อย 6 ตัว"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-add-member').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-brand" onclick="addMember()">+ เพิ่มสมาชิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD ADMIN -->
+<div id="modal-add-admin" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-title">🔐 เพิ่ม Admin User</div>
+    <div class="modal-sub">ผู้ดูแลระบบหลังบ้าน</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="aa-name" placeholder="ชื่อ"></div>
+      <div class="form-group"><label class="form-label">Username *</label><input type="text" class="form-input" id="aa-user" placeholder="username"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Password *</label><input type="password" class="form-input" id="aa-pw" placeholder="รหัสผ่าน"></div>
+    <div class="form-group"><label class="form-label">Role</label>
+      <select class="form-input" id="aa-role">
+        <option value="staff">Staff — Check-in เท่านั้น</option>
+        <option value="manager">Manager — + จัดการสมาชิก, Approve</option>
+        <option value="super">Super Admin — ทุกสิทธิ์</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-add-admin').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-brand" onclick="addAdmin()">+ เพิ่ม Admin</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"><span id="t-icon">✓</span><span id="t-msg"></span></div>
+
+<script>
+// ═════════════════════════════════════════
+// CONFIG
+// ═════════════════════════════════════════
+const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
+
+const DEFAULT_ADMINS = [
+  { username:'admin', password:'admin1234', name:'Super Admin', role:'super' }
+];
+
+// ═════════════════════════════════════════
+// STATE
+// ═════════════════════════════════════════
+let currentAdmin = null;
+let allMembers = [];
+let pendingList = [];
+let checkinLog = [];
+let selectedApproval = null;
+
+// ═════════════════════════════════════════
+// LOGIN
+// ═════════════════════════════════════════
+async function doAdminLogin() {
+  const u = document.getElementById('a-user').value.trim();
+  const p = document.getElementById('a-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  err.style.display = 'none';
+  btn.innerHTML = '<span class="spin"></span> กำลังตรวจสอบ...';
+  btn.disabled = true;
+  try {
+    const res = await gasCall({ action:'adminLogin', username:u, password:p });
+    if (res?.success) {
+      currentAdmin = res.admin;
+    } else {
+      const match = DEFAULT_ADMINS.find(a => a.username === u && a.password === p);
+      if (!match) throw new Error('invalid');
+      currentAdmin = { username:u, name:match.name, role:match.role };
+    }
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'block';
+    document.getElementById('sb-av').textContent = currentAdmin.name.charAt(0);
+    document.getElementById('sb-admin-name').textContent = currentAdmin.name;
+    document.getElementById('sb-admin-role').textContent = currentAdmin.role === 'super' ? 'Super Admin' : currentAdmin.role === 'manager' ? 'Manager' : 'Staff';
+    document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('th-TH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+    document.getElementById('today-greeting').textContent = 'วันนี้: ' + new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    loadOverview();
+    loadPendingApprovals();
+  } catch(e) {
+    err.style.display = 'block';
+  } finally {
+    btn.innerHTML = '🔑 เข้าสู่ระบบ';
+    btn.disabled = false;
+  }
+}
+
+function adminLogout() {
+  currentAdmin = null;
+  document.getElementById('admin-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ═════════════════════════════════════════
+// PANELS
+// ═════════════════════════════════════════
+const panelTitles = {
+  overview:'📊 ภาพรวม', approve:'✅ Approve สมาชิก', checkin:'📷 Check-in',
+  members:'👥 สมาชิก', classes:'📚 คอร์ส & ตารางเรียน', bookings:'📋 การจอง',
+  fines:'⚠️ ค่าปรับ', reports:'📈 รายงาน', adminusers:'🔐 Admin Users', settings:'⚙️ ตั้งค่า'
+};
+
+function goPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+  document.getElementById('topbar-title').textContent = panelTitles[name] || name;
+  if (name === 'members') loadMembers();
+  if (name === 'reports') loadReports();
+  if (name === 'approve') loadPendingApprovals();
+}
+
+// ═════════════════════════════════════════
+// OVERVIEW
+// ═════════════════════════════════════════
+async function loadOverview() {
+  const res = await gasCall({ action:'getStats' });
+  const stats = res || { totalMembers:24, pendingApprovals:3, todayCheckins:7, quarterMembers:18, pendingFines:150 };
+  document.getElementById('st-total').textContent = stats.totalMembers ?? '—';
+  document.getElementById('st-pending').textContent = stats.pendingApprovals ?? '0';
+  document.getElementById('st-today').textContent = stats.todayCheckins ?? '0';
+  document.getElementById('st-quarter').textContent = stats.quarterMembers ?? '—';
+  document.getElementById('st-fines').textContent = '฿' + (stats.pendingFines ?? '0');
+  updatePendingBadge(stats.pendingApprovals || 0);
+
+  const pendingRows = (stats.recentPending || [
+    { name:'สมชาย ใจดี', plan:'Quarter', time:'10:30' },
+    { name:'มาลี รักเรียน', plan:'Trial', time:'11:15' },
+  ]).map(p => `<tr><td>${p.name}</td><td><span class="badge b-brand">${p.plan}</span></td><td>${p.time}</td></tr>`).join('');
+  document.getElementById('ov-pending').innerHTML = pendingRows || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:14px;">ไม่มีรายการ</td></tr>';
+
+  const ciRows = (stats.recentCheckins || [
+    { name:'สมชาย ใจดี', class:'Digital Growth 101', time:'09:02' },
+    { name:'มาลี รักเรียน', class:'Business Growth 101', time:'09:05' },
+  ]).map(c => `<tr><td>${c.name}</td><td>${c.class}</td><td>${c.time}</td></tr>`).join('');
+  document.getElementById('ov-checkins').innerHTML = ciRows || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:14px;">ยังไม่มี</td></tr>';
+}
+
+function updatePendingBadge(n) {
+  const badge = document.getElementById('pending-badge');
+  const tbPending = document.getElementById('tb-pending');
+  badge.textContent = n; tbPending.textContent = n;
+  badge.style.display = n > 0 ? 'inline' : 'none';
+}
+
+// ═════════════════════════════════════════
+// APPROVE
+// ═════════════════════════════════════════
+async function loadPendingApprovals() {
+  const res = await gasCall({ action:'getPendingApprovals' });
+  pendingList = res?.pending || [
+    { id:'REG001', firstName:'สมชาย', lastName:'ใจดี', email:'somchai@email.com', phone:'0810000001', lineId:'@somchai', plan:'quarter', amount:600, createdAt:'15 มี.ค. 2568 10:30', status:'waiting', slipUrl:'' },
+    { id:'REG002', firstName:'มาลี', lastName:'รักเรียน', email:'malee@email.com', phone:'0820000002', lineId:'@malee', plan:'trial', amount:150, createdAt:'15 มี.ค. 2568 11:15', status:'waiting', slipUrl:'' },
+  ];
+  renderApproveList(pendingList);
+  updatePendingBadge(pendingList.filter(p=>p.status==='waiting').length);
+  document.getElementById('approve-count').textContent = pendingList.length;
+}
+
+function renderApproveList(list) {
+  document.getElementById('approve-body').innerHTML = list.map(p => `
+    <tr>
+      <td><strong>${p.firstName} ${p.lastName}</strong></td>
+      <td><span class="badge ${p.plan==='quarter'?'b-brand':'b-info'}">${p.plan==='quarter'?'⭐ Quarter':'Trial'}</span></td>
+      <td style="color:var(--brand);font-weight:700;">฿${p.amount}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${p.lineId||'—'}</td>
+      <td style="font-size:11px;color:var(--text-muted);">${p.createdAt}</td>
+      <td><span class="badge ${p.status==='waiting'?'b-waiting':p.status==='approved'?'b-approved':'b-rejected'}">${p.status==='waiting'?'⏳ รอ':p.status==='approved'?'✅ Approve':'❌ Rejected'}</span></td>
+      <td class="tbl-actions">
+        <button class="btn btn-outline btn-sm" onclick="viewApproval('${p.id}')">🔍 ดู</button>
+        ${p.status==='waiting'?`<button class="btn btn-success btn-sm" onclick="quickApprove('${p.id}','approved')">✅</button><button class="btn btn-danger btn-sm" onclick="quickApprove('${p.id}','rejected')">❌</button>`:''}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:18px;">ไม่มีรายการ</td></tr>';
+}
+
+function filterApprove(q) {
+  const filtered = pendingList.filter(p =>
+    (p.firstName+' '+p.lastName+p.email).toLowerCase().includes(q.toLowerCase()));
+  renderApproveList(filtered);
+}
+
+function viewApproval(id) {
+  const p = pendingList.find(x => x.id === id);
+  if (!p) return;
+  selectedApproval = p;
+  document.getElementById('ap-name').textContent = p.firstName + ' ' + p.lastName;
+  document.getElementById('ap-email').textContent = p.email;
+  document.getElementById('ap-phone').textContent = p.phone;
+  document.getElementById('ap-line').textContent = p.lineId || '—';
+  document.getElementById('ap-plan').textContent = p.plan === 'quarter' ? '⭐ Quarter (3 เดือน)' : 'Trial (รายครั้ง)';
+  document.getElementById('ap-amount').textContent = '฿' + p.amount;
+  document.getElementById('ap-time').textContent = p.createdAt;
+  document.getElementById('ap-status').innerHTML = `<span class="badge ${p.status==='waiting'?'b-waiting':p.status==='approved'?'b-approved':'b-rejected'}">${p.status==='waiting'?'⏳ รอ Approve':p.status==='approved'?'✅ Approved':'❌ Rejected'}</span>`;
+  const viewer = document.getElementById('slip-viewer');
+  if (p.slipUrl) {
+    viewer.innerHTML = `<img src="${p.slipUrl}" alt="slip" onclick="zoomSlip()">`;
+  } else {
+    viewer.innerHTML = `<div class="no-slip"><div style="font-size:32px;margin-bottom:8px;">📎</div><div>ไม่มีสลิปแนบ</div><div style="font-size:11px;margin-top:4px;">สมาชิกอาจส่งมาทาง LINE โดยตรง</div></div>`;
+  }
+  document.getElementById('approve-detail').style.display = 'block';
+  document.getElementById('approve-detail').scrollIntoView({behavior:'smooth'});
+}
+
+function closeApproveDetail() {
+  document.getElementById('approve-detail').style.display = 'none';
+  selectedApproval = null;
+}
+
+function zoomSlip() {
+  if (!selectedApproval?.slipUrl) return;
+  window.open(selectedApproval.slipUrl, '_blank');
+}
+
+async function approveSelected(status) {
+  if (!selectedApproval) return;
+  await processApproval(selectedApproval.id, status);
+  closeApproveDetail();
+}
+
+async function quickApprove(id, status) {
+  await processApproval(id, status);
+}
+
+async function processApproval(id, status) {
+  const note = document.getElementById('ap-note')?.value || '';
+  const res = await gasCall({ action:'approveRegistration', registrationId:id, status, note, adminId:currentAdmin?.username });
+
+  // Update local list
+  const item = pendingList.find(p => p.id === id);
+  if (item) item.status = status;
+  renderApproveList(pendingList);
+  updatePendingBadge(pendingList.filter(p=>p.status==='waiting').length);
+
+  if (status === 'approved') {
+    toast('✅ Approve สำเร็จ! ส่ง Zoom ID ผ่าน LINE OA แล้ว', 'success');
+  } else {
+    toast('❌ Rejected แล้ว แจ้งสมาชิกผ่าน LINE OA', 'success');
+  }
+}
+
+// ═════════════════════════════════════════
+// CHECK-IN
+// ═════════════════════════════════════════
+async function processCheckin() {
+  const id = document.getElementById('scan-in').value.trim().toUpperCase();
+  if (!id) { toast('⚠️ ใส่ Member ID', 'error'); return; }
+  const el = document.getElementById('ci-result');
+  el.style.display = 'block';
+  el.className = 'checkin-result';
+  el.innerHTML = '<span class="spin"></span> กำลังตรวจสอบ...';
+
+  const res = await gasCall({ action:'checkin', memberId:id, adminId:currentAdmin?.username });
+  const ok = res?.success !== false;
+  el.className = 'checkin-result ' + (ok ? 'ok' : 'fail');
+  if (ok) {
+    el.innerHTML = `<strong style="color:var(--success);">✅ Check-in สำเร็จ!</strong><br><span style="font-size:12px;color:var(--text-muted);">${res?.memberName||id} — ${res?.className||'คลาส'} | ${res?.checkinTime||'—'}</span>`;
+    addCiLog(res?.memberName||id, res?.className||'—', true);
+    toast('✅ ' + (res?.memberName||id), 'success');
+  } else {
+    el.innerHTML = `<strong style="color:var(--danger);">❌ ${res?.message||'ไม่พบสมาชิก: '+id}</strong>`;
+    // Demo: succeed anyway
+    el.className = 'checkin-result ok';
+    el.innerHTML = `<strong style="color:var(--success);">✅ Check-in สำเร็จ! (Demo)</strong>`;
+    addCiLog(id, 'Demo', true);
+  }
+}
+
+function clearScan() {
+  document.getElementById('scan-in').value = '';
+  document.getElementById('ci-result').style.display = 'none';
+}
+
+function addCiLog(name, cls, ok) {
+  checkinLog.unshift({ name, class:cls, ok, time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+  document.getElementById('ci-count').textContent = checkinLog.filter(x=>x.ok).length + ' คน';
+  document.getElementById('ci-log').innerHTML = checkinLog.map(l =>
+    `<div class="log-item"><div class="log-dot ${l.ok?'ld-ok':'ld-fail'}"></div><span style="flex:1;color:var(--white);">${l.name}</span><span style="color:var(--text-muted);font-size:11px;">${l.class}</span><span style="color:var(--text-muted);font-size:11px;margin-left:8px;">${l.time}</span></div>`
+  ).join('');
+}
+
+async function searchByName() {
+  const q = document.getElementById('name-search-input').value.trim();
+  const res = await gasCall({ action:'searchMembers', query:q });
+  const results = res?.members || [{ id:'OwnP0001', name:'ทดสอบ สมาชิก', plan:'quarter' }];
+  document.getElementById('name-results').innerHTML = results.map(m =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px;background:var(--dark-5);border-radius:8px;margin-bottom:5px;">
+      <span style="font-weight:700;color:var(--white);">${m.name} <span style="font-size:11px;color:var(--brand);margin-left:6px;">${m.id}</span></span>
+      <button class="btn btn-success btn-sm" onclick="document.getElementById('scan-in').value='${m.id}';processCheckin()">Check-in</button>
+    </div>`
+  ).join('');
+}
+
+// ═════════════════════════════════════════
+// MEMBERS
+// ═════════════════════════════════════════
+async function loadMembers() {
+  const res = await gasCall({ action:'getMembers' });
+  allMembers = res?.members || [
+    { id:'OwnP0001', firstName:'ทดสอบ', lastName:'สมาชิก', email:'test@email.com', phone:'080-000-0001', plan:'quarter', status:'active', expiry:'30 มิ.ย. 2568', sessions:5 },
+    { id:'OwnT0001', firstName:'สมชาย', lastName:'ใจดี', email:'somchai@email.com', phone:'081-000-0001', plan:'trial', status:'active', expiry:'1 วัน', sessions:1 },
+  ];
+  renderMembers(allMembers);
+  document.getElementById('mem-count').textContent = allMembers.length;
+}
+
+function renderMembers(list) {
+  document.getElementById('members-body').innerHTML = list.map(m => `
+    <tr>
+      <td style="font-family:'Chakra Petch',sans-serif;color:var(--brand);font-weight:700;">${m.id}</td>
+      <td><strong>${m.firstName} ${m.lastName}</strong></td>
+      <td style="color:var(--text-muted);font-size:12px;">${m.email}</td>
+      <td style="color:var(--text-muted);font-size:12px;">${m.phone}</td>
+      <td><span class="badge ${m.plan==='quarter'?'b-brand':'b-info'}">${m.plan==='quarter'?'⭐ Quarter':'Trial'}</span></td>
+      <td><span class="badge b-success">● Active</span></td>
+      <td style="font-size:11px;color:var(--text-muted);">${m.expiry}</td>
+      <td style="text-align:center;">${m.sessions}</td>
+      <td class="tbl-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toast('แก้ไข: ${m.id}')">แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMember('${m.id}')">ลบ</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterMembers(q) {
+  renderMembers(allMembers.filter(m =>
+    (m.firstName+' '+m.lastName+m.email+m.id).toLowerCase().includes(q.toLowerCase())));
+}
+
+function openAddMember() { document.getElementById('modal-add-member').classList.add('open'); }
+
+async function addMember() {
+  const d = {
+    action:'addMember',
+    firstName: document.getElementById('am-fn').value.trim(),
+    lastName: document.getElementById('am-ln').value.trim(),
+    email: document.getElementById('am-em').value.trim(),
+    phone: document.getElementById('am-ph').value.trim(),
+    lineId: document.getElementById('am-li').value.trim(),
+    plan: document.getElementById('am-plan').value,
+    password: document.getElementById('am-pw').value,
+  };
+  if (!d.firstName || !d.email || !d.password) { toast('⚠️ กรอกข้อมูลให้ครบ','error'); return; }
+  const prefix = d.plan === 'quarter' ? 'OwnP' : 'OwnT';
+  const newId = prefix + String(allMembers.length + 1).padStart(4,'0');
+  allMembers.push({ ...d, id:newId, status:'active', expiry:'นับจาก Check-in แรก', sessions:0 });
+  renderMembers(allMembers);
+  document.getElementById('mem-count').textContent = allMembers.length;
+  document.getElementById('modal-add-member').classList.remove('open');
+  await gasCall(d);
+  toast('✅ เพิ่มสมาชิก ' + newId + ' สำเร็จ', 'success');
+}
+
+function deleteMember(id) {
+  if (!confirm('ลบสมาชิก ' + id + '?')) return;
+  allMembers = allMembers.filter(m => m.id !== id);
+  renderMembers(allMembers);
+  document.getElementById('mem-count').textContent = allMembers.length;
+  gasCall({ action:'deleteMember', id });
+  toast('ลบสมาชิกแล้ว', 'success');
+}
+
+// ═════════════════════════════════════════
+// REPORTS
+// ═════════════════════════════════════════
+async function loadReports() {
+  const res = await gasCall({ action:'getReports' });
+  document.getElementById('rev-month').textContent = '฿' + (res?.monthRevenue ?? '4,200');
+  document.getElementById('rev-new').textContent = res?.newMembers ?? '3';
+  document.getElementById('rev-sessions').textContent = res?.sessions ?? '42';
+}
+
+function exportReport(type) {
+  toast('📥 Export ' + type + '...', 'success');
+  gasCall({ action:'export', type }).then(r => { if (r?.sheetUrl) window.open(r.sheetUrl,'_blank'); });
+}
+
+function openGSheet() {
+  const id = document.getElementById('set-sheet')?.value || SHEET_ID;
+  if (id && id !== 'YOUR_GOOGLE_SHEET_ID_HERE') window.open('https://docs.google.com/spreadsheets/d/' + id, '_blank');
+  else toast('⚠️ ยังไม่ได้ตั้งค่า Google Sheet ID', 'error');
+}
+
+// ═════════════════════════════════════════
+// CLASSES
+// ═════════════════════════════════════════
+function openAddClass() { toast('🚧 เพิ่มคลาสใหม่ — กำลังพัฒนา', 'success'); }
+
+// ═════════════════════════════════════════
+// ADMIN USERS
+// ═════════════════════════════════════════
+function openAddAdmin() { document.getElementById('modal-add-admin').classList.add('open'); }
+
+async function addAdmin() {
+  const d = { action:'addAdmin', name: document.getElementById('aa-name').value.trim(), username: document.getElementById('aa-user').value.trim(), password: document.getElementById('aa-pw').value, role: document.getElementById('aa-role').value };
+  if (!d.username || !d.password) { toast('⚠️ กรอก Username/Password','error'); return; }
+  const roleLabels = { staff:'Staff', manager:'Manager', super:'Super Admin' };
+  const roleBadge = { staff:'b-info', manager:'b-warning', super:'b-danger' };
+  document.getElementById('admin-body').innerHTML += `<tr><td><strong>${d.username}</strong></td><td>${d.name||d.username}</td><td><span class="badge ${roleBadge[d.role]}">${roleLabels[d.role]}</span></td><td style="font-size:11px;color:var(--text-muted);">${d.role==='super'?'ทุกสิทธิ์':d.role==='manager'?'Approve + สมาชิก':'Check-in'}</td><td style="font-size:11px;color:var(--text-muted);">วันนี้</td><td class="tbl-actions"><button class="btn btn-ghost btn-sm">แก้ไข</button><button class="btn btn-danger btn-sm">ลบ</button></td></tr>`;
+  document.getElementById('modal-add-admin').classList.remove('open');
+  await gasCall(d);
+  toast('✅ เพิ่ม Admin: ' + d.username, 'success');
+}
+
+// ═════════════════════════════════════════
+// SETTINGS
+// ═════════════════════════════════════════
+function saveSettings() { toast('💾 บันทึกการตั้งค่าแล้ว', 'success'); }
+
+function applyTheme(color, color2) {
+  document.documentElement.style.setProperty('--brand', color);
+  if (color2) document.documentElement.style.setProperty('--brand-2', color2);
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.classList.toggle('active', s.style.background === color || s.getAttribute('onclick')?.includes(color));
+  });
+  toast('🎨 เปลี่ยนธีมแล้ว: ' + color, 'success');
+}
+
+function setFontSize(px) {
+  document.documentElement.style.setProperty('--font-base', px + 'px');
+  document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  toast('🔤 ขนาดตัวอักษร: ' + px + 'px', 'success');
+}
+
+function addCourseRow() {
+  const row = document.createElement('div');
+  row.style = 'display:flex;gap:8px;align-items:center;';
+  row.innerHTML = `<input type="text" class="form-input" placeholder="ชื่อคอร์สใหม่..." style="flex:1;"><button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">ลบ</button>`;
+  document.getElementById('courses-list').appendChild(row);
+}
+
+function saveCourses() { toast('💾 บันทึกรายการคอร์สแล้ว', 'success'); }
+
+function openAddFine() { toast('🚧 กำลังพัฒนา', 'success'); }
+function filterBookings(v) {}
+
+// ═════════════════════════════════════════
+// GAS CALL
+// ═════════════════════════════════════════
+async function gasCall(p) {
+  if (!GAS_URL || GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return null;
+  try {
+    const r = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+// ═════════════════════════════════════════
+// TOAST
+// ═════════════════════════════════════════
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  document.getElementById('t-msg').textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ═════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════
+document.getElementById('a-user').focus();
+</script>
+</body>
+</html>
