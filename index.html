@@ -1118,37 +1118,92 @@ async function loadPublicSchedule() {
 }
 
 // ─────────────────────────────────────────────────
-// LINE LIFF
+// LINE LIFF — ใช้ pattern เดียวกับ App.jsx ที่ทำงานได้จริง
 // ─────────────────────────────────────────────────
 async function initLiff() {
   try {
-    if (typeof liff === 'undefined' || CFG.LIFF_ID === '2009199519-UViGDRf7') return;
-    await liff.init({ liffId: CFG.LIFF_ID });
-    if (!liff.isLoggedIn()) return;
-    STATE.lineProfile = await liff.getProfile();
+    // ต้องมี LIFF_ID จริง
+    if (!CFG.LIFF_ID || CFG.LIFF_ID === '2009199519-UViGDRf7') {
+      console.warn('LIFF_ID not set');
+      return;
+    }
+
+    // รอให้ SDK โหลดก่อน (อาจช้าเล็กน้อย)
+    let attempts = 0;
+    while (!window.liff && attempts < 20) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+
+    if (!window.liff) {
+      console.warn('LIFF SDK not loaded');
+      return;
+    }
+
+    // Init LIFF — จำเป็นต้องเรียกทุกครั้ง
+    await window.liff.init({ liffId: CFG.LIFF_ID });
+
+    // ถ้ายังไม่ได้ login → redirect ไป LINE login
+    if (!window.liff.isLoggedIn()) {
+      // เฉพาะเมื่อเปิดใน LINE browser เท่านั้น
+      if (window.liff.isInClient()) {
+        window.liff.login();
+      }
+      return;
+    }
+
+    // ดึง Profile
+    const profile = await window.liff.getProfile();
+    if (!profile) return;
+
+    STATE.lineProfile = {
+      userId:      profile.userId,
+      displayName: profile.displayName,
+      pictureUrl:  profile.pictureUrl,
+    };
+
+    // Cache ไว้ใช้ซ้ำ
+    window.__liffUserId = profile.userId;
+
+    console.log('LINE Login:', profile.displayName, profile.userId);
+
+    // ลอง login กับ GAS
     const res = await api('lineLogin', {
-      lineUserId:   STATE.lineProfile.userId,
-      displayName:  STATE.lineProfile.displayName,
+      lineUserId:  profile.userId,
+      displayName: profile.displayName,
     });
+
     if (res?.success) {
+      // สมาชิกเก่า → เข้าพอร์ทัลเลย
       loadPortal(res.user);
     } else if (res?.needRegister) {
+      // สมาชิกใหม่ → เปิดฟอร์มสมัคร พร้อม prefill
       prefillLine();
       openModal('register');
     }
-  } catch (e) { console.log('LIFF:', e); }
+
+  } catch (e) {
+    console.error('LIFF init error:', e);
+  }
 }
 
 function lineFlow() {
-  if (typeof liff !== 'undefined' && CFG.LIFF_ID !== '2009199519-UViGDRf7') {
-    liff.login();
+  // ถ้าเปิดใน LINE browser และมี LIFF_ID จริง
+  if (window.liff && CFG.LIFF_ID !== '2009199519-UViGDRf7') {
+    if (window.liff.isInClient()) {
+      // อยู่ใน LINE app แล้ว — ดึง profile โดยตรง
+      initLiff();
+    } else {
+      // เปิดใน browser ปกติ — redirect ไป LIFF URL
+      window.location.href = 'https://liff.line.me/' + CFG.LIFF_ID;
+    }
     return;
   }
-  // Demo mode
+  // Demo mode (กรณี LIFF_ID ยังไม่ได้ตั้ง)
   STATE.lineProfile = { userId: 'U_DEMO_' + Date.now(), displayName: 'ทดสอบ LINE' };
   prefillLine();
   openModal('register');
-  toast('💚 LINE (Demo Mode)', 'ok');
+  toast('💚 LINE (Demo Mode — ยังไม่ได้ตั้ง LIFF_ID)', 'ok');
 }
 
 function prefillLine() {
