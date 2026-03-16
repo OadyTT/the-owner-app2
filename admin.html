@@ -640,14 +640,17 @@ let allMembers = [], pendingList = [], ciLog = [], selApproval = null;
 
 // ─── API ──────────────────────────────────────────
 async function api(action, data={}) {
-  if (!GAS || GAS === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return null;
   try {
     const r = await fetch(GAS, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain'},
       body: JSON.stringify({ action, ...data })
     });
     return await r.json();
-  } catch(e) { console.error('API:', e); return null; }
+  } catch(e) {
+    console.error('API error:', action, e);
+    return null;
+  }
 }
 
 // ─── LOGIN ────────────────────────────────────────

@@ -1033,19 +1033,15 @@ const STATE = {
 // API
 // ─────────────────────────────────────────────────
 async function api(action, data = {}) {
-  if (!CFG.GAS_URL || CFG.GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-    console.warn('GAS_URL not configured');
-    return null;
-  }
   try {
     const res = await fetch(CFG.GAS_URL, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify({ action, ...data }),
     });
     return await res.json();
   } catch (e) {
-    console.error('API error:', e);
+    console.error('API error:', action, e);
     return null;
   }
 }
