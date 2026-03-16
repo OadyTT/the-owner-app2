@@ -1006,7 +1006,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
 // NEVER put sensitive keys here
 // ─────────────────────────────────────────────────
 const CFG = {
-  GAS_URL:   'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
+  GAS_URL:   'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
   LIFF_ID:   '2009199519-UViGDRf7',
   // These are fetched from GAS dynamically
   zoomId:    '964 333 6086',
@@ -1034,7 +1034,7 @@ const STATE = {
 // API
 // ─────────────────────────────────────────────────
 async function api(action, data = {}) {
-  if (!CFG.GAS_URL || CFG.GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+  if (!CFG.GAS_URL || CFG.GAS_URL === 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec') {
     console.warn('GAS_URL not configured');
     return null;
   }
