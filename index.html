@@ -1006,7 +1006,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
 // NEVER put sensitive keys here
 // ─────────────────────────────────────────────────
 const CFG = {
-  GAS_URL:   'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
+  GAS_URL:   'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
   LIFF_ID:   '2009199519-UViGDRf7',
   // These are fetched from GAS dynamically
   zoomId:    '964 333 6086',
@@ -1034,7 +1034,7 @@ const STATE = {
 // API
 // ─────────────────────────────────────────────────
 async function api(action, data = {}) {
-  if (!CFG.GAS_URL || CFG.GAS_URL === 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec') {
+  if (!CFG.GAS_URL || CFG.GAS_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
     console.warn('GAS_URL not configured');
     return null;
   }
@@ -1118,54 +1118,53 @@ async function loadPublicSchedule() {
 }
 
 // ─────────────────────────────────────────────────
-// LINE LIFF — ใช้ pattern เดียวกับ App.jsx ที่ทำงานได้จริง
+// LINE LIFF — ตรงตาม App.jsx ที่ทำงานได้จริง
 // ─────────────────────────────────────────────────
+
+// Helper — ดึง userId จาก LIFF (ไม่ต้อง init เอง)
+async function getLiffUserId() {
+  try {
+    if (window.__liffUserId) return window.__liffUserId;
+    if (!window.liff || !CFG.LIFF_ID || CFG.LIFF_ID === '2009199519-UViGDRf7') return null;
+    if (window.liff.isLoggedIn && window.liff.isLoggedIn()) {
+      const profile = await window.liff.getProfile();
+      if (profile) {
+        window.__liffUserId = profile.userId;
+        return profile.userId;
+      }
+    }
+    return null;
+  } catch (e) { return null; }
+}
+
 async function initLiff() {
   try {
-    // ต้องมี LIFF_ID จริง
-    if (!CFG.LIFF_ID || CFG.LIFF_ID === '2009199519-UViGDRf7') {
-      console.warn('LIFF_ID not set');
-      return;
-    }
+    if (!CFG.LIFF_ID || CFG.LIFF_ID === '2009199519-UViGDRf7') return;
 
-    // รอให้ SDK โหลดก่อน (อาจช้าเล็กน้อย)
-    let attempts = 0;
-    while (!window.liff && attempts < 20) {
+    // รอ SDK โหลด
+    let wait = 0;
+    while (!window.liff && wait < 30) {
       await new Promise(r => setTimeout(r, 100));
-      attempts++;
+      wait++;
     }
+    if (!window.liff) return;
 
-    if (!window.liff) {
-      console.warn('LIFF SDK not loaded');
-      return;
-    }
-
-    // Init LIFF — จำเป็นต้องเรียกทุกครั้ง
+    // Init
     await window.liff.init({ liffId: CFG.LIFF_ID });
 
-    // ถ้ายังไม่ได้ login → redirect ไป LINE login
-    if (!window.liff.isLoggedIn()) {
-      // เฉพาะเมื่อเปิดใน LINE browser เท่านั้น
-      if (window.liff.isInClient()) {
-        window.liff.login();
-      }
-      return;
-    }
+    // ไม่ได้ login → ข้ามไป (user ต้องกดปุ่มเอง)
+    if (!window.liff.isLoggedIn()) return;
 
-    // ดึง Profile
+    // ดึง profile
     const profile = await window.liff.getProfile();
     if (!profile) return;
 
+    window.__liffUserId = profile.userId;
     STATE.lineProfile = {
       userId:      profile.userId,
       displayName: profile.displayName,
-      pictureUrl:  profile.pictureUrl,
+      pictureUrl:  profile.pictureUrl || '',
     };
-
-    // Cache ไว้ใช้ซ้ำ
-    window.__liffUserId = profile.userId;
-
-    console.log('LINE Login:', profile.displayName, profile.userId);
 
     // ลอง login กับ GAS
     const res = await api('lineLogin', {
@@ -1174,36 +1173,80 @@ async function initLiff() {
     });
 
     if (res?.success) {
-      // สมาชิกเก่า → เข้าพอร์ทัลเลย
       loadPortal(res.user);
-    } else if (res?.needRegister) {
-      // สมาชิกใหม่ → เปิดฟอร์มสมัคร พร้อม prefill
+    } else {
+      // สมาชิกใหม่ → prefill แล้วเปิดฟอร์ม
       prefillLine();
       openModal('register');
     }
 
   } catch (e) {
-    console.error('LIFF init error:', e);
+    console.error('LIFF:', e.message);
   }
 }
 
-function lineFlow() {
-  // ถ้าเปิดใน LINE browser และมี LIFF_ID จริง
-  if (window.liff && CFG.LIFF_ID !== '2009199519-UViGDRf7') {
-    if (window.liff.isInClient()) {
-      // อยู่ใน LINE app แล้ว — ดึง profile โดยตรง
-      initLiff();
-    } else {
-      // เปิดใน browser ปกติ — redirect ไป LIFF URL
-      window.location.href = 'https://liff.line.me/' + CFG.LIFF_ID;
-    }
+async function lineFlow() {
+  // ไม่มี LIFF_ID จริง
+  if (!CFG.LIFF_ID || CFG.LIFF_ID === '2009199519-UViGDRf7') {
+    toast('⚠️ LIFF_ID ยังไม่ได้ตั้งค่า', 'err');
     return;
   }
-  // Demo mode (กรณี LIFF_ID ยังไม่ได้ตั้ง)
-  STATE.lineProfile = { userId: 'U_DEMO_' + Date.now(), displayName: 'ทดสอบ LINE' };
-  prefillLine();
-  openModal('register');
-  toast('💚 LINE (Demo Mode — ยังไม่ได้ตั้ง LIFF_ID)', 'ok');
+
+  // รอ SDK
+  let wait = 0;
+  while (!window.liff && wait < 30) {
+    await new Promise(r => setTimeout(r, 100));
+    wait++;
+  }
+
+  // ไม่มี SDK (เปิดใน browser ปกติ)
+  if (!window.liff) {
+    window.location.href = 'https://liff.line.me/' + CFG.LIFF_ID;
+    return;
+  }
+
+  try {
+    await window.liff.init({ liffId: CFG.LIFF_ID });
+
+    // ยังไม่ login → redirect LINE
+    if (!window.liff.isLoggedIn()) {
+      window.liff.login({ redirectUri: window.location.href });
+      return;
+    }
+
+    // Login แล้ว → ดึง profile
+    const profile = await window.liff.getProfile();
+    if (!profile) return;
+
+    window.__liffUserId = profile.userId;
+    STATE.lineProfile = {
+      userId:      profile.userId,
+      displayName: profile.displayName,
+      pictureUrl:  profile.pictureUrl || '',
+    };
+
+    // ลอง login กับ GAS
+    const res = await api('lineLogin', {
+      lineUserId:  profile.userId,
+      displayName: profile.displayName,
+    });
+
+    if (res?.success) {
+      closeModal('login');
+      loadPortal(res.user);
+      toast('✅ เข้าสู่ระบบด้วย LINE สำเร็จ', 'ok');
+    } else {
+      // สมาชิกใหม่
+      prefillLine();
+      closeModal('login');
+      openModal('register');
+    }
+
+  } catch (e) {
+    console.error('lineFlow:', e.message);
+    // fallback — redirect ไป LIFF URL
+    window.location.href = 'https://liff.line.me/' + CFG.LIFF_ID;
+  }
 }
 
 function prefillLine() {
