@@ -631,7 +631,7 @@ button,input,select,textarea{font-family:inherit;}
 
 // ─── CONFIG ───────────────────────────────────────
 const GAS = 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec';
-const SHEET_ID = '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0';
+const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
 const DEFAULT_ADMINS = [{ u:'admin', p:'admin1234', name:'Super Admin', role:'super' }];
 
 // ─── STATE ────────────────────────────────────────
@@ -640,7 +640,7 @@ let allMembers = [], pendingList = [], ciLog = [], selApproval = null;
 
 // ─── API ──────────────────────────────────────────
 async function api(action, data={}) {
-  if (!GAS || GAS === 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec') return null;
+  if (!GAS || GAS === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return null;
   try {
     const r = await fetch(GAS, {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -1190,7 +1190,7 @@ async function saveFines() {
 }
 
 function openGS() {
-  if (SHEET_ID && SHEET_ID !== '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0')
+  if (SHEET_ID && SHEET_ID !== 'YOUR_GOOGLE_SHEET_ID_HERE')
     window.open('https://docs.google.com/spreadsheets/d/' + SHEET_ID, '_blank');
   else toast('⚠️ ยังไม่ได้ตั้งค่า Sheet ID', 'er');
 }
