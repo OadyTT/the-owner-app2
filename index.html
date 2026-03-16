@@ -1339,6 +1339,7 @@ async function submitReg() {
 
   try {
     const payload = {
+      action:          'registerWithSlip',
       plan:            STATE.plan,
       firstName:       fn,
       lastName:        document.getElementById('r-ln').value.trim(),
@@ -1349,26 +1350,41 @@ async function submitReg() {
       amount:          STATE.plan === 'quarter' ? 600 : 150,
     };
 
+    // แนบ Slip (จำกัด 3MB เพื่อไม่ให้ GAS timeout)
     if (STATE.slipFile) {
+      if (STATE.slipFile.size > 3 * 1024 * 1024) {
+        toast('⚠️ ไฟล์ใหญ่เกินไป กรุณาใช้ภาพขนาดเล็กกว่า 3MB', 'err');
+        return;
+      }
       payload.slipBase64 = await fileToB64(STATE.slipFile);
       payload.slipName   = STATE.slipFile.name;
     }
 
-    const res = await api('registerWithSlip', payload);
+    // ส่งตรงไปยัง GAS URL (ไม่ผ่าน api() wrapper เพื่อหลีกเลี่ยง null check)
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec';
+    const res = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify(payload),
+    }).then(r => r.json()).catch(() => null);
 
-    if (res && !res.success) {
-      toast('❌ ' + res.message, 'err');
+    if (!res) {
+      toast('❌ ส่งข้อมูลไม่ได้ กรุณาตรวจสอบ Internet', 'err');
+      return;
+    }
+    if (!res.success) {
+      toast('❌ ' + (res.message || 'เกิดข้อผิดพลาด'), 'err');
       return;
     }
 
-    // Show success
+    // สำเร็จจริงๆ
     document.getElementById('reg-form').style.display = 'none';
     document.getElementById('reg-success').style.display = 'block';
     toast('🎉 ส่งข้อมูลสำเร็จ! รอ Admin Approve', 'ok');
 
   } catch (e) {
     console.error(e);
-    toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'err');
+    toast('❌ เกิดข้อผิดพลาด: ' + e.message, 'err');
   } finally {
     btn.classList.remove('loading-btn'); btn.disabled = false;
   }
