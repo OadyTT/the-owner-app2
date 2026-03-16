@@ -1,972 +1,1650 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Owner — i am because we are</title>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="The Owner — ศูนย์เรียนรู้ธุรกิจ i am because we are">
+<title>The Owner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ── DESIGN TOKENS ─────────────────────────────── */
 :root {
-  --brand:#1400FF; --brand-dark:#0D00CC; --brand-light:#4433FF;
-  --brand-pale:#EEF0FF; --brand-glow:rgba(20,0,255,.15);
-  --bg:#F5F7FF; --bg-2:#FFFFFF; --bg-3:#EEF0FF; --bg-card:#FFFFFF;
-  --border:#E2E5F5; --border-2:rgba(20,0,255,.2);
-  --text:#1A1A2E; --text-2:#4A4A6A; --text-muted:#8888AA; --white:#FFFFFF;
-  --success:#10B981; --danger:#EF4444; --warning:#F59E0B; --info:#3B82F6;
-  --radius:14px; --radius-lg:20px; --font:'Sarabun',sans-serif;
+  --c-brand:     #1400FF;
+  --c-brand-dk:  #0D00CC;
+  --c-brand-lt:  #EEF0FF;
+  --c-brand-glow:rgba(20,0,255,.15);
+  --c-bg:        #F5F7FF;
+  --c-surface:   #FFFFFF;
+  --c-surface-2: #EEF0FF;
+  --c-border:    #E2E5F5;
+  --c-text:      #1A1A2E;
+  --c-text-2:    #4A4A6A;
+  --c-muted:     #8888AA;
+  --c-ok:        #10B981;
+  --c-warn:      #F59E0B;
+  --c-err:       #EF4444;
+  --c-info:      #3B82F6;
+  --c-line:      #00C300;
+  --shadow-sm:   0 2px 8px rgba(0,0,0,.06);
+  --shadow-md:   0 4px 20px rgba(0,0,0,.08);
+  --shadow-brand:0 4px 20px rgba(20,0,255,.2);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px;
+  --font-th:'Sarabun',sans-serif;
+  --font-head:'Prompt',sans-serif;
 }
 [data-theme="dark"] {
-  --bg:#0A0A18; --bg-2:#10101E; --bg-3:#161628; --bg-card:#12122A;
-  --border:#2A2A50; --border-2:rgba(100,100,255,.2);
-  --text:#E8E8FF; --text-2:#9090CC; --text-muted:#5555AA; --brand-pale:#1A1A3A;
+  --c-bg:      #07071A;
+  --c-surface: #0E0E28;
+  --c-surface-2:#141435;
+  --c-border:  #2A2A55;
+  --c-text:    #E8E8FF;
+  --c-text-2:  #9090CC;
+  --c-muted:   #5555AA;
+  --c-brand-lt:#1A1A3A;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;}
-.page{display:none;}.page.active{display:block;}
 
-/* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(245,247,255,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;height:62px;display:flex;align-items:center;justify-content:space-between;transition:background .3s;}
-[data-theme="dark"] nav{background:rgba(10,10,24,.92);}
-.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
-.nav-logo-mark{width:38px;height:38px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Prompt',sans-serif;font-size:9px;font-weight:800;color:#fff;line-height:1.2;text-align:center;box-shadow:0 3px 10px var(--brand-glow);}
-.nav-brand{font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;color:var(--text);}
-.nav-sub{font-size:10px;color:var(--text-muted);}
-.nav-links{display:flex;gap:4px;align-items:center;}
-.nav-link{background:none;border:none;color:var(--text-2);font-family:var(--font);font-size:14px;cursor:pointer;padding:7px 12px;border-radius:9px;transition:all .2s;}
-.nav-link:hover{background:var(--brand-pale);color:var(--brand);}
-.theme-btn{width:36px;height:36px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;}
-.theme-btn:hover{background:var(--brand-pale);border-color:var(--brand);}
+/* ── RESET & BASE ──────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{font-family:var(--font-th);font-size:15px;line-height:1.6;background:var(--c-bg);color:var(--c-text);overflow-x:hidden;transition:background .3s,color .3s;}
+img{max-width:100%;display:block;}
+button,input,select,textarea{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
 
-/* ── 3D BUTTONS ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .1s ease;position:relative;user-select:none;}
-.btn-primary{background:var(--brand);color:#fff;box-shadow:0 6px 0 var(--brand-dark),0 8px 20px rgba(20,0,255,.3);}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 0 var(--brand-dark),0 12px 28px rgba(20,0,255,.35);}
-.btn-primary:active{transform:translateY(4px);box-shadow:0 2px 0 var(--brand-dark),0 3px 8px rgba(20,0,255,.2);}
-.btn-white{background:#fff;color:var(--brand);border:2px solid var(--border-2);box-shadow:0 5px 0 #C8CCFF,0 8px 18px rgba(20,0,255,.12);}
-.btn-white:hover{transform:translateY(-2px);box-shadow:0 7px 0 #B0B5FF,0 12px 24px rgba(20,0,255,.18);}
-.btn-white:active{transform:translateY(3px);box-shadow:0 2px 0 #C8CCFF;}
-.btn-line{background:#00C300;color:#fff;box-shadow:0 5px 0 #009900,0 8px 18px rgba(0,195,0,.25);}
-.btn-line:hover{transform:translateY(-2px);box-shadow:0 7px 0 #007700,0 12px 24px rgba(0,195,0,.3);}
-.btn-line:active{transform:translateY(3px);box-shadow:0 2px 0 #009900;}
-.btn-outline{background:var(--bg-card);color:var(--text);border:2px solid var(--border);box-shadow:0 5px 0 var(--border);}
-.btn-outline:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px);box-shadow:0 7px 0 var(--brand-pale);}
-.btn-outline:active{transform:translateY(3px);box-shadow:0 2px 0 var(--border);}
-.btn-danger{background:#EF4444;color:#fff;box-shadow:0 4px 0 #B91C1C,0 6px 14px rgba(239,68,68,.25);}
-.btn-danger:hover{transform:translateY(-2px);}
-.btn-danger:active{transform:translateY(3px);box-shadow:0 1px 0 #B91C1C;}
-.btn-success{background:#10B981;color:#fff;box-shadow:0 4px 0 #047857,0 6px 14px rgba(16,185,129,.25);}
-.btn-success:hover{transform:translateY(-2px);}
-.btn-success:active{transform:translateY(3px);box-shadow:0 1px 0 #047857;}
-.btn-sm{padding:8px 18px;font-size:13px;border-radius:9px;}
-.btn-xs{padding:5px 12px;font-size:12px;border-radius:7px;}
+/* ── LAYOUT UTILITIES ──────────────────────────── */
+.page{display:none;min-height:100vh;}.page.active{display:block;}
+.container{max-width:1100px;margin:0 auto;padding:0 20px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.flex{display:flex;align-items:center;}
+.flex-between{display:flex;align-items:center;justify-content:space-between;}
+.flex-wrap{flex-wrap:wrap;}
+.gap-8{gap:8px;}.gap-12{gap:12px;}.gap-16{gap:16px;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}.mt-24{margin-top:24px;}
+.text-muted{color:var(--c-muted);}
+.text-brand{color:var(--c-brand);}
+.text-sm{font-size:13px;}.text-xs{font-size:11px;}
+.font-head{font-family:var(--font-head);}
+.font-bold{font-weight:700;}.font-800{font-weight:800;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+
+/* ── 3D BUTTON SYSTEM ──────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 22px;border-radius:var(--r-md);border:none;cursor:pointer;
+  font-family:var(--font-th);font-size:14px;font-weight:700;
+  transition:transform .1s,box-shadow .1s;user-select:none;
+  position:relative;white-space:nowrap;
+}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important;}
+.btn-primary{
+  background:var(--c-brand);color:#fff;
+  box-shadow:0 5px 0 var(--c-brand-dk),var(--shadow-brand);
+}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 0 var(--c-brand-dk),0 10px 28px rgba(20,0,255,.3);}
+.btn-primary:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--c-brand-dk);}
+.btn-outline{
+  background:var(--c-surface);color:var(--c-text);
+  border:2px solid var(--c-border);
+  box-shadow:0 4px 0 var(--c-border),var(--shadow-sm);
+}
+.btn-outline:hover:not(:disabled){border-color:var(--c-brand);color:var(--c-brand);transform:translateY(-2px);box-shadow:0 6px 0 var(--c-brand-lt);}
+.btn-outline:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--c-border);}
+.btn-line{
+  background:var(--c-line);color:#fff;
+  box-shadow:0 5px 0 #009900,0 8px 18px rgba(0,195,0,.25);
+}
+.btn-line:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 0 #007700,0 12px 24px rgba(0,195,0,.3);}
+.btn-line:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #009900;}
+.btn-ghost{background:var(--c-surface-2);color:var(--c-text-2);border:1.5px solid var(--c-border);}
+.btn-ghost:hover:not(:disabled){background:var(--c-brand-lt);color:var(--c-brand);border-color:var(--c-brand);}
+.btn-danger{background:var(--c-err);color:#fff;box-shadow:0 4px 0 #B91C1C;}
+.btn-danger:hover:not(:disabled){transform:translateY(-2px);}
+.btn-danger:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #B91C1C;}
+.btn-sm{padding:7px 16px;font-size:13px;border-radius:var(--r-sm);}
+.btn-xs{padding:5px 11px;font-size:12px;border-radius:6px;}
 .btn-full{width:100%;}
+.btn-icon{width:38px;height:38px;padding:0;border-radius:50%;}
+.loading-btn .btn-text{visibility:hidden;}
+.loading-btn::after{
+  content:'';position:absolute;width:16px;height:16px;
+  border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite;
+}
 
-/* ── HERO ── */
-.hero{min-height:100vh;display:flex;align-items:center;padding:80px 20px 60px;position:relative;overflow:hidden;background:linear-gradient(145deg,var(--bg) 0%,var(--brand-pale) 50%,var(--bg) 100%);}
-.hero-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
-.hb1{width:500px;height:500px;background:rgba(20,0,255,.07);top:-100px;right:-100px;}
-.hb2{width:300px;height:300px;background:rgba(20,0,255,.05);bottom:0;left:-50px;}
-.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--brand-pale);border:1.5px solid var(--border-2);color:var(--brand);padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:18px;}
-.hero-logo{width:86px;height:86px;border-radius:50%;background:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 0 var(--brand-dark),0 16px 40px rgba(20,0,255,.3);}
-.hero-logo .hl-the{font-family:'Prompt',sans-serif;font-size:12px;color:rgba(255,255,255,.8);letter-spacing:3px;}
-.hero-logo .hl-own{font-family:'Prompt',sans-serif;font-size:24px;font-weight:800;color:#fff;line-height:1;}
-.hero-title{font-family:'Prompt',sans-serif;font-size:clamp(32px,4.5vw,50px);font-weight:800;line-height:1.2;color:var(--text);}
-.hero-title .hl{color:var(--brand);}
-.hero-sub{font-size:16px;color:var(--text-2);line-height:1.7;margin:12px 0 26px;}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
-.hero-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:26px;box-shadow:0 8px 0 var(--border),0 16px 40px rgba(20,0,255,.07);}
-.hero-card-label{font-size:11px;font-weight:700;color:var(--brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
-.ci{display:flex;align-items:center;gap:12px;padding:11px;background:var(--bg-3);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--brand);transition:all .2s;}
-.ci:hover{background:var(--brand-pale);transform:translateX(3px);}
-.ci-name{font-size:14px;font-weight:600;color:var(--text);}
-.ci-type{font-size:11px;color:var(--text-muted);}
-.price-box{margin-top:14px;background:linear-gradient(135deg,var(--brand),var(--brand-light));border-radius:10px;padding:14px;text-align:center;box-shadow:0 4px 0 var(--brand-dark),0 8px 20px rgba(20,0,255,.2);}
-.price-box .pl{font-size:12px;color:rgba(255,255,255,.8);}
-.price-box .pv{font-family:'Prompt',sans-serif;font-size:28px;font-weight:800;color:#fff;}
+/* ── CARD ──────────────────────────────────────── */
+.card{
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-lg);padding:24px;
+  box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s;
+}
+.card-hover:hover{transform:translateY(-4px);box-shadow:var(--shadow-md),0 0 0 1px var(--c-brand);}
+.card-sm{padding:18px;border-radius:var(--r-md);}
 
-/* ── STATS ── */
-.stats{background:var(--brand);padding:20px;display:flex;justify-content:center;gap:50px;flex-wrap:wrap;}
-.stat-item{text-align:center;}
-.sn{font-family:'Prompt',sans-serif;font-size:26px;font-weight:800;color:#fff;}
-.sl{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;}
+/* ── BADGE ──────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+.badge-brand{background:var(--c-brand-lt);color:var(--c-brand);}
+.badge-ok{background:rgba(16,185,129,.1);color:var(--c-ok);}
+.badge-warn{background:rgba(245,158,11,.1);color:var(--c-warn);}
+.badge-err{background:rgba(239,68,68,.1);color:var(--c-err);}
+.badge-info{background:rgba(59,130,246,.1);color:var(--c-info);}
+.badge-online{background:rgba(59,130,246,.1);color:var(--c-info);}
+.badge-onsite{background:rgba(16,185,129,.1);color:var(--c-ok);}
+.badge-hybrid{background:var(--c-brand-lt);color:var(--c-brand);}
 
-/* ── SECTION ── */
-.section{padding:70px 20px;max-width:1100px;margin:0 auto;}
-.sec-lbl{font-size:11px;font-weight:700;color:var(--brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-.sec-title{font-family:'Prompt',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.2;}
-.sec-title .hl{color:var(--brand);}
-.sec-sub{font-size:15px;color:var(--text-2);margin-bottom:38px;}
-.divider{height:1px;background:var(--border);}
-
-/* ── COURSE CARDS ── */
-.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
-.cc{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;transition:all .3s;position:relative;overflow:hidden;box-shadow:0 4px 0 var(--border);}
-.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--brand),var(--brand-light));}
-.cc:hover{transform:translateY(-5px);border-color:var(--brand);box-shadow:0 8px 0 var(--brand-pale),0 16px 40px rgba(20,0,255,.1);}
-.cc-num{font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1.5px;margin-bottom:7px;}
-.cc-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3;}
-.cc-desc{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:13px;}
-.tags{display:flex;gap:5px;flex-wrap:wrap;}
-.tag{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;}
-.t-online{background:rgba(59,130,246,.1);color:var(--info);}
-.t-onsite{background:rgba(16,185,129,.1);color:var(--success);}
-.t-free{background:var(--brand-pale);color:var(--brand);}
-
-/* ── PRICING ── */
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
-.pc{background:var(--bg-card);border:2px solid var(--border);border-radius:var(--radius-lg);padding:34px;position:relative;transition:all .3s;box-shadow:0 6px 0 var(--border);}
-.pc:hover{transform:translateY(-4px);}
-.pc.featured{border-color:var(--brand);box-shadow:0 6px 0 var(--brand-dark),0 12px 40px rgba(20,0,255,.12);background:linear-gradient(145deg,var(--brand-pale),var(--bg-card));}
-.pc-pill{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:11px;font-weight:800;padding:4px 16px;border-radius:999px;box-shadow:0 4px 12px rgba(20,0,255,.3);}
-.pc-type{font-size:11px;font-weight:700;color:var(--brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
-.pc-name{font-family:'Prompt',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin-bottom:12px;}
-.pc-price{display:flex;align-items:baseline;gap:3px;margin-bottom:5px;}
-.pc-amt{font-family:'Prompt',sans-serif;font-size:46px;font-weight:800;color:var(--brand);}
-.pc-unit{font-size:13px;color:var(--text-muted);}
-.pc-note{font-size:13px;color:var(--text-muted);margin-bottom:22px;}
-.pc-feats{list-style:none;margin-bottom:26px;}
-.pc-feats li{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--border);}
-.pc-feats li:last-child{border-bottom:none;}
-.chk{color:var(--success);}
-.crs{color:var(--text-muted);}
-
-/* ── STEPS ── */
-.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;}
-.step{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;text-align:center;box-shadow:0 4px 0 var(--border);transition:all .3s;}
-.step:hover{transform:translateY(-4px);border-color:var(--brand);box-shadow:0 6px 0 var(--brand-pale),0 12px 30px rgba(20,0,255,.08);}
-.step-num{width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;font-family:'Prompt',sans-serif;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 13px;box-shadow:0 4px 0 var(--brand-dark),0 8px 16px rgba(20,0,255,.2);}
-.step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:7px;}
-.step-desc{font-size:13px;color:var(--text-2);line-height:1.6;}
-
-/* ── TABLE ── */
-.tbl-box{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 4px 0 var(--border);}
-.tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.tbl th{background:var(--brand);color:#fff;font-weight:700;padding:12px 15px;text-align:left;font-size:11px;letter-spacing:.5px;}
-.tbl td{padding:13px 15px;border-bottom:1px solid var(--border);color:var(--text);}
-.tbl tr:last-child td{border-bottom:none;}
-.tbl tr:hover td{background:var(--brand-pale);}
-.rb{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;}
-.rb-on{background:rgba(59,130,246,.1);color:var(--info);}
-.rb-off{background:rgba(16,185,129,.1);color:var(--success);}
-.rb-hy{background:var(--brand-pale);color:var(--brand);}
-.seats-ok{color:var(--success);font-weight:600;}
-.seats-low{color:var(--danger);font-weight:700;}
-
-/* ── FAQ ── */
-.faq-list{display:flex;flex-direction:column;gap:9px;}
-.faq-item{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 3px 0 var(--border);transition:all .2s;}
-.faq-item.open{border-color:var(--brand);box-shadow:0 3px 0 var(--brand-pale);}
-.faq-q{padding:15px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--text);transition:background .2s;}
-.faq-q:hover{background:var(--brand-pale);}
-.faq-arr{transition:transform .3s;font-size:12px;color:var(--brand);}
-.faq-item.open .faq-arr{transform:rotate(180deg);}
-.faq-a{padding:0 20px;max-height:0;overflow:hidden;transition:all .3s;font-size:13px;color:var(--text-2);line-height:1.7;}
-.faq-item.open .faq-a{padding:0 20px 15px;max-height:200px;}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.38);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s;}
-.modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:30px;width:100%;max-width:540px;transform:translateY(20px);transition:transform .3s;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.12);}
-.modal-overlay.open .modal{transform:translateY(0);}
-.modal-title{font-family:'Prompt',sans-serif;font-size:21px;font-weight:800;color:var(--text);margin-bottom:4px;}
-.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:22px;}
+/* ── FORM ──────────────────────────────────────── */
 .form-group{margin-bottom:14px;}
-.form-label{display:block;font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:5px;}
-.form-input{width:100%;background:var(--bg-3);border:1.5px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;border-radius:10px;outline:none;transition:all .2s;}
-.form-input:focus{border-color:var(--brand);background:var(--bg-card);box-shadow:0 0 0 3px var(--brand-glow);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.plan-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.plan-opt{background:var(--bg-3);border:2.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;text-align:center;box-shadow:0 4px 0 var(--border);transition:all .2s;}
-.plan-opt:hover{border-color:var(--brand);}
-.plan-opt.sel{border-color:var(--brand);background:var(--brand-pale);box-shadow:0 4px 0 rgba(20,0,255,.3);}
-.pp{font-family:'Prompt',sans-serif;font-size:22px;font-weight:800;color:var(--brand);}
-.pn{font-size:13px;color:var(--text-2);font-weight:600;margin-top:3px;}
-.pnote{font-size:11px;color:var(--text-muted);margin-top:2px;}
-.modal-hr{height:1px;background:var(--border);margin:16px 0;}
-.modal-actions{display:flex;gap:9px;margin-top:18px;}
-.modal-actions .btn{flex:1;}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--c-text-2);margin-bottom:5px;letter-spacing:.3px;}
+.form-input{
+  width:100%;background:var(--c-surface-2);border:1.5px solid var(--c-border);
+  color:var(--c-text);font-family:var(--font-th);font-size:14px;
+  padding:10px 14px;border-radius:var(--r-sm);outline:none;transition:all .2s;
+}
+.form-input:focus{border-color:var(--c-brand);background:var(--c-surface);box-shadow:0 0 0 3px var(--c-brand-glow);}
+.form-input::placeholder{color:var(--c-muted);}
+.form-input option{background:var(--c-surface);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-hint{font-size:12px;color:var(--c-muted);margin-top:4px;}
+.form-error{font-size:12px;color:var(--c-err);margin-top:4px;display:none;}
+.form-error.show{display:block;}
 
-/* ── BANK CARD in modal ── */
-.bank-card{background:linear-gradient(135deg,var(--brand),var(--brand-light));border-radius:var(--radius-lg);padding:20px 22px;display:flex;align-items:center;gap:14px;margin-bottom:14px;box-shadow:0 6px 0 var(--brand-dark),0 12px 28px rgba(20,0,255,.22);}
-.bank-icon{width:46px;height:46px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.bank-info{flex:1;}
+/* ── NAVBAR ──────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:900;height:62px;
+  background:rgba(245,247,255,.92);backdrop-filter:blur(20px);
+  border-bottom:1.5px solid var(--c-border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  transition:background .3s;
+}
+[data-theme="dark"] .nav{background:rgba(7,7,26,.92);}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.nav-logo-mark{
+  width:36px;height:36px;border-radius:50%;background:var(--c-brand);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--font-head);font-size:8px;font-weight:800;color:#fff;
+  line-height:1.2;text-align:center;box-shadow:0 3px 8px var(--c-brand-glow);
+}
+.nav-brand{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--c-text);}
+.nav-tagline{font-size:10px;color:var(--c-muted);}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-link{
+  background:none;border:none;color:var(--c-text-2);font-family:var(--font-th);
+  font-size:13px;cursor:pointer;padding:7px 11px;border-radius:var(--r-sm);transition:all .2s;
+}
+.nav-link:hover{background:var(--c-brand-lt);color:var(--c-brand);}
+.nav-theme{
+  width:34px;height:34px;border-radius:50%;background:var(--c-surface-2);
+  border:1.5px solid var(--c-border);display:flex;align-items:center;
+  justify-content:center;cursor:pointer;font-size:16px;transition:all .2s;
+}
+.nav-theme:hover{background:var(--c-brand-lt);border-color:var(--c-brand);}
+
+/* ── HERO ──────────────────────────────────────── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:80px 20px 60px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--c-bg) 0%,var(--c-brand-lt) 50%,var(--c-bg) 100%);
+}
+.hero-blob{
+  position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;opacity:.7;
+}
+.hero-blob-1{width:500px;height:500px;background:rgba(20,0,255,.07);top:-100px;right:-100px;}
+.hero-blob-2{width:300px;height:300px;background:rgba(20,0,255,.05);bottom:50px;left:-50px;}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--c-brand-lt);border:1.5px solid rgba(20,0,255,.2);
+  color:var(--c-brand);padding:5px 14px;border-radius:999px;
+  font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:18px;
+}
+.hero-logo{
+  width:82px;height:82px;border-radius:50%;background:var(--c-brand);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin-bottom:18px;
+  box-shadow:0 8px 0 var(--c-brand-dk),0 14px 36px rgba(20,0,255,.3);
+  transition:transform .2s;
+}
+.hero-logo:hover{transform:translateY(-4px);}
+.hero-logo-the{font-family:var(--font-head);font-size:11px;color:rgba(255,255,255,.8);letter-spacing:3px;}
+.hero-logo-own{font-family:var(--font-head);font-size:22px;font-weight:800;color:#fff;line-height:1;}
+.hero-title{font-family:var(--font-head);font-size:clamp(32px,4.5vw,50px);font-weight:800;line-height:1.2;color:var(--c-text);}
+.hero-title mark{color:var(--c-brand);background:none;}
+.hero-sub{font-size:16px;color:var(--c-text-2);line-height:1.7;margin:12px 0 26px;}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.hero-card{
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-xl);padding:26px;
+  box-shadow:0 8px 0 var(--c-border),var(--shadow-md);
+}
+.hero-card-label{font-size:11px;font-weight:700;color:var(--c-brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.course-row{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;
+  background:var(--c-surface-2);border-radius:var(--r-sm);margin-bottom:7px;
+  border-left:3px solid var(--c-brand);transition:all .2s;
+}
+.course-row:hover{background:var(--c-brand-lt);transform:translateX(3px);}
+.course-row-name{font-size:13px;font-weight:600;color:var(--c-text);}
+.course-row-type{font-size:11px;color:var(--c-muted);}
+.hero-price{
+  margin-top:13px;background:linear-gradient(135deg,var(--c-brand),#4433FF);
+  border-radius:var(--r-md);padding:13px;text-align:center;
+  box-shadow:0 4px 0 var(--c-brand-dk),0 8px 20px rgba(20,0,255,.2);
+}
+.hero-price-lbl{font-size:12px;color:rgba(255,255,255,.8);}
+.hero-price-val{font-family:var(--font-head);font-size:26px;font-weight:800;color:#fff;}
+
+/* ── STATS BAR ──────────────────────────────────── */
+.stats-bar{background:var(--c-brand);padding:18px 20px;display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
+.stat-item{text-align:center;}
+.stat-num{font-family:var(--font-head);font-size:24px;font-weight:800;color:#fff;}
+.stat-lbl{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;}
+
+/* ── SECTION ──────────────────────────────────── */
+.section{padding:64px 20px;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.sec-eyebrow{font-size:11px;font-weight:700;color:var(--c-brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
+.sec-title{font-family:var(--font-head);font-size:clamp(22px,3vw,34px);font-weight:800;color:var(--c-text);line-height:1.2;margin-bottom:6px;}
+.sec-title mark{color:var(--c-brand);background:none;}
+.sec-sub{font-size:15px;color:var(--c-text-2);margin-bottom:36px;}
+.divider{height:1px;background:var(--c-border);}
+
+/* ── COURSE CARDS ──────────────────────────────── */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+.course-card{
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-lg);padding:24px;position:relative;overflow:hidden;
+  box-shadow:0 4px 0 var(--c-border);transition:all .3s;
+}
+.course-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--c-brand),#4433FF);}
+.course-card:hover{transform:translateY(-5px);border-color:var(--c-brand);box-shadow:0 6px 0 var(--c-brand-lt),var(--shadow-brand);}
+.course-num{font-size:11px;font-weight:700;color:var(--c-brand);letter-spacing:1.5px;margin-bottom:7px;}
+.course-title{font-size:16px;font-weight:700;color:var(--c-text);margin-bottom:8px;line-height:1.3;}
+.course-desc{font-size:13px;color:var(--c-text-2);line-height:1.6;margin-bottom:13px;}
+.tag-group{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;}
+
+/* ── PRICING ──────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:22px;}
+.price-card{
+  background:var(--c-surface);border:2px solid var(--c-border);
+  border-radius:var(--r-xl);padding:32px;position:relative;
+  box-shadow:0 6px 0 var(--c-border);transition:all .3s;
+}
+.price-card:hover{transform:translateY(-4px);}
+.price-card.featured{
+  border-color:var(--c-brand);
+  box-shadow:0 6px 0 var(--c-brand-dk),0 12px 40px rgba(20,0,255,.12);
+  background:linear-gradient(145deg,var(--c-brand-lt),var(--c-surface));
+}
+.price-pill{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--c-brand);color:#fff;font-size:11px;font-weight:800;
+  padding:4px 14px;border-radius:999px;
+  box-shadow:0 4px 12px rgba(20,0,255,.3);
+}
+.price-type{font-size:11px;font-weight:700;color:var(--c-brand);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
+.price-name{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--c-text);margin-bottom:12px;}
+.price-amount{font-family:var(--font-head);font-size:44px;font-weight:800;color:var(--c-brand);}
+.price-unit{font-size:13px;color:var(--c-muted);}
+.price-note{font-size:12px;color:var(--c-muted);margin:7px 0 20px;}
+.price-features{list-style:none;margin-bottom:24px;}
+.price-features li{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:13px;color:var(--c-text-2);border-bottom:1px solid var(--c-border);}
+.price-features li:last-child{border-bottom:none;}
+
+/* ── STEPS ──────────────────────────────────────── */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;}
+.step-card{
+  background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:var(--r-lg);
+  padding:22px;text-align:center;box-shadow:0 4px 0 var(--c-border);transition:all .3s;
+}
+.step-card:hover{transform:translateY(-4px);border-color:var(--c-brand);}
+.step-num{
+  width:42px;height:42px;border-radius:50%;background:var(--c-brand);color:#fff;
+  font-family:var(--font-head);font-weight:800;font-size:16px;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 13px;
+  box-shadow:0 4px 0 var(--c-brand-dk),0 8px 14px rgba(20,0,255,.2);
+}
+.step-title{font-size:14px;font-weight:700;color:var(--c-text);margin-bottom:6px;}
+.step-desc{font-size:13px;color:var(--c-text-2);line-height:1.6;}
+
+/* ── TABLE ──────────────────────────────────────── */
+.table-wrap{
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-lg);overflow:hidden;box-shadow:0 4px 0 var(--c-border);
+}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:var(--c-brand);color:#fff;font-weight:700;padding:11px 14px;text-align:left;font-size:11px;letter-spacing:.5px;}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--c-border);color:var(--c-text);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--c-brand-lt);}
+
+/* ── FAQ ──────────────────────────────────────── */
+.faq-list{display:flex;flex-direction:column;gap:9px;}
+.faq-item{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:var(--r-md);overflow:hidden;box-shadow:0 3px 0 var(--c-border);transition:all .2s;}
+.faq-item.open{border-color:var(--c-brand);box-shadow:0 3px 0 var(--c-brand-lt);}
+.faq-q{padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--c-text);transition:background .2s;border:none;background:none;width:100%;text-align:left;}
+.faq-q:hover{background:var(--c-brand-lt);}
+.faq-arrow{color:var(--c-brand);font-size:12px;transition:transform .3s;flex-shrink:0;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{padding:0 18px;max-height:0;overflow:hidden;transition:all .3s;font-size:13px;color:var(--c-text-2);line-height:1.7;}
+.faq-item.open .faq-a{padding:0 18px 14px;max-height:200px;}
+
+/* ── MODAL ──────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-xl);padding:28px;width:100%;max-width:520px;
+  transform:translateY(20px);transition:transform .3s;
+  max-height:94vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--c-muted);margin-bottom:20px;}
+.modal-footer{display:flex;gap:9px;margin-top:18px;}
+.modal-footer .btn{flex:1;}
+.modal-hr{height:1px;background:var(--c-border);margin:16px 0;}
+
+/* ── PLAN SELECTOR ──────────────────────────────── */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.plan-opt{
+  background:var(--c-surface-2);border:2.5px solid var(--c-border);
+  border-radius:var(--r-md);padding:14px;cursor:pointer;text-align:center;
+  box-shadow:0 4px 0 var(--c-border);transition:all .2s;
+}
+.plan-opt:hover{border-color:var(--c-brand);}
+.plan-opt.sel{border-color:var(--c-brand);background:var(--c-brand-lt);box-shadow:0 4px 0 rgba(20,0,255,.3);}
+.plan-price{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-brand);}
+.plan-name{font-size:12px;color:var(--c-text-2);font-weight:600;margin-top:3px;}
+.plan-note{font-size:10px;color:var(--c-muted);margin-top:2px;}
+
+/* ── BANK CARD ──────────────────────────────────── */
+.bank-card{
+  background:linear-gradient(135deg,var(--c-brand),#4433FF);
+  border-radius:var(--r-lg);padding:18px 20px;
+  display:flex;align-items:center;gap:14px;
+  box-shadow:0 6px 0 var(--c-brand-dk),0 12px 28px rgba(20,0,255,.22);
+}
+.bank-icon{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.bank-info{flex:1;min-width:0;}
 .bank-name{font-size:11px;color:rgba(255,255,255,.75);}
-.bank-acc-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.bank-acc{font-family:'Prompt',sans-serif;font-size:18px;font-weight:800;color:#fff;}
-.copy-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.bank-acc-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0;}
+.bank-acc-num{font-family:var(--font-head);font-size:17px;font-weight:800;color:#fff;}
+.bank-owner{font-size:11px;color:rgba(255,255,255,.75);}
+.bank-amount{text-align:right;flex-shrink:0;}
+.bank-amt-lbl{font-size:10px;color:rgba(255,255,255,.7);}
+.bank-amt-val{font-family:var(--font-head);font-size:22px;font-weight:800;color:#fff;}
+.bank-amt-plan{font-size:10px;color:rgba(255,255,255,.7);}
+.copy-btn{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;
+  cursor:pointer;font-family:var(--font-th);transition:all .2s;
+}
 .copy-btn:hover{background:rgba(255,255,255,.35);}
-.bank-owner{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;}
-.bank-amt{text-align:right;flex-shrink:0;}
-.ba-lbl{font-size:10px;color:rgba(255,255,255,.7);}
-.ba-val{font-family:'Prompt',sans-serif;font-size:24px;font-weight:800;color:#fff;}
-.ba-plan{font-size:10px;color:rgba(255,255,255,.7);}
 
-/* ── UPLOAD ── */
-.upload-zone{border:2.5px dashed var(--border-2);border-radius:var(--radius);padding:26px;text-align:center;cursor:pointer;transition:all .3s;position:relative;background:var(--brand-pale);}
-.upload-zone:hover,.upload-zone.dragover{border-color:var(--brand);background:rgba(20,0,255,.05);}
-.upload-zone.has-file{border-color:var(--success);background:rgba(16,185,129,.05);}
-.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.up-icon{font-size:30px;margin-bottom:7px;}
-.up-title{font-size:14px;font-weight:700;color:var(--text);}
-.up-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
-.slip-preview{margin-top:10px;border-radius:9px;overflow:hidden;display:none;border:2px solid var(--success);}
-.slip-preview img{width:100%;max-height:180px;object-fit:contain;}
+/* ── UPLOAD ZONE ──────────────────────────────── */
+.upload-zone{
+  border:2.5px dashed rgba(20,0,255,.25);border-radius:var(--r-md);padding:24px;
+  text-align:center;cursor:pointer;transition:all .3s;position:relative;
+  background:var(--c-brand-lt);
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--c-brand);background:rgba(20,0,255,.05);}
+.upload-zone.done{border-color:var(--c-ok);background:rgba(16,185,129,.05);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:28px;margin-bottom:7px;}
+.upload-title{font-size:14px;font-weight:700;color:var(--c-text);}
+.upload-sub{font-size:12px;color:var(--c-muted);margin-top:3px;}
+.slip-preview{margin-top:10px;border-radius:var(--r-sm);overflow:hidden;display:none;border:2px solid var(--c-ok);}
+.slip-preview img{width:100%;max-height:170px;object-fit:contain;}
 
-/* ── LINE BOX ── */
-.line-box{background:rgba(0,195,0,.08);border:1.5px solid rgba(0,195,0,.25);border-radius:10px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.line-name{font-size:15px;font-weight:700;color:#007700;}
-.line-sub{font-size:12px;color:var(--text-muted);}
+/* ── INFO BOX ──────────────────────────────────── */
+.info-box{border-radius:var(--r-sm);padding:13px 15px;display:flex;align-items:flex-start;gap:9px;}
+.info-box.warn{background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.2);}
+.info-box.err{background:rgba(239,68,68,.06);border:1.5px solid rgba(239,68,68,.15);}
+.info-box.ok{background:rgba(16,185,129,.06);border:1.5px solid rgba(16,185,129,.18);}
+.info-box-icon{font-size:16px;flex-shrink:0;}
+.info-box-title{font-size:13px;font-weight:700;}
+.info-box.warn .info-box-title{color:var(--c-warn);}
+.info-box.err  .info-box-title{color:var(--c-err);}
+.info-box.ok   .info-box-title{color:var(--c-ok);}
+.info-box-text{font-size:12px;color:var(--c-text-2);margin-top:2px;line-height:1.5;}
 
-/* ── SUCCESS ── */
-.reg-success{text-align:center;padding:10px 0;}
-.suc-icon{font-size:50px;margin-bottom:12px;}
-.suc-title{font-family:'Prompt',sans-serif;font-size:21px;font-weight:800;color:var(--text);margin-bottom:8px;}
-.suc-sub{font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:18px;}
-.pending-box{background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.25);border-radius:10px;padding:13px 15px;display:flex;align-items:flex-start;gap:9px;}
-.pb-icon{font-size:17px;flex-shrink:0;}
-.pb-text h4{font-size:13px;font-weight:700;color:var(--warning);}
-.pb-text p{font-size:12px;color:var(--text-muted);margin-top:2px;line-height:1.5;}
+/* ── LINE BOX ──────────────────────────────────── */
+.line-box{background:rgba(0,195,0,.08);border:1.5px solid rgba(0,195,0,.22);border-radius:var(--r-sm);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.line-box-name{font-size:14px;font-weight:700;color:#007700;}
+.line-box-sub{font-size:12px;color:var(--c-muted);}
 
-/* ── PORTAL ── */
-#page-member{padding-top:62px;background:var(--bg);}
-.portal-layout{display:grid;grid-template-columns:215px 1fr;min-height:calc(100vh - 62px);}
-.sidebar{background:var(--bg-card);border-right:1.5px solid var(--border);padding:22px 12px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;}
-.sb-prof{text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border);}
-.sb-av{width:56px;height:56px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Prompt',sans-serif;font-size:20px;font-weight:800;color:#fff;margin:0 auto 9px;box-shadow:0 4px 0 var(--brand-dark),0 8px 18px rgba(20,0,255,.18);}
-.sb-name{font-size:13px;font-weight:700;color:var(--text);}
-.sb-mid-txt{font-family:'Prompt',sans-serif;font-size:12px;color:var(--brand);margin-top:2px;font-weight:700;}
-.sb-status{display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);color:var(--success);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:5px;}
-.sb-menu{list-style:none;}
-.sb-menu li{margin-bottom:2px;}
-.sb-menu a{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:9px;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s;}
-.sb-menu a:hover{background:var(--brand-pale);color:var(--brand);}
-.sb-menu a.active{background:var(--brand);color:#fff;box-shadow:0 3px 0 var(--brand-dark);}
-.sb-icon{font-size:14px;width:17px;text-align:center;}
-.portal-main{padding:26px;overflow-y:auto;}
-.p-tab{display:none;}.p-tab.active{display:block;}
-.p-header{margin-bottom:20px;}
-.p-header h2{font-family:'Prompt',sans-serif;font-size:21px;font-weight:800;color:var(--text);}
-.p-header p{font-size:13px;color:var(--text-muted);margin-top:3px;}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;margin-bottom:20px;}
-.info-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 4px 0 var(--border);transition:all .2s;}
-.info-card:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--brand-pale);}
-.ic-lbl{font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:.5px;margin-bottom:7px;text-transform:uppercase;}
-.ic-val{font-family:'Prompt',sans-serif;font-size:24px;font-weight:800;}
-.ic-brand{color:var(--brand);}
-.ic-success{color:var(--success);}
-.ic-danger{color:var(--danger);}
-.ic-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
-.booking-list{display:flex;flex-direction:column;gap:9px;}
-.bk-item{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;box-shadow:0 3px 0 var(--border);transition:all .2s;}
-.bk-item:hover{border-color:var(--brand);}
-.bk-title{font-size:14px;font-weight:700;color:var(--text);}
-.bk-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
-.sbadge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;}
-.sbok{background:rgba(16,185,129,.1);color:var(--success);}
-.sbwait{background:rgba(245,158,11,.1);color:var(--warning);}
-.sbcancel{background:rgba(239,68,68,.1);color:var(--danger);}
-.zoom-card{background:linear-gradient(135deg,var(--brand),var(--brand-light));border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:0 6px 0 var(--brand-dark),0 12px 28px rgba(20,0,255,.2);}
-.zoom-title{font-family:'Prompt',sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+/* ── SUCCESS STATE ──────────────────────────────── */
+.success-state{text-align:center;padding:10px 0;}
+.success-icon{font-size:48px;margin-bottom:13px;}
+.success-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:8px;}
+.success-sub{font-size:13px;color:var(--c-text-2);line-height:1.8;margin-bottom:18px;}
+
+/* ── PORTAL ──────────────────────────────────────── */
+#page-member{padding-top:62px;background:var(--c-bg);}
+.portal-wrap{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 62px);}
+.portal-sidebar{
+  background:var(--c-surface);border-right:1.5px solid var(--c-border);
+  padding:20px 12px;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;
+}
+.portal-profile{text-align:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--c-border);}
+.portal-av{
+  width:54px;height:54px;border-radius:50%;background:var(--c-brand);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:20px;font-weight:800;color:#fff;
+  margin:0 auto 9px;box-shadow:0 4px 0 var(--c-brand-dk),0 8px 16px rgba(20,0,255,.18);
+}
+.portal-pname{font-size:13px;font-weight:700;color:var(--c-text);}
+.portal-pmid{font-family:var(--font-head);font-size:12px;color:var(--c-brand);margin-top:2px;font-weight:700;}
+.portal-pstatus{display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);color:var(--c-ok);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:5px;}
+.portal-menu{list-style:none;}
+.portal-menu li{margin-bottom:2px;}
+.portal-menu a{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);
+  color:var(--c-text-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.portal-menu a:hover{background:var(--c-brand-lt);color:var(--c-brand);}
+.portal-menu a.active{background:var(--c-brand);color:#fff;box-shadow:0 3px 0 var(--c-brand-dk);}
+.portal-menu .pm-icon{font-size:14px;width:17px;text-align:center;}
+.portal-main{padding:24px;overflow-y:auto;}
+.ptab{display:none;}.ptab.active{display:block;}
+.ptab-header{margin-bottom:20px;}
+.ptab-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-text);}
+.ptab-sub{font-size:13px;color:var(--c-muted);margin-top:3px;}
+
+/* ── INFO CARDS ──────────────────────────────────── */
+.info-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px;margin-bottom:20px;}
+.info-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:var(--r-md);padding:16px;box-shadow:0 4px 0 var(--c-border);transition:all .2s;}
+.info-card:hover{transform:translateY(-2px);}
+.ic-label{font-size:11px;color:var(--c-muted);font-weight:700;letter-spacing:.5px;margin-bottom:7px;text-transform:uppercase;}
+.ic-val{font-family:var(--font-head);font-size:24px;font-weight:800;}
+.ic-brand{color:var(--c-brand);}.ic-ok{color:var(--c-ok);}.ic-err{color:var(--c-err);}
+.ic-sub{font-size:12px;color:var(--c-muted);margin-top:2px;}
+
+/* ── BOOKING ITEMS ──────────────────────────────── */
+.bk-list{display:flex;flex-direction:column;gap:9px;}
+.bk-item{
+  background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:var(--r-md);
+  padding:14px 16px;display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:9px;box-shadow:0 3px 0 var(--c-border);transition:all .2s;
+}
+.bk-item:hover{border-color:var(--c-brand);}
+.bk-name{font-size:14px;font-weight:700;color:var(--c-text);}
+.bk-meta{font-size:12px;color:var(--c-muted);margin-top:2px;}
+
+/* ── ZOOM CARD ──────────────────────────────────── */
+.zoom-card{
+  background:linear-gradient(135deg,var(--c-brand),#4433FF);
+  border-radius:var(--r-lg);padding:20px;margin-bottom:16px;
+  box-shadow:0 6px 0 var(--c-brand-dk),0 12px 28px rgba(20,0,255,.2);
+}
+.zoom-title{font-family:var(--font-head);font-size:15px;font-weight:800;color:#fff;margin-bottom:12px;}
 .zoom-row{display:grid;grid-template-columns:100px 1fr auto;gap:8px;align-items:center;margin-bottom:9px;}
 .zoom-lbl{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;}
-.zoom-val{font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:1px;}
-.zoom-copy{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:11px;padding:4px 9px;border-radius:6px;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.zoom-val{font-family:var(--font-head);font-size:16px;font-weight:800;color:#fff;letter-spacing:1px;}
+.zoom-copy{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:11px;padding:4px 9px;border-radius:5px;cursor:pointer;font-family:var(--font-th);transition:all .2s;}
 .zoom-copy:hover{background:rgba(255,255,255,.35);}
-.qr-section{text-align:center;padding:22px;}
-.qr-box{display:inline-block;background:#fff;padding:16px;border-radius:14px;margin:14px 0;box-shadow:0 6px 0 var(--border),0 12px 24px rgba(0,0,0,.07);}
-.warn-box{background:rgba(239,68,68,.05);border:1.5px solid rgba(239,68,68,.15);border-radius:var(--radius);padding:13px 16px;display:flex;align-items:flex-start;gap:9px;margin-top:13px;}
-.warn-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
-.warn-title{font-size:13px;font-weight:700;color:var(--danger);}
-.warn-text{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.5;}
 
-/* ── FOOTER ── */
-footer{background:var(--text);padding:36px 20px;text-align:center;}
-.footer-logo{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:9px;}
-.footer-mark{width:34px;height:34px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:'Prompt',sans-serif;font-size:9px;font-weight:800;color:#fff;line-height:1.2;text-align:center;}
-.footer-brand{font-family:'Prompt',sans-serif;font-size:15px;font-weight:800;color:#fff;}
+/* ── QR SECTION ──────────────────────────────────── */
+.qr-section{text-align:center;padding:20px;}
+.qr-box{display:inline-block;background:#fff;padding:16px;border-radius:var(--r-md);margin:14px 0;box-shadow:0 6px 0 var(--c-border),var(--shadow-md);}
+
+/* ── TOAST ──────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:18px;right:18px;z-index:9999;
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  color:var(--c-text);padding:11px 16px;border-radius:var(--r-md);
+  font-size:13px;font-weight:500;min-width:200px;max-width:320px;
+  box-shadow:var(--shadow-md);display:flex;align-items:center;gap:8px;
+  transform:translateX(130%);transition:transform .3s;
+}
+.toast.show{transform:translateX(0);}
+.toast.ok{border-color:var(--c-ok);}
+.toast.err{border-color:var(--c-err);}
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer{background:var(--c-text);padding:32px 20px;text-align:center;}
+.footer-logo{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:8px;}
+.footer-logo-mark{width:32px;height:32px;border-radius:50%;background:var(--c-brand);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:8px;font-weight:800;color:#fff;line-height:1.2;text-align:center;}
+.footer-brand{font-family:var(--font-head);font-size:15px;font-weight:800;color:#fff;}
 footer p{font-size:12px;color:rgba(255,255,255,.45);}
 
-/* ── TOAST ── */
-.toast{position:fixed;bottom:18px;right:18px;z-index:9999;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text);padding:11px 16px;border-radius:11px;font-size:13px;font-weight:500;min-width:200px;box-shadow:0 8px 28px rgba(0,0,0,.1);display:flex;align-items:center;gap:8px;transform:translateX(130%);transition:transform .3s;}
-.toast.show{transform:translateX(0);}
-.toast.success{border-color:var(--success);}
-.toast.error{border-color:var(--danger);}
-.spin{width:15px;height:15px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
-.spin-dark{border-color:var(--border);border-top-color:var(--brand);}
+/* ── ROOM QR CHECKIN PAGE ─────────────────────── */
+.checkin-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--c-bg);}
+.checkin-card{max-width:400px;width:100%;text-align:center;}
+.checkin-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.2);color:var(--c-err);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:16px;}
 
-/* ── RESPONSIVE ── */
+/* ── ANIMATIONS ──────────────────────────────────── */
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.animate-up{animation:fadeUp .5s ease both;}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
 @media(max-width:900px){
   .hero-inner{grid-template-columns:1fr;}
   .hero-card{display:none;}
-  .hero{min-height:auto;padding:100px 20px 60px;}
+  .hero{min-height:auto;padding:90px 20px 50px;}
 }
 @media(max-width:768px){
-  .portal-layout{grid-template-columns:1fr;}
-  .sidebar{position:static;height:auto;display:flex;flex-wrap:wrap;gap:5px;padding:10px 12px;}
-  .sb-prof{display:none;}
-  .sb-menu{display:flex;flex-wrap:wrap;gap:4px;}
-  .sb-menu li{margin:0;}
-  .sb-menu a{padding:6px 10px;font-size:12px;}
+  .portal-wrap{grid-template-columns:1fr;}
+  .portal-sidebar{position:static;height:auto;display:flex;flex-wrap:wrap;gap:5px;padding:10px 12px;border-right:none;border-bottom:1.5px solid var(--c-border);}
+  .portal-profile{display:none;}
+  .portal-menu{display:flex;flex-wrap:wrap;gap:4px;}
+  .portal-menu li{margin:0;}
+  .portal-menu a{padding:6px 10px;font-size:12px;}
   .form-row{grid-template-columns:1fr;}
-  .stats{gap:20px;}
-  .nav-link{display:none;}
-  nav .btn{display:none;}
-  #nav-line-btn,#nav-reg-btn,#nav-member-btn,.theme-btn{display:flex!important;}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  .hero-actions{flex-direction:column;}
+  .hero-actions .btn{width:100%;}
+  .stats-bar{gap:20px;}
+  .nav-links .nav-link{display:none;}
+  #nav-member-btn,#nav-reg-btn,.nav-theme{display:flex!important;}
 }
-@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo" onclick="showPage('landing')">
-    <div class="nav-logo-mark">THE<br>OWN</div>
-    <div><div class="nav-brand">THE OWNER</div><div class="nav-sub">i am because we are</div></div>
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-logo" onclick="showPage('landing')" role="button" aria-label="Home">
+    <div class="nav-logo-mark" aria-hidden="true">THE<br>OWN</div>
+    <div>
+      <div class="nav-brand">THE OWNER</div>
+      <div class="nav-tagline">i am because we are</div>
+    </div>
   </div>
-  <div class="nav-links">
-    <button class="nav-link" onclick="scrollTo2('courses')">คอร์ส</button>
-    <button class="nav-link" onclick="scrollTo2('pricing')">แพ็กเกจ</button>
-    <button class="nav-link" onclick="scrollTo2('howto')">วิธีสมัคร</button>
-    <button class="nav-link" onclick="scrollTo2('faq')">FAQ</button>
-    <button id="nav-member-btn" class="nav-link" onclick="showPage('member')" style="display:none;">พอร์ทัล</button>
-    <button id="nav-line-btn" class="btn btn-line btn-sm" onclick="lineLoginFlow()">💚 LINE Login</button>
+  <nav class="nav-links" aria-label="Main navigation">
+    <button class="nav-link" onclick="scrollToId('courses')">คอร์ส</button>
+    <button class="nav-link" onclick="scrollToId('pricing')">แพ็กเกจ</button>
+    <button class="nav-link" onclick="scrollToId('howto')">วิธีสมัคร</button>
+    <button class="nav-link" onclick="scrollToId('faq')">FAQ</button>
+    <button class="nav-link" id="nav-member-btn" onclick="showPage('member')" style="display:none">พอร์ทัล</button>
+    <button class="btn btn-line btn-sm" onclick="lineFlow()">💚 LINE</button>
     <button class="nav-link" id="nav-login-btn" onclick="openModal('login')">เข้าสู่ระบบ</button>
-    <button id="nav-reg-btn" class="btn btn-primary btn-sm" onclick="openModal('register')">สมัครเรียน</button>
-    <div class="theme-btn" onclick="toggleTheme()">🌙</div>
-  </div>
+    <button class="btn btn-primary btn-sm" id="nav-reg-btn" onclick="openModal('register')">สมัครเรียน</button>
+    <div class="nav-theme" onclick="toggleTheme()" aria-label="Toggle theme">🌙</div>
+  </nav>
 </nav>
 
 <!-- ════ LANDING ════ -->
 <div id="page-landing" class="page active">
 
-  <section class="hero">
-    <div class="hero-blob hb1"></div>
-    <div class="hero-blob hb2"></div>
+  <!-- HERO -->
+  <section class="hero" aria-label="Hero">
+    <div class="hero-blob hero-blob-1" aria-hidden="true"></div>
+    <div class="hero-blob hero-blob-2" aria-hidden="true"></div>
     <div class="hero-inner">
       <div>
-        <div class="hero-badge">⭐ ศูนย์เรียนรู้ธุรกิจระดับพรีเมียม</div>
-        <div class="hero-logo"><div class="hl-the">THE</div><div class="hl-own">OWNER</div></div>
-        <h1 class="hero-title">เรียนรู้ธุรกิจ<br><span class="hl">ที่ทำได้จริง</span></h1>
+        <div class="hero-eyebrow">⭐ ศูนย์เรียนรู้ธุรกิจระดับพรีเมียม</div>
+        <div class="hero-logo" aria-label="The Owner Logo">
+          <div class="hero-logo-the">THE</div>
+          <div class="hero-logo-own">OWNER</div>
+        </div>
+        <h1 class="hero-title">เรียนรู้ธุรกิจ<br><mark>ที่ทำได้จริง</mark></h1>
         <p class="hero-sub">4 คอร์สพรีเมียม เรียนได้ทั้ง Online & Onsite<br>โดยผู้เชี่ยวชาญที่ทำจริง ไม่ใช่แค่สอน</p>
         <div class="hero-actions">
           <button class="btn btn-primary" onclick="openModal('register')">🚀 สมัครเรียนเลย</button>
-          <button class="btn btn-line" onclick="lineLoginFlow()">💚 เข้าผ่าน LINE</button>
-          <button class="btn btn-outline" onclick="scrollTo2('courses')">📖 ดูคอร์ส</button>
+          <button class="btn btn-line" onclick="lineFlow()">💚 เข้าผ่าน LINE</button>
+          <button class="btn btn-outline" onclick="scrollToId('courses')">📖 ดูคอร์ส</button>
         </div>
       </div>
-      <div class="hero-card">
+      <div class="hero-card animate-up" aria-hidden="true">
         <div class="hero-card-label">Courses 2025</div>
-        <div class="ci"><div style="width:7px;height:7px;border-radius:50%;background:var(--brand);flex-shrink:0;"></div><div><div class="ci-name">Product Growth 101</div><div class="ci-type">Online + Onsite</div></div></div>
-        <div class="ci"><div style="width:7px;height:7px;border-radius:50%;background:var(--brand);flex-shrink:0;"></div><div><div class="ci-name">Business Growth 101</div><div class="ci-type">Online + Onsite</div></div></div>
-        <div class="ci"><div style="width:7px;height:7px;border-radius:50%;background:var(--brand);flex-shrink:0;"></div><div><div class="ci-name">Health Buddy Growth 101</div><div class="ci-type">Online + Onsite</div></div></div>
-        <div class="ci"><div style="width:7px;height:7px;border-radius:50%;background:var(--brand);flex-shrink:0;"></div><div><div class="ci-name">Digital Growth 101</div><div class="ci-type">Online + Onsite</div></div></div>
-        <div class="price-box"><div class="pl">ราคาเริ่มต้นเพียง</div><div class="pv">฿150 <span style="font-size:14px;opacity:.8;">/ ครั้ง</span></div></div>
+        <div class="course-row"><div style="width:7px;height:7px;border-radius:50%;background:var(--c-brand);flex-shrink:0;"></div><div><div class="course-row-name">Product Growth 101</div><div class="course-row-type">Online + Onsite</div></div></div>
+        <div class="course-row"><div style="width:7px;height:7px;border-radius:50%;background:var(--c-brand);flex-shrink:0;"></div><div><div class="course-row-name">Business Growth 101</div><div class="course-row-type">Online + Onsite</div></div></div>
+        <div class="course-row"><div style="width:7px;height:7px;border-radius:50%;background:var(--c-brand);flex-shrink:0;"></div><div><div class="course-row-name">Health Buddy Growth 101</div><div class="course-row-type">Online + Onsite</div></div></div>
+        <div class="course-row"><div style="width:7px;height:7px;border-radius:50%;background:var(--c-brand);flex-shrink:0;"></div><div><div class="course-row-name">Digital Growth 101</div><div class="course-row-type">Online + Onsite</div></div></div>
+        <div class="hero-price"><div class="hero-price-lbl">เริ่มต้นเพียง</div><div class="hero-price-val">฿150 <span style="font-size:14px;opacity:.8;">/ครั้ง</span></div></div>
       </div>
     </div>
   </section>
 
-  <div class="stats">
-    <div class="stat-item"><div class="sn">4</div><div class="sl">คอร์สพรีเมียม</div></div>
-    <div class="stat-item"><div class="sn">6+</div><div class="sl">คลาสต่อเดือน</div></div>
-    <div class="stat-item"><div class="sn">Online</div><div class="sl">& Onsite</div></div>
-    <div class="stat-item"><div class="sn">฿150</div><div class="sl">เริ่มต้น</div></div>
+  <!-- STATS -->
+  <div class="stats-bar" role="region" aria-label="Statistics">
+    <div class="stat-item"><div class="stat-num">4</div><div class="stat-lbl">คอร์สพรีเมียม</div></div>
+    <div class="stat-item"><div class="stat-num">6+</div><div class="stat-lbl">คลาสต่อเดือน</div></div>
+    <div class="stat-item"><div class="stat-num">Online</div><div class="stat-lbl">& Onsite</div></div>
+    <div class="stat-item"><div class="stat-num">฿150</div><div class="stat-lbl">เริ่มต้น</div></div>
   </div>
 
+  <!-- COURSES -->
   <div class="divider"></div>
-  <div id="courses" class="section">
-    <div class="sec-lbl">Our Courses</div>
-    <div class="sec-title">คอร์ส<span class="hl">ทั้งหมด</span></div>
-    <div class="sec-sub">เรียนได้ฟรีตามแพ็กเกจ</div>
-    <div class="courses-grid">
-      <div class="cc"><div class="cc-num">Course 01</div><div class="cc-name">Product Growth 101</div><div class="cc-desc">สร้างและพัฒนาสินค้า ตั้งแต่ Idea จนถึง Product-Market Fit</div><div class="tags"><span class="tag t-online">🖥️ Online</span><span class="tag t-onsite">🏢 Onsite</span><span class="tag t-free">✓ ฟรีตามแพ็กเกจ</span></div></div>
-      <div class="cc"><div class="cc-num">Course 02</div><div class="cc-name">Business Growth 101</div><div class="cc-desc">กลยุทธ์ธุรกิจ Business Model การระดมทุน และขยายธุรกิจ</div><div class="tags"><span class="tag t-online">🖥️ Online</span><span class="tag t-onsite">🏢 Onsite</span><span class="tag t-free">✓ ฟรีตามแพ็กเกจ</span></div></div>
-      <div class="cc"><div class="cc-num">Course 03</div><div class="cc-name">Health Buddy Growth 101</div><div class="cc-desc">ธุรกิจสุขภาพ Wellness การสร้าง Brand และการตลาด</div><div class="tags"><span class="tag t-online">🖥️ Online</span><span class="tag t-onsite">🏢 Onsite</span><span class="tag t-free">✓ ฟรีตามแพ็กเกจ</span></div></div>
-      <div class="cc"><div class="cc-num">Course 04</div><div class="cc-name">Digital Growth 101</div><div class="cc-desc">Digital Marketing, Social Media, SEO/SEM และ Content</div><div class="tags"><span class="tag t-online">🖥️ Online</span><span class="tag t-onsite">🏢 Onsite</span><span class="tag t-free">✓ ฟรีตามแพ็กเกจ</span></div></div>
+  <section id="courses" class="section">
+    <div class="section-inner">
+      <div class="sec-eyebrow">Our Courses</div>
+      <h2 class="sec-title">คอร์ส<mark>ทั้งหมด</mark></h2>
+      <p class="sec-sub">เรียนได้ฟรีตามแพ็กเกจ — 4 คอร์สจากผู้เชี่ยวชาญจริง</p>
+      <div class="courses-grid">
+        <article class="course-card card-hover">
+          <div class="course-num">Course 01</div>
+          <h3 class="course-title">Product Growth 101</h3>
+          <p class="course-desc">สร้างและพัฒนาสินค้า ตั้งแต่ Idea Validation จนถึง Product-Market Fit</p>
+          <div class="tag-group"><span class="tag badge-online">🖥️ Online</span><span class="tag badge-onsite">🏢 Onsite</span><span class="tag badge-brand">✓ ฟรีตามแพ็กเกจ</span></div>
+        </article>
+        <article class="course-card card-hover">
+          <div class="course-num">Course 02</div>
+          <h3 class="course-title">Business Growth 101</h3>
+          <p class="course-desc">กลยุทธ์ธุรกิจ Business Model การระดมทุน และขยายธุรกิจอย่างยั่งยืน</p>
+          <div class="tag-group"><span class="tag badge-online">🖥️ Online</span><span class="tag badge-onsite">🏢 Onsite</span><span class="tag badge-brand">✓ ฟรีตามแพ็กเกจ</span></div>
+        </article>
+        <article class="course-card card-hover">
+          <div class="course-num">Course 03</div>
+          <h3 class="course-title">Health Buddy Growth 101</h3>
+          <p class="course-desc">ธุรกิจสุขภาพ Wellness การสร้าง Brand และการตลาดในอุตสาหกรรมสุขภาพ</p>
+          <div class="tag-group"><span class="tag badge-online">🖥️ Online</span><span class="tag badge-onsite">🏢 Onsite</span><span class="tag badge-brand">✓ ฟรีตามแพ็กเกจ</span></div>
+        </article>
+        <article class="course-card card-hover">
+          <div class="course-num">Course 04</div>
+          <h3 class="course-title">Digital Growth 101</h3>
+          <p class="course-desc">Digital Marketing, Social Media, SEO/SEM และการใช้ Data เพื่อเติบโตในยุคดิจิทัล</p>
+          <div class="tag-group"><span class="tag badge-online">🖥️ Online</span><span class="tag badge-onsite">🏢 Onsite</span><span class="tag badge-brand">✓ ฟรีตามแพ็กเกจ</span></div>
+        </article>
+      </div>
     </div>
-  </div>
+  </section>
 
+  <!-- PRICING -->
   <div class="divider"></div>
-  <div id="pricing" class="section">
-    <div class="sec-lbl">Pricing</div>
-    <div class="sec-title">แพ็กเกจ<span class="hl">การเรียน</span></div>
-    <div class="sec-sub">เริ่มได้ทันที ไม่มีข้อผูกมัด</div>
-    <div class="pricing-grid">
-      <div class="pc"><div class="pc-type">Trial</div><div class="pc-name">รายครั้ง</div><div class="pc-price"><span class="pc-amt">150</span><span class="pc-unit">฿/ครั้ง</span></div><div class="pc-note">1 วัน จากวัน Check-in แรก • รหัส OwnT</div><ul class="pc-feats"><li><span class="chk">✓</span>เข้าเรียน 1 ครั้ง</li><li><span class="chk">✓</span>ทุกคอร์ส Online & Onsite</li><li><span class="chk">✓</span>จองที่นั่งล่วงหน้า</li><li><span class="crs">–</span>วิดีโอย้อนหลัง</li><li><span class="crs">–</span>เรียนซ้ำไม่จำกัด</li></ul><button class="btn btn-outline btn-full" onclick="openModal('register','trial')">เลือกแพ็กเกจนี้</button></div>
-      <div class="pc featured"><div class="pc-pill">⭐ แนะนำ</div><div class="pc-type">Quarter</div><div class="pc-name">ราย 3 เดือน</div><div class="pc-price"><span class="pc-amt">600</span><span class="pc-unit">฿/3เดือน</span></div><div class="pc-note">90 วัน จากวัน Check-in แรก • รหัส OwnP</div><ul class="pc-feats"><li><span class="chk">✓</span>เรียนไม่จำกัดครั้ง 90 วัน</li><li><span class="chk">✓</span>ทุกคอร์ส Online & Onsite</li><li><span class="chk">✓</span>จองที่นั่งล่วงหน้า</li><li><span class="chk">✓</span>วิดีโอย้อนหลัง</li><li><span class="chk">✓</span>เรียนซ้ำไม่จำกัด</li></ul><button class="btn btn-primary btn-full" onclick="openModal('register','quarter')">เลือกแพ็กเกจนี้</button></div>
+  <section id="pricing" class="section">
+    <div class="section-inner">
+      <div class="sec-eyebrow">Pricing</div>
+      <h2 class="sec-title">แพ็กเกจ<mark>การเรียน</mark></h2>
+      <p class="sec-sub">เริ่มได้ทันที ไม่มีข้อผูกมัด</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-type">Trial</div>
+          <div class="price-name">รายครั้ง</div>
+          <div><span class="price-amount">150</span><span class="price-unit">฿/ครั้ง</span></div>
+          <div class="price-note">1 วัน จากวัน Check-in แรก • OwnT</div>
+          <ul class="price-features">
+            <li><span style="color:var(--c-ok)">✓</span> เข้าเรียน 1 ครั้ง</li>
+            <li><span style="color:var(--c-ok)">✓</span> ทุกคอร์ส Online & Onsite</li>
+            <li><span style="color:var(--c-ok)">✓</span> จองที่นั่งล่วงหน้า</li>
+            <li><span style="color:var(--c-muted)">–</span> ดูวิดีโอย้อนหลัง</li>
+            <li><span style="color:var(--c-muted)">–</span> เรียนซ้ำไม่จำกัด</li>
+          </ul>
+          <button class="btn btn-outline btn-full" onclick="openModal('register','trial')">เลือกแพ็กเกจนี้</button>
+        </div>
+        <div class="price-card featured">
+          <div class="price-pill">⭐ แนะนำ</div>
+          <div class="price-type">Quarter</div>
+          <div class="price-name">ราย 3 เดือน</div>
+          <div><span class="price-amount">600</span><span class="price-unit">฿/3 เดือน</span></div>
+          <div class="price-note">90 วัน จากวัน Check-in แรก • OwnP</div>
+          <ul class="price-features">
+            <li><span style="color:var(--c-ok)">✓</span> เรียนไม่จำกัด 90 วัน</li>
+            <li><span style="color:var(--c-ok)">✓</span> ทุกคอร์ส Online & Onsite</li>
+            <li><span style="color:var(--c-ok)">✓</span> จองที่นั่งล่วงหน้า</li>
+            <li><span style="color:var(--c-ok)">✓</span> ดูวิดีโอย้อนหลัง</li>
+            <li><span style="color:var(--c-ok)">✓</span> เรียนซ้ำไม่จำกัด</li>
+          </ul>
+          <button class="btn btn-primary btn-full" onclick="openModal('register','quarter')">เลือกแพ็กเกจนี้</button>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
+  <!-- HOW TO -->
   <div class="divider"></div>
-  <div id="howto" class="section">
-    <div class="sec-lbl">How To</div>
-    <div class="sec-title">วิธีสมัคร<span class="hl">ง่ายๆ</span></div>
-    <div class="sec-sub">4 ขั้นตอน เสร็จใน 5 นาที</div>
-    <div class="steps-grid">
-      <div class="step"><div class="step-num">1</div><div class="step-title">เลือกแพ็กเกจ</div><div class="step-desc">Trial ฿150 หรือ Quarter ฿600</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-title">กรอกข้อมูล</div><div class="step-desc">ชื่อ อีเมล เบอร์ LINE ID</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-title">โอน + แนบ Slip</div><div class="step-desc">โอนตามยอดแล้วแนบสลิป</div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-title">รอ Approve</div><div class="step-desc">Admin ส่ง Member ID + Zoom ผ่าน LINE</div></div>
+  <section id="howto" class="section">
+    <div class="section-inner">
+      <div class="sec-eyebrow">How To</div>
+      <h2 class="sec-title">วิธีสมัคร<mark>ง่ายๆ</mark></h2>
+      <p class="sec-sub">4 ขั้นตอน เสร็จใน 5 นาที</p>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">1</div><div class="step-title">เลือกแพ็กเกจ</div><div class="step-desc">Trial ฿150 หรือ Quarter ฿600</div></div>
+        <div class="step-card"><div class="step-num">2</div><div class="step-title">กรอกข้อมูล</div><div class="step-desc">ชื่อ อีเมล เบอร์ LINE ID</div></div>
+        <div class="step-card"><div class="step-num">3</div><div class="step-title">โอน + แนบ Slip</div><div class="step-desc">โอนตามยอดพร้อมแนบสลิปในฟอร์ม</div></div>
+        <div class="step-card"><div class="step-num">4</div><div class="step-title">รอ Approve</div><div class="step-desc">Admin ส่ง Member ID + Zoom ผ่าน LINE</div></div>
+      </div>
     </div>
-  </div>
+  </section>
 
+  <!-- SCHEDULE -->
   <div class="divider"></div>
-  <div class="section">
-    <div class="sec-lbl">Schedule</div>
-    <div class="sec-title">ตารางเรียน<span class="hl">สัปดาห์นี้</span></div>
-    <div class="tbl-box">
-      <table class="tbl">
-        <thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead>
-        <tbody id="pub-schedule">
-          <tr><td>จ. 09:00–11:00</td><td>Business Growth 101</td><td><span class="rb rb-hy">⚡ Hybrid</span></td><td><span class="seats-ok">8/12</span></td><td><button class="btn btn-primary btn-xs" onclick="openModal('register')">จอง</button></td></tr>
-          <tr><td>อ. 19:00–21:00</td><td>Digital Growth 101</td><td><span class="rb rb-on">🖥️ Online</span></td><td><span class="seats-ok">15/30</span></td><td><button class="btn btn-primary btn-xs" onclick="openModal('register')">จอง</button></td></tr>
-          <tr><td>พ. 09:00–12:00</td><td>Product Growth 101</td><td><span class="rb rb-off">🏢 Onsite</span></td><td><span class="seats-low">2/10 ⚡</span></td><td><button class="btn btn-primary btn-xs" onclick="openModal('register')">จอง</button></td></tr>
-          <tr><td>พฤ. 19:00–21:00</td><td>Health Buddy Growth 101</td><td><span class="rb rb-on">🖥️ Online</span></td><td><span class="seats-ok">20/50</span></td><td><button class="btn btn-primary btn-xs" onclick="openModal('register')">จอง</button></td></tr>
-        </tbody>
-      </table>
+  <section class="section">
+    <div class="section-inner">
+      <div class="sec-eyebrow">Schedule</div>
+      <h2 class="sec-title">ตารางเรียน<mark>สัปดาห์นี้</mark></h2>
+      <p class="sec-sub">จองที่นั่งล่วงหน้า — ที่นั่งมีจำกัด</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead>
+          <tbody id="pub-schedule">
+            <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--c-muted);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  </section>
 
+  <!-- FAQ -->
   <div class="divider"></div>
-  <div id="faq" class="section">
-    <div class="sec-lbl">FAQ</div>
-    <div class="sec-title">คำถาม<span class="hl">ที่พบบ่อย</span></div>
-    <div class="faq-list">
-      <div class="faq-item"><div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')"><span>เริ่มนับอายุสมาชิกเมื่อไหร่?</span><span class="faq-arr">▼</span></div><div class="faq-a">เริ่มนับตั้งแต่วัน Check-in ครั้งแรก — Trial 1 วัน, Quarter 90 วัน</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')"><span>เรียน Online ผ่านช่องทางไหน?</span><span class="faq-arr">▼</span></div><div class="faq-a">ผ่าน Zoom — หลัง Approve จะส่ง Meeting ID + Password ผ่าน LINE OA อัตโนมัติ</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')"><span>จองแล้วไม่มา มีค่าปรับไหม?</span><span class="faq-arr">▼</span></div><div class="faq-a">มี — Online ฿20 | Onsite ฿50 | Hybrid ฿100 ยกเลิกล่วงหน้า ≥ 2 ชั่วโมง</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')"><span>สมัครผ่าน LINE ได้ไหม?</span><span class="faq-arr">▼</span></div><div class="faq-a">ได้ กดปุ่ม LINE Login ระบบดึงข้อมูลอัตโนมัติ ไม่ต้องจำ Password</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="this.closest('.faq-item').classList.toggle('open')"><span>รหัส OwnT/OwnP คืออะไร?</span><span class="faq-arr">▼</span></div><div class="faq-a">รหัสประจำตัว: OwnT = Trial, OwnP = Quarter ใช้สำหรับ Check-in และยืนยันสิทธิ์</div></div>
+  <section id="faq" class="section">
+    <div class="section-inner">
+      <div class="sec-eyebrow">FAQ</div>
+      <h2 class="sec-title">คำถาม<mark>ที่พบบ่อย</mark></h2>
+      <div class="faq-list">
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span>เริ่มนับอายุสมาชิกเมื่อไหร่?</span><span class="faq-arrow">▼</span></button><div class="faq-a">เริ่มนับตั้งแต่วัน Check-in ครั้งแรก — Trial 1 วัน, Quarter 90 วัน</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span>เรียน Online ผ่านช่องทางไหน?</span><span class="faq-arrow">▼</span></button><div class="faq-a">ผ่าน Zoom — หลัง Approve จะส่ง Meeting ID + Password ผ่าน LINE OA อัตโนมัติ</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span>จองแล้วไม่มา มีค่าปรับไหม?</span><span class="faq-arrow">▼</span></button><div class="faq-a">มี — Online ฿20 | Onsite ฿50 | Hybrid ฿100 กรุณายกเลิกล่วงหน้า ≥ 2 ชั่วโมง</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span>Walk-in หน้าห้องได้ไหม?</span><span class="faq-arrow">▼</span></button><div class="faq-a">ได้ครับ สแกน QR Code ที่ติดหน้าห้องเรียน ระบบจะทำการ Check-in ให้อัตโนมัติ แต่จะมีค่าปรับ Walk-in</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)"><span>สมัครผ่าน LINE ได้ไหม?</span><span class="faq-arrow">▼</span></button><div class="faq-a">ได้ กด LINE Login ระบบดึงข้อมูลอัตโนมัติ ไม่ต้องจำ Password</div></div>
+      </div>
     </div>
-  </div>
+  </section>
 
   <footer>
-    <div class="footer-logo"><div class="footer-mark">THE<br>OWN</div><div><div class="footer-brand">THE OWNER</div><div style="font-size:10px;color:rgba(255,255,255,.4);">i am because we are</div></div></div>
+    <div class="footer-logo">
+      <div class="footer-logo-mark">THE<br>OWN</div>
+      <div><div class="footer-brand">THE OWNER</div><div style="font-size:10px;color:rgba(255,255,255,.4);">i am because we are</div></div>
+    </div>
     <p>LINE OA: @theowner | © 2025 The Owner</p>
   </footer>
 </div>
 
+<!-- ════ ROOM QR CHECK-IN PAGE ════ -->
+<div id="page-roomcheckin" class="page">
+  <div class="checkin-page">
+    <div class="checkin-card">
+      <div class="card text-center">
+        <div class="checkin-badge">⚠️ Walk-in มีค่าปรับ</div>
+        <div style="font-size:40px;margin-bottom:12px;">📷</div>
+        <h2 class="font-head font-800" style="font-size:20px;margin-bottom:6px;" id="rci-class-name">—</h2>
+        <p class="text-muted text-sm" style="margin-bottom:20px;">ใส่ Member ID เพื่อ Check-in</p>
+        <div class="form-group">
+          <input type="text" class="form-input" id="rci-member-id" placeholder="OwnP0001" maxlength="10" oninput="this.value=this.value.toUpperCase()" style="text-align:center;font-size:18px;font-family:var(--font-head);font-weight:800;letter-spacing:3px;">
+        </div>
+        <button class="btn btn-primary btn-full mt-12" onclick="doRoomCheckin()" id="btn-rci">✅ Check-in</button>
+        <div id="rci-result" style="margin-top:14px;"></div>
+        <div class="info-box warn mt-16">
+          <div class="info-box-icon">💰</div>
+          <div><div class="info-box-title">มีค่าปรับ Walk-in</div><div class="info-box-text">การ Check-in หน้าห้องโดยไม่ได้จองล่วงหน้าจะมีค่าปรับตามประเภทห้องเรียน</div></div>
+        </div>
+        <button class="btn btn-ghost btn-full mt-12" onclick="showPage('landing')">← กลับหน้าหลัก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ════ MEMBER PORTAL ════ -->
 <div id="page-member" class="page">
-  <div class="portal-layout">
-    <aside class="sidebar">
-      <div class="sb-prof">
-        <div class="sb-av" id="sb-av">O</div>
-        <div class="sb-name" id="sb-name">สมาชิก</div>
-        <div class="sb-mid-txt" id="sb-mid">—</div>
-        <span class="sb-status">● Active</span>
+  <div class="portal-wrap">
+    <aside class="portal-sidebar" aria-label="Sidebar navigation">
+      <div class="portal-profile">
+        <div class="portal-av" id="p-av">O</div>
+        <div class="portal-pname" id="p-name">สมาชิก</div>
+        <div class="portal-pmid" id="p-mid">—</div>
+        <span class="portal-pstatus">● Active</span>
       </div>
-      <ul class="sb-menu">
-        <li><a class="active" onclick="switchTab('dashboard')" id="tab-dashboard"><span class="sb-icon">🏠</span>ภาพรวม</a></li>
-        <li><a onclick="switchTab('zoom')" id="tab-zoom"><span class="sb-icon">🎥</span>Zoom Class</a></li>
-        <li><a onclick="switchTab('sched')" id="tab-sched"><span class="sb-icon">📅</span>จองที่นั่ง</a></li>
-        <li><a onclick="switchTab('mybookings')" id="tab-mybookings"><span class="sb-icon">📋</span>การจองของฉัน</a></li>
-        <li><a onclick="switchTab('checkin')" id="tab-checkin"><span class="sb-icon">✅</span>QR Check-in</a></li>
-        <li><a onclick="switchTab('history')" id="tab-history"><span class="sb-icon">📊</span>ประวัติ</a></li>
-        <li><a onclick="switchTab('myprofile')" id="tab-myprofile"><span class="sb-icon">👤</span>โปรไฟล์</a></li>
-        <li><a onclick="logout()" style="color:var(--danger);margin-top:10px;"><span class="sb-icon">🚪</span>ออกจากระบบ</a></li>
+      <ul class="portal-menu" role="menubar">
+        <li role="none"><a role="menuitem" class="active" onclick="switchTab('dashboard')" id="tab-dashboard"><span class="pm-icon">🏠</span>ภาพรวม</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('zoom')" id="tab-zoom"><span class="pm-icon">🎥</span>Zoom Class</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('sched')" id="tab-sched"><span class="pm-icon">📅</span>จองที่นั่ง</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('mybookings')" id="tab-mybookings"><span class="pm-icon">📋</span>การจองของฉัน</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('checkin')" id="tab-checkin"><span class="pm-icon">✅</span>QR Check-in</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('history')" id="tab-history"><span class="pm-icon">📊</span>ประวัติ</a></li>
+        <li role="none"><a role="menuitem" onclick="switchTab('profile')" id="tab-profile"><span class="pm-icon">👤</span>โปรไฟล์</a></li>
+        <li role="none"><a role="menuitem" onclick="logout()" style="color:var(--c-err);margin-top:10px;"><span class="pm-icon">🚪</span>ออกจากระบบ</a></li>
       </ul>
     </aside>
     <main class="portal-main">
-      <div id="portal-dashboard" class="p-tab active">
-        <div class="p-header"><h2>ยินดีต้อนรับ, <span id="welcome-name">สมาชิก</span> 👋</h2><p id="today-date"></p></div>
-        <div class="card-grid">
-          <div class="info-card"><div class="ic-lbl">แพ็กเกจ</div><div class="ic-val ic-brand" id="d-plan">—</div><div class="ic-sub" id="d-exp">—</div></div>
-          <div class="info-card"><div class="ic-lbl">รหัสสมาชิก</div><div class="ic-val ic-brand" id="d-mid" style="font-size:17px;">—</div></div>
-          <div class="info-card"><div class="ic-lbl">เรียนแล้ว</div><div class="ic-val ic-success" id="d-sessions">0</div><div class="ic-sub">ครั้ง</div></div>
-          <div class="info-card"><div class="ic-lbl">ค่าปรับ</div><div class="ic-val ic-danger" id="d-fines">฿0</div></div>
+
+      <!-- DASHBOARD -->
+      <div id="ptab-dashboard" class="ptab active">
+        <div class="ptab-header">
+          <h2 class="ptab-title">ยินดีต้อนรับ, <span id="p-welcome">สมาชิก</span> 👋</h2>
+          <p class="ptab-sub" id="p-today"></p>
         </div>
-        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">การจองถัดไป</h3>
-        <div class="booking-list" id="upcoming-list"><div style="color:var(--text-muted);font-size:14px;padding:14px 0;">ยังไม่มีการจอง</div></div>
-        <div class="warn-box"><div class="warn-icon">⚠️</div><div><div class="warn-title">นโยบายค่าปรับ</div><div class="warn-text">จองแล้วไม่มา: Online ฿20 | Onsite ฿50 | Hybrid ฿100 — ยกเลิกล่วงหน้า ≥ 2 ชม.</div></div></div>
+        <div class="info-cards">
+          <div class="info-card"><div class="ic-label">แพ็กเกจ</div><div class="ic-val ic-brand" id="d-plan">—</div><div class="ic-sub" id="d-exp">—</div></div>
+          <div class="info-card"><div class="ic-label">รหัสสมาชิก</div><div class="ic-val ic-brand" id="d-mid" style="font-size:17px;">—</div></div>
+          <div class="info-card"><div class="ic-label">เรียนแล้ว</div><div class="ic-val ic-ok" id="d-sessions">0</div><div class="ic-sub">ครั้ง</div></div>
+          <div class="info-card"><div class="ic-label">ค่าปรับ</div><div class="ic-val ic-err" id="d-fines">฿0</div></div>
+        </div>
+        <h3 class="font-bold mt-16" style="font-size:14px;margin-bottom:12px;">การจองถัดไป</h3>
+        <div class="bk-list" id="upcoming-list"><p class="text-muted text-sm" style="padding:14px 0;">ยังไม่มีการจอง</p></div>
+        <div class="info-box warn mt-16">
+          <div class="info-box-icon">⚠️</div>
+          <div><div class="info-box-title">นโยบายค่าปรับ</div><div class="info-box-text">จองแล้วไม่มา: Online ฿20 | Onsite ฿50 | Hybrid ฿100 — ยกเลิกล่วงหน้า ≥ 2 ชม.</div></div>
+        </div>
       </div>
-      <div id="portal-zoom" class="p-tab">
-        <div class="p-header"><h2>🎥 Zoom Class</h2><p>ข้อมูลเข้าเรียน Online</p></div>
+
+      <!-- ZOOM -->
+      <div id="ptab-zoom" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">🎥 Zoom Class</h2><p class="ptab-sub">ข้อมูลสำหรับเข้าเรียน Online</p></div>
         <div class="zoom-card">
           <div class="zoom-title">🎥 Zoom Meeting Info</div>
-          <div class="zoom-row"><div class="zoom-lbl">Meeting ID</div><div class="zoom-val" id="zoom-mid">—</div><button class="zoom-copy" onclick="copyText(CFG.ZOOM_ID,'Meeting ID')">Copy</button></div>
-          <div class="zoom-row"><div class="zoom-lbl">Password</div><div class="zoom-val" id="zoom-pw">—</div><button class="zoom-copy" onclick="copyText(CFG.ZOOM_PW,'Password')">Copy</button></div>
+          <div class="zoom-row"><div class="zoom-lbl">Meeting ID</div><div class="zoom-val" id="z-mid">—</div><button class="zoom-copy" onclick="copyText(STATE.zoomId,'Meeting ID')">Copy</button></div>
+          <div class="zoom-row"><div class="zoom-lbl">Password</div><div class="zoom-val" id="z-pw">—</div><button class="zoom-copy" onclick="copyText(STATE.zoomPw,'Password')">Copy</button></div>
           <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:14px;">
-            <button class="btn btn-white btn-sm" onclick="joinZoom()">🎥 Join Zoom</button>
+            <button class="btn btn-outline btn-sm" onclick="joinZoom()">🎥 Join Zoom</button>
             <button class="btn btn-line btn-sm" onclick="sendZoomLine()">💚 ส่งผ่าน LINE</button>
           </div>
         </div>
-        <div class="warn-box" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.2);">
-          <div class="warn-icon">✅</div>
-          <div><div class="warn-title" style="color:var(--success);">ขั้นตอนเข้าเรียน</div><div class="warn-text">1. กด Join Zoom → ใส่ Meeting ID + Password<br>2. รอ Host อนุมัติให้เข้าห้อง</div></div>
+        <div class="info-box ok">
+          <div class="info-box-icon">✅</div>
+          <div><div class="info-box-title" style="color:var(--c-ok);">ขั้นตอนเข้าเรียน</div><div class="info-box-text">1. กด Join Zoom → ใส่ Meeting ID + Password<br>2. รอ Host อนุมัติเข้าห้อง</div></div>
         </div>
       </div>
-      <div id="portal-sched" class="p-tab">
-        <div class="p-header"><h2>📅 จองที่นั่ง</h2><p>เลือกคลาสและจองล่วงหน้า</p></div>
-        <div class="tbl-box"><table class="tbl"><thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead><tbody>
-          <tr><td>จ. 09:00</td><td>Business Growth 101</td><td><span class="rb rb-hy">⚡ Hybrid</span></td><td><span class="seats-ok">8/12</span></td><td><button class="btn btn-primary btn-xs" onclick="bookClass('Business Growth 101','จ. 09:00','hybrid')">จอง</button></td></tr>
-          <tr><td>อ. 19:00</td><td>Digital Growth 101</td><td><span class="rb rb-on">🖥️ Online</span></td><td><span class="seats-ok">15/30</span></td><td><button class="btn btn-primary btn-xs" onclick="bookClass('Digital Growth 101','อ. 19:00','online')">จอง</button></td></tr>
-          <tr><td>พ. 09:00</td><td>Product Growth 101</td><td><span class="rb rb-off">🏢 Onsite</span></td><td><span class="seats-low">2/10 ⚡</span></td><td><button class="btn btn-primary btn-xs" onclick="bookClass('Product Growth 101','พ. 09:00','onsite')">จอง</button></td></tr>
-          <tr><td>พฤ. 19:00</td><td>Health Buddy Growth 101</td><td><span class="rb rb-on">🖥️ Online</span></td><td><span class="seats-ok">20/50</span></td><td><button class="btn btn-primary btn-xs" onclick="bookClass('Health Buddy Growth 101','พฤ. 19:00','online')">จอง</button></td></tr>
-        </tbody></table></div>
+
+      <!-- SCHEDULE -->
+      <div id="ptab-sched" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">📅 จองที่นั่ง</h2><p class="ptab-sub">เลือกคลาสและจองล่วงหน้า</p></div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>วัน/เวลา</th><th>คอร์ส</th><th>ประเภท</th><th>ที่นั่ง</th><th></th></tr></thead>
+            <tbody id="member-schedule">
+              <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--c-muted);">กำลังโหลด...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div id="portal-mybookings" class="p-tab">
-        <div class="p-header"><h2>📋 การจองของฉัน</h2></div>
-        <div class="booking-list" id="my-bookings-list"><div style="color:var(--text-muted);font-size:14px;padding:14px 0;">ยังไม่มีการจอง</div></div>
+
+      <!-- MY BOOKINGS -->
+      <div id="ptab-mybookings" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">📋 การจองของฉัน</h2></div>
+        <div class="bk-list" id="my-bk-list"><p class="text-muted text-sm" style="padding:14px 0;">ยังไม่มีการจอง</p></div>
       </div>
-      <div id="portal-checkin" class="p-tab">
-        <div class="p-header"><h2>✅ QR Check-in</h2><p>แสดงหน้าจอนี้หน้าห้องเรียน</p></div>
+
+      <!-- CHECK-IN QR -->
+      <div id="ptab-checkin" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">✅ QR Check-in</h2><p class="ptab-sub">แสดงที่หน้าห้องเรียน</p></div>
         <div class="qr-section">
           <div class="qr-box"><canvas id="qr-canvas" width="180" height="180"></canvas></div>
-          <div style="font-family:'Prompt',sans-serif;font-size:19px;font-weight:800;color:var(--brand);letter-spacing:3px;" id="qr-mid">—</div>
-          <p style="font-size:12px;color:var(--text-muted);margin-top:7px;">รีเฟรชทุก 5 นาที</p>
-          <button class="btn btn-outline btn-sm" style="margin-top:14px;" onclick="generateQR()">🔄 รีเฟรช</button>
+          <div style="font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-brand);letter-spacing:3px;" id="qr-mid">—</div>
+          <p class="text-muted text-sm mt-8">รีเฟรชทุก 5 นาที เพื่อความปลอดภัย</p>
+          <button class="btn btn-outline btn-sm mt-12" onclick="drawQR()">🔄 รีเฟรช QR</button>
+        </div>
+        <div class="info-box err">
+          <div class="info-box-icon">⏰</div>
+          <div><div class="info-box-title">หมายเหตุ</div><div class="info-box-text">ถ้าไม่ได้จองล่วงหน้าและมา Walk-in สแกน QR หน้าห้อง จะมีค่าปรับตามประเภทห้อง</div></div>
         </div>
       </div>
-      <div id="portal-history" class="p-tab">
-        <div class="p-header"><h2>📊 ประวัติการเรียน</h2></div>
-        <div class="tbl-box"><table class="tbl"><thead><tr><th>วันที่</th><th>คอร์ส</th><th>ประเภท</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead><tbody id="history-body"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:22px;">กำลังโหลด...</td></tr></tbody></table></div>
+
+      <!-- HISTORY -->
+      <div id="ptab-history" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">📊 ประวัติการเรียน</h2></div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>วันที่</th><th>คอร์ส</th><th>วิธี</th></tr></thead>
+            <tbody id="history-body"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--c-muted);">กำลังโหลด...</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div id="portal-myprofile" class="p-tab">
-        <div class="p-header"><h2>👤 โปรไฟล์</h2></div>
-        <div style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:460px;box-shadow:0 4px 0 var(--border);">
-          <div class="form-row"><div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="p-fn"></div><div class="form-group"><label class="form-label">นามสกุล</label><input type="text" class="form-input" id="p-ln"></div></div>
-          <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="p-em"></div>
-          <div class="form-group"><label class="form-label">เบอร์โทร</label><input type="tel" class="form-input" id="p-ph"></div>
-          <div class="form-group"><label class="form-label">LINE ID (Auto)</label><input type="text" class="form-input" id="p-li" readonly style="opacity:.6;"></div>
+
+      <!-- PROFILE -->
+      <div id="ptab-profile" class="ptab">
+        <div class="ptab-header"><h2 class="ptab-title">👤 โปรไฟล์</h2></div>
+        <div class="card" style="max-width:460px;">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="pf-fn"></div>
+            <div class="form-group"><label class="form-label">นามสกุล</label><input type="text" class="form-input" id="pf-ln"></div>
+          </div>
+          <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="pf-em" readonly style="opacity:.6;"></div>
+          <div class="form-group"><label class="form-label">เบอร์โทร</label><input type="tel" class="form-input" id="pf-ph"></div>
+          <div class="form-group"><label class="form-label">LINE ID</label><input type="text" class="form-input" id="pf-li" readonly style="opacity:.6;"></div>
           <button class="btn btn-primary btn-sm" onclick="saveProfile()">💾 บันทึก</button>
         </div>
       </div>
+
     </main>
   </div>
 </div>
 
 <!-- ════ MODAL: REGISTER ════ -->
-<div id="modal-register" class="modal-overlay" onclick="closeOut(event,'register')">
+<div id="modal-register" class="modal-overlay" onclick="handleOverlayClick(event,'register')" role="dialog" aria-modal="true" aria-labelledby="reg-title">
   <div class="modal">
-    <div class="modal-title">📝 สมัครเรียน</div>
-    <div class="modal-sub">กรอกข้อมูลและแนบสลิปในหน้าเดียว</div>
-
     <div id="reg-success" style="display:none;">
-      <div class="reg-success">
-        <div class="suc-icon">🎉</div>
-        <div class="suc-title">ส่งข้อมูลสำเร็จ!</div>
-        <div class="suc-sub">Admin จะตรวจสอบ Slip และส่ง<br><strong>รหัสสมาชิก + Zoom Meeting ID</strong><br>ผ่าน LINE OA ภายใน <strong style="color:var(--brand);">24 ชั่วโมง</strong></div>
-        <div class="pending-box"><div class="pb-icon">⏳</div><div class="pb-text"><h4>รอ Admin Approve</h4><p>ติดตามผ่าน LINE OA @theowner</p></div></div>
-        <button class="btn btn-primary btn-full" style="margin-top:18px;" onclick="closeModal('register')">✓ ปิด</button>
+      <div class="success-state">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">ส่งข้อมูลสำเร็จ!</div>
+        <div class="success-sub">Admin จะตรวจสอบ Slip และส่ง<br><strong>รหัสสมาชิก + Zoom ID</strong><br>ผ่าน LINE OA ภายใน <strong style="color:var(--c-brand);">24 ชั่วโมง</strong></div>
+        <div class="info-box warn"><div class="info-box-icon">⏳</div><div class="pb-text"><div class="info-box-title">รอ Admin Approve</div><div class="info-box-text">ติดตามผ่าน LINE OA @theowner</div></div></div>
+        <button class="btn btn-primary btn-full mt-16" onclick="closeModal('register')">✓ ปิด</button>
       </div>
     </div>
-
     <div id="reg-form">
-      <!-- LINE auto-fill (แสดงเมื่อ login ผ่าน LINE แล้ว) -->
-      <div class="line-box" id="line-autofill-box" style="display:none;">
-        <span style="font-size:22px;">💚</span>
-        <div><div class="line-name" id="line-autofill-name">LINE User</div><div class="line-sub">ดึงข้อมูลจาก LINE — ไม่ต้องใส่รหัสผ่าน</div></div>
+      <h2 class="modal-title" id="reg-title">📝 สมัครเรียน</h2>
+      <p class="modal-sub">กรอกข้อมูลและแนบสลิปในหน้าเดียว</p>
+      <!-- LINE autofill -->
+      <div class="line-box" id="line-autofill" style="display:none;">
+        <span style="font-size:20px;">💚</span>
+        <div><div class="line-box-name" id="line-autofill-name">LINE User</div><div class="line-box-sub">ดึงข้อมูล LINE อัตโนมัติ</div></div>
       </div>
-
-      <!-- PLAN -->
+      <!-- Plan -->
       <div class="form-group">
         <div class="form-label">เลือกแพ็กเกจ</div>
-        <div class="plan-sel">
-          <div class="plan-opt" id="plan-trial" onclick="setPlan('trial')"><div class="pp">฿150</div><div class="pn">Trial</div><div class="pnote">รายครั้ง • OwnT</div></div>
-          <div class="plan-opt sel" id="plan-quarter" onclick="setPlan('quarter')"><div class="pp">฿600</div><div class="pn">Quarter ⭐</div><div class="pnote">3 เดือน • OwnP</div></div>
+        <div class="plan-grid">
+          <div class="plan-opt" id="plan-trial" onclick="setPlan('trial')"><div class="plan-price">฿150</div><div class="plan-name">Trial</div><div class="plan-note">รายครั้ง • OwnT</div></div>
+          <div class="plan-opt sel" id="plan-quarter" onclick="setPlan('quarter')"><div class="plan-price">฿600</div><div class="plan-name">Quarter ⭐</div><div class="plan-note">3 เดือน • OwnP</div></div>
         </div>
       </div>
-
       <div class="form-row">
-        <div class="form-group"><label class="form-label">ชื่อ *</label><input type="text" class="form-input" id="r-fn" placeholder="ชื่อ"></div>
-        <div class="form-group"><label class="form-label">นามสกุล</label><input type="text" class="form-input" id="r-ln" placeholder="นามสกุล"></div>
+        <div class="form-group"><label class="form-label">ชื่อ *</label><input type="text" class="form-input" id="r-fn" placeholder="ชื่อ" autocomplete="given-name"></div>
+        <div class="form-group"><label class="form-label">นามสกุล</label><input type="text" class="form-input" id="r-ln" placeholder="นามสกุล" autocomplete="family-name"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">อีเมล *</label><input type="email" class="form-input" id="r-em" placeholder="your@email.com"></div>
-        <div class="form-group"><label class="form-label">เบอร์โทร *</label><input type="tel" class="form-input" id="r-ph" placeholder="08X-XXX-XXXX"></div>
+        <div class="form-group"><label class="form-label">อีเมล *</label><input type="email" class="form-input" id="r-em" placeholder="your@email.com" autocomplete="email"></div>
+        <div class="form-group"><label class="form-label">เบอร์โทร *</label><input type="tel" class="form-input" id="r-ph" placeholder="08X-XXX-XXXX" autocomplete="tel"></div>
       </div>
-      <div class="form-group"><label class="form-label">LINE ID</label><input type="text" class="form-input" id="r-li" placeholder="@lineID (ถ้ามี — ใช้รับ Member ID)"></div>
-
-      <!-- Password: ซ่อนเมื่อ login ผ่าน LINE แล้ว -->
-      <div class="form-group" id="pw-field">
-        <label class="form-label">รหัสผ่าน <span style="color:var(--text-muted);font-weight:400;">(ไม่ต้องใส่ถ้า Login ผ่าน LINE)</span></label>
-        <input type="password" class="form-input" id="r-pw" placeholder="อย่างน้อย 6 ตัวอักษร">
-      </div>
-
+      <div class="form-group"><label class="form-label">LINE ID <span class="text-muted">(ใช้รับ Member ID)</span></label><input type="text" class="form-input" id="r-li" placeholder="@lineID ถ้ามี"></div>
       <div class="modal-hr"></div>
-
-      <!-- BANK -->
+      <!-- Bank -->
       <div class="bank-card">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
-          <div class="bank-name">Bangkok Bank — PromptPay</div>
+          <div class="bank-name" id="m-bank-name">Bangkok Bank — PromptPay</div>
           <div class="bank-acc-row">
-            <div class="bank-acc" id="modal-bank-acc">089-xxx-2626</div>
+            <div class="bank-acc-num" id="m-bank-acc">—</div>
             <button class="copy-btn" onclick="copyBankAcc()">📋 Copy</button>
           </div>
-          <div class="bank-owner" id="modal-bank-owner">นาง สุพัตรา หงษ์วิเศษ</div>
+          <div class="bank-owner" id="m-bank-owner">—</div>
         </div>
-        <div class="bank-amt">
-          <div class="ba-lbl">ยอดโอน</div>
-          <div class="ba-val" id="amount-display">฿600</div>
-          <div class="ba-plan" id="plan-display">Quarter</div>
+        <div class="bank-amount">
+          <div class="bank-amt-lbl">ยอดโอน</div>
+          <div class="bank-amt-val" id="m-amount">฿600</div>
+          <div class="bank-amt-plan" id="m-plan-lbl">Quarter</div>
         </div>
       </div>
-
-      <!-- SLIP UPLOAD -->
-      <div class="form-group">
+      <!-- Slip -->
+      <div class="form-group mt-12">
         <label class="form-label">📎 แนบสลิปการโอนเงิน *</label>
         <div class="upload-zone" id="upload-zone"
-          ondragover="event.preventDefault();this.classList.add('dragover')"
-          ondragleave="this.classList.remove('dragover')"
-          ondrop="handleDrop(event)">
-          <div class="up-icon" id="up-icon">📎</div>
-          <div class="up-title" id="up-title">คลิกหรือลากสลิปมาวางที่นี่</div>
-          <div class="up-sub" id="up-sub">JPG, PNG, PDF — ไม่เกิน 5MB</div>
-          <input type="file" class="upload-input" id="slip-upload" accept="image/*,.pdf" onchange="handleSlipUpload(event)">
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="onDrop(event)">
+          <div class="upload-icon" id="up-icon">📎</div>
+          <div class="upload-title" id="up-title">คลิกหรือลากสลิปมาวาง</div>
+          <div class="upload-sub" id="up-sub">JPG, PNG, PDF — ไม่เกิน 5MB</div>
+          <input type="file" id="slip-input" accept="image/*,.pdf" onchange="onSlipSelect(event)" aria-label="Upload slip">
         </div>
-        <div class="slip-preview" id="slip-preview"><img id="slip-img" src="" alt="slip"></div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:5px;">💡 ถ่ายให้เห็นวันที่ เวลา และจำนวนเงิน</div>
+        <div class="slip-preview" id="slip-preview"><img id="slip-img" src="" alt="Slip preview"></div>
+        <div class="form-hint">💡 ถ่ายให้เห็นวันที่ เวลา และจำนวนเงินชัดเจน</div>
       </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-outline" onclick="closeModal('register')">ยกเลิก</button>
-        <button class="btn btn-primary" onclick="submitRegister()" id="btn-reg" style="flex:2;">🚀 ส่งข้อมูลสมัครเรียน</button>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('register')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="submitReg()" id="btn-reg" style="flex:2;">🚀 ส่งข้อมูลสมัครเรียน</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ════ MODAL: LOGIN ════ -->
-<div id="modal-login" class="modal-overlay" onclick="closeOut(event,'login')">
+<div id="modal-login" class="modal-overlay" onclick="handleOverlayClick(event,'login')" role="dialog" aria-modal="true" aria-labelledby="login-title">
   <div class="modal">
-    <div class="modal-title">🔑 เข้าสู่ระบบ</div>
-    <div class="modal-sub">สมาชิก The Owner</div>
-    <button class="btn btn-line btn-full" style="margin-bottom:14px;" onclick="lineLoginFlow()">💚 เข้าผ่าน LINE (แนะนำ — ไม่ต้องจำ Password)</button>
-    <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:14px;">— หรือ —</div>
-    <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="l-em" placeholder="your@email.com"></div>
-    <div class="form-group"><label class="form-label">รหัสผ่าน</label><input type="password" class="form-input" id="l-pw" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('login')">ยกเลิก</button>
+    <h2 class="modal-title" id="login-title">🔑 เข้าสู่ระบบ</h2>
+    <p class="modal-sub">สมาชิก The Owner</p>
+    <button class="btn btn-line btn-full" style="margin-bottom:14px;" onclick="lineFlow()">💚 เข้าผ่าน LINE (แนะนำ)</button>
+    <div style="text-align:center;color:var(--c-muted);font-size:12px;margin-bottom:14px;">— หรือ —</div>
+    <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="l-em" placeholder="your@email.com" autocomplete="email"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('login')">ยกเลิก</button>
       <button class="btn btn-primary" onclick="doLogin()" id="btn-login">เข้าสู่ระบบ</button>
     </div>
-    <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-muted);">ยังไม่มีบัญชี? <span style="color:var(--brand);cursor:pointer;font-weight:700;" onclick="closeModal('login');openModal('register')">สมัครสมาชิก</span></p>
+    <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--c-muted);">ยังไม่มีบัญชี? <button class="btn-link" onclick="closeModal('login');openModal('register')" style="color:var(--c-brand);font-weight:700;background:none;border:none;cursor:pointer;font-family:inherit;">สมัครสมาชิก</button></p>
   </div>
 </div>
 
-<div id="toast" class="toast"><span id="t-icon">✓</span><span id="t-msg"></span></div>
+<!-- TOAST -->
+<div id="toast" class="toast" role="alert" aria-live="polite"><span id="t-msg"></span></div>
 
 <script>
-/* ════ CONFIG — แก้ค่าตรงนี้ ════ */
+'use strict';
+
+// ─────────────────────────────────────────────────
+// CONFIG — values loaded from GAS at runtime
+// NEVER put sensitive keys here
+// ─────────────────────────────────────────────────
 const CFG = {
-  GAS_URL:    'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
-  LIFF_ID:    '2009199519-UViGDRf7',
-  ZOOM_ID:    '964 333 6086',
-  ZOOM_PW:    '12345',
-  BANK_ACC:   '089-xxx-2626',
-  BANK_OWNER: 'นาง สุพัตรา หงษ์วิเศษ',
+  GAS_URL:   'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
+  LIFF_ID:   '2009199519-UViGDRf7',
+  // These are fetched from GAS dynamically
+  zoomId:    '964 333 6086',
+  zoomPw:    '12345',
+  bankAcc:   '',
+  bankOwner: '',
+  bankName:  '',
 };
 
-/* ════ STATE ════ */
-let user=null, plan='quarter', myBookings=[], lineProfile=null, slipFile=null, isDark=false;
+// ─────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────
+const STATE = {
+  user:        null,
+  plan:        'quarter',
+  slipFile:    null,
+  lineProfile: null,
+  bookings:    [],
+  zoomId:      CFG.zoomId,
+  zoomPw:      CFG.zoomPw,
+  roomQrToken: null,
+};
 
-/* ════ THEME ════ */
-function toggleTheme(){
-  isDark=!isDark;
-  document.documentElement.setAttribute('data-theme',isDark?'dark':'');
-  document.querySelector('.theme-btn').textContent=isDark?'☀️':'🌙';
-}
-
-/* ════ NAV ════ */
-function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');window.scrollTo(0,0);}
-function scrollTo2(id){if(!document.getElementById('page-landing').classList.contains('active'))showPage('landing');setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'}),300);}
-
-/* ════ MODAL ════ */
-function openModal(name,p){
-  if(p)setPlan(p);
-  if(name==='register'){
-    document.getElementById('modal-bank-acc').textContent=CFG.BANK_ACC;
-    document.getElementById('modal-bank-owner').textContent=CFG.BANK_OWNER;
-    updateAmount();
+// ─────────────────────────────────────────────────
+// API
+// ─────────────────────────────────────────────────
+async function api(action, data = {}) {
+  if (!CFG.GAS_URL || CFG.GAS_URL === 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec') {
+    console.warn('GAS_URL not configured');
+    return null;
   }
-  document.getElementById('modal-'+name).classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeModal(name){
-  document.getElementById('modal-'+name).classList.remove('open');
-  document.body.style.overflow='';
-  if(name==='register')resetForm();
-}
-function closeOut(e,n){if(e.target.classList.contains('modal-overlay'))closeModal(n);}
-
-/* ════ PLAN ════ */
-function setPlan(p){
-  plan=p;
-  document.querySelectorAll('.plan-opt').forEach(el=>el.classList.remove('sel'));
-  document.getElementById('plan-'+p)?.classList.add('sel');
-  updateAmount();
-}
-function updateAmount(){
-  const a=document.getElementById('amount-display');
-  const b=document.getElementById('plan-display');
-  if(a)a.textContent=plan==='quarter'?'฿600':'฿150';
-  if(b)b.textContent=plan==='quarter'?'Quarter 3 เดือน':'Trial รายครั้ง';
+  try {
+    const res = await fetch(CFG.GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action, ...data }),
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return null;
+  }
 }
 
-/* ════ LINE LIFF ════ */
-async function initLiff(){
-  try{
-    if(typeof liff!=='undefined'&&CFG.LIFF_ID!=='YOUR_LIFF_ID_HERE'){
-      await liff.init({liffId:CFG.LIFF_ID});
-      if(liff.isLoggedIn()){
-        lineProfile=await liff.getProfile();
-        // ลอง auto-login ก่อน
-        const res=await gasCall({action:'lineLogin',lineUserId:lineProfile.userId,displayName:lineProfile.displayName});
-        if(res?.success){user=res.user;loadPortal(user);}
-        else{
-          // ยังไม่ได้สมัคร → เปิด modal สมัคร พร้อมข้อมูล LINE
-          prefillLineData();
-          openModal('register');
-        }
-      }
+// ─────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────
+async function init() {
+  // Check for room QR check-in URL param
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'roomCheckin') {
+    STATE.roomQrToken = params.get('token');
+    showPage('roomcheckin');
+    loadRoomCheckinInfo();
+    return;
+  }
+
+  // Load settings (bank info etc.)
+  loadSettings();
+
+  // Load public schedule
+  loadPublicSchedule();
+
+  // Init LINE LIFF
+  initLiff();
+}
+
+async function loadSettings() {
+  const res = await api('getSettings');
+  if (res?.success) {
+    const s = res.settings;
+    STATE.zoomId    = s.zoom_id    || CFG.zoomId;
+    STATE.zoomPw    = s.zoom_pw    || CFG.zoomPw;
+    CFG.bankAcc     = s.bank_acc   || '';
+    CFG.bankOwner   = s.bank_owner || '';
+    CFG.bankName    = s.bank_name  || 'Bangkok Bank';
+    // Update bank display
+    const accEl   = document.getElementById('m-bank-acc');
+    const ownEl   = document.getElementById('m-bank-owner');
+    const nameEl  = document.getElementById('m-bank-name');
+    if (accEl)   accEl.textContent   = CFG.bankAcc;
+    if (ownEl)   ownEl.textContent   = CFG.bankOwner;
+    if (nameEl)  nameEl.textContent  = CFG.bankName + ' — PromptPay';
+  }
+}
+
+async function loadPublicSchedule() {
+  const res = await api('getClasses');
+  const tbody = document.getElementById('pub-schedule');
+  if (!res?.success || !res.classes?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--c-muted);">ยังไม่มีตารางเรียน</td></tr>';
+    return;
+  }
+  const typeMap = { online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid' };
+  const clsMap  = { online:'badge-online', onsite:'badge-onsite', hybrid:'badge-hybrid' };
+  tbody.innerHTML = res.classes.map(c => {
+    const left = Number(c.maxSeats) - Number(c.bookedSeats);
+    const seatsHtml = left <= 2
+      ? `<span style="color:var(--c-err);font-weight:700;">${left} เหลือ⚡</span>`
+      : `<span style="color:var(--c-ok);font-weight:600;">${c.bookedSeats}/${c.maxSeats}</span>`;
+    return `<tr>
+      <td>${c.day} ${c.time}</td>
+      <td>${c.name}</td>
+      <td><span class="badge ${clsMap[c.type]||'badge-brand'}">${typeMap[c.type]||c.type}</span></td>
+      <td>${seatsHtml}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="openModal('register')">จอง</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────
+// LINE LIFF
+// ─────────────────────────────────────────────────
+async function initLiff() {
+  try {
+    if (typeof liff === 'undefined' || CFG.LIFF_ID === '2009199519-UViGDRf7') return;
+    await liff.init({ liffId: CFG.LIFF_ID });
+    if (!liff.isLoggedIn()) return;
+    STATE.lineProfile = await liff.getProfile();
+    const res = await api('lineLogin', {
+      lineUserId:   STATE.lineProfile.userId,
+      displayName:  STATE.lineProfile.displayName,
+    });
+    if (res?.success) {
+      loadPortal(res.user);
+    } else if (res?.needRegister) {
+      prefillLine();
+      openModal('register');
     }
-  }catch(e){console.log('LIFF:',e);}
+  } catch (e) { console.log('LIFF:', e); }
 }
 
-function lineLoginFlow(){
-  if(typeof liff!=='undefined'&&CFG.LIFF_ID!=='YOUR_LIFF_ID_HERE'){
+function lineFlow() {
+  if (typeof liff !== 'undefined' && CFG.LIFF_ID !== '2009199519-UViGDRf7') {
     liff.login();
     return;
   }
   // Demo mode
-  lineProfile={userId:'U'+Date.now(),displayName:'ทดสอบ LINE User'};
-  prefillLineData();
+  STATE.lineProfile = { userId: 'U_DEMO_' + Date.now(), displayName: 'ทดสอบ LINE' };
+  prefillLine();
   openModal('register');
-  toast('💚 เชื่อมต่อ LINE (Demo)','success');
+  toast('💚 LINE (Demo Mode)', 'ok');
 }
 
-function prefillLineData(){
-  if(!lineProfile)return;
-  // แสดง LINE info box
-  document.getElementById('line-autofill-box').style.display='flex';
-  document.getElementById('line-autofill-name').textContent=lineProfile.displayName;
-  // pre-fill ชื่อจาก displayName
-  const parts=lineProfile.displayName.split(' ');
-  document.getElementById('r-fn').value=parts[0]||'';
-  document.getElementById('r-ln').value=parts.slice(1).join(' ')||'';
-  document.getElementById('r-li').value=lineProfile.userId||'';
-  // ซ่อน password field — ไม่ต้องใส่
-  document.getElementById('pw-field').style.display='none';
+function prefillLine() {
+  if (!STATE.lineProfile) return;
+  const box  = document.getElementById('line-autofill');
+  const name = document.getElementById('line-autofill-name');
+  if (box)  box.style.display = 'flex';
+  if (name) name.textContent = STATE.lineProfile.displayName;
+  const parts = STATE.lineProfile.displayName.split(' ');
+  const fn = document.getElementById('r-fn');
+  const ln = document.getElementById('r-ln');
+  const li = document.getElementById('r-li');
+  if (fn) fn.value = parts[0] || '';
+  if (ln) ln.value = parts.slice(1).join(' ') || '';
+  if (li) li.value = STATE.lineProfile.userId || '';
 }
 
-/* ════ REGISTER ════ */
-async function submitRegister(){
-  const fn=document.getElementById('r-fn').value.trim();
-  const em=document.getElementById('r-em').value.trim();
-  const ph=document.getElementById('r-ph').value.trim();
-  const pw=document.getElementById('r-pw').value;
-  const li=lineProfile?.userId||document.getElementById('r-li').value.trim();
+// ─────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
 
-  if(!fn){toast('⚠️ กรุณากรอกชื่อ','error');return;}
-  if(!em){toast('⚠️ กรุณากรอกอีเมล','error');return;}
-  if(!ph){toast('⚠️ กรุณากรอกเบอร์โทร','error');return;}
-  if(!pw&&!lineProfile){toast('⚠️ กรุณากรอกรหัสผ่าน หรือ Login ด้วย LINE','error');return;}
-  if(!slipFile){toast('⚠️ กรุณาแนบสลิปการโอนเงิน','error');return;}
+function scrollToId(id) {
+  if (!document.getElementById('page-landing').classList.contains('active')) showPage('landing');
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 300);
+}
 
-  const btn=document.getElementById('btn-reg');
-  btn.innerHTML='<span class="spin"></span> กำลังส่ง...';
-  btn.disabled=true;
+// ─────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────
+function openModal(name, p) {
+  if (p) setPlan(p);
+  if (name === 'register') refreshBankDisplay();
+  document.getElementById('modal-' + name)?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(name) {
+  document.getElementById('modal-' + name)?.classList.remove('open');
+  document.body.style.overflow = '';
+  if (name === 'register') resetRegForm();
+}
+function handleOverlayClick(e, name) {
+  if (e.target.classList.contains('modal-overlay')) closeModal(name);
+}
 
-  try{
-    const payload={
-      action:'registerWithSlip',plan,
-      firstName:fn,lastName:document.getElementById('r-ln').value.trim(),
-      email:em,phone:ph,lineId:li,
-      lineDisplayName:lineProfile?.displayName||'',
-      password:pw||'line-auth-'+Date.now(),
-      amount:plan==='quarter'?600:150,
-      timestamp:new Date().toISOString(),
+function refreshBankDisplay() {
+  const a = document.getElementById('m-bank-acc');
+  const o = document.getElementById('m-bank-owner');
+  if (a) a.textContent = CFG.bankAcc  || 'กำลังโหลด...';
+  if (o) o.textContent = CFG.bankOwner || '';
+  updateAmountDisplay();
+}
+
+// ─────────────────────────────────────────────────
+// PLAN
+// ─────────────────────────────────────────────────
+function setPlan(p) {
+  STATE.plan = p;
+  document.querySelectorAll('.plan-opt').forEach(el => el.classList.remove('sel'));
+  document.getElementById('plan-' + p)?.classList.add('sel');
+  updateAmountDisplay();
+}
+function updateAmountDisplay() {
+  const a = document.getElementById('m-amount');
+  const l = document.getElementById('m-plan-lbl');
+  if (a) a.textContent = STATE.plan === 'quarter' ? '฿600' : '฿150';
+  if (l) l.textContent = STATE.plan === 'quarter' ? 'Quarter 3 เดือน' : 'Trial รายครั้ง';
+}
+
+// ─────────────────────────────────────────────────
+// REGISTER
+// ─────────────────────────────────────────────────
+async function submitReg() {
+  const fn = document.getElementById('r-fn').value.trim();
+  const em = document.getElementById('r-em').value.trim();
+  const ph = document.getElementById('r-ph').value.trim();
+  const li = STATE.lineProfile?.userId || document.getElementById('r-li').value.trim();
+
+  if (!fn) { toast('⚠️ กรุณากรอกชื่อ', 'err'); return; }
+  if (!em || !em.includes('@')) { toast('⚠️ กรุณากรอกอีเมลที่ถูกต้อง', 'err'); return; }
+  if (!ph) { toast('⚠️ กรุณากรอกเบอร์โทร', 'err'); return; }
+  if (!STATE.slipFile) { toast('⚠️ กรุณาแนบสลิปการโอนเงิน', 'err'); return; }
+
+  const btn = document.getElementById('btn-reg');
+  btn.classList.add('loading-btn'); btn.disabled = true;
+
+  try {
+    const payload = {
+      plan:            STATE.plan,
+      firstName:       fn,
+      lastName:        document.getElementById('r-ln').value.trim(),
+      email:           em,
+      phone:           ph,
+      lineId:          li,
+      lineDisplayName: STATE.lineProfile?.displayName || '',
+      amount:          STATE.plan === 'quarter' ? 600 : 150,
     };
-    if(slipFile){
-      payload.slipBase64=await fileToBase64(slipFile);
-      payload.slipName=slipFile.name;
-      payload.slipType=slipFile.type;
+
+    if (STATE.slipFile) {
+      payload.slipBase64 = await fileToB64(STATE.slipFile);
+      payload.slipName   = STATE.slipFile.name;
     }
-    const res=await gasCall(payload);
-    // ถ้า GAS ตอบ success หรือ demo mode
-    document.getElementById('reg-form').style.display='none';
-    document.getElementById('reg-success').style.display='block';
-    toast('🎉 ส่งข้อมูลสำเร็จ!','success');
-  }catch(e){
-    document.getElementById('reg-form').style.display='none';
-    document.getElementById('reg-success').style.display='block';
-    toast('🎉 บันทึกข้อมูลแล้ว (Demo)','success');
-  }finally{
-    btn.innerHTML='🚀 ส่งข้อมูลสมัครเรียน';
-    btn.disabled=false;
+
+    const res = await api('registerWithSlip', payload);
+
+    if (res && !res.success) {
+      toast('❌ ' + res.message, 'err');
+      return;
+    }
+
+    // Show success
+    document.getElementById('reg-form').style.display = 'none';
+    document.getElementById('reg-success').style.display = 'block';
+    toast('🎉 ส่งข้อมูลสำเร็จ! รอ Admin Approve', 'ok');
+
+  } catch (e) {
+    console.error(e);
+    toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'err');
+  } finally {
+    btn.classList.remove('loading-btn'); btn.disabled = false;
   }
 }
 
-function resetForm(){
-  document.getElementById('reg-form').style.display='block';
-  document.getElementById('reg-success').style.display='none';
-  document.getElementById('pw-field').style.display='block';
-  document.getElementById('line-autofill-box').style.display='none';
-  slipFile=null;
-  const preview=document.getElementById('slip-preview');
-  const zone=document.getElementById('upload-zone');
-  if(preview)preview.style.display='none';
-  if(zone)zone.classList.remove('has-file');
-  document.getElementById('up-icon').textContent='📎';
-  document.getElementById('up-title').textContent='คลิกหรือลากสลิปมาวางที่นี่';
-  document.getElementById('up-sub').textContent='JPG, PNG, PDF — ไม่เกิน 5MB';
+function resetRegForm() {
+  document.getElementById('reg-form').style.display = 'block';
+  document.getElementById('reg-success').style.display = 'none';
+  STATE.slipFile = null;
+  STATE.lineProfile = null;
+  const preview = document.getElementById('slip-preview');
+  if (preview) preview.style.display = 'none';
+  const zone = document.getElementById('upload-zone');
+  if (zone) { zone.classList.remove('done'); zone.classList.remove('drag'); }
+  setUploadState('📎', 'คลิกหรือลากสลิปมาวาง', 'JPG, PNG, PDF — ไม่เกิน 5MB');
+  const lineBox = document.getElementById('line-autofill');
+  if (lineBox) lineBox.style.display = 'none';
+  ['r-fn','r-ln','r-em','r-ph','r-li'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 }
 
-/* ════ SLIP ════ */
-function handleSlipUpload(e){const f=e.target.files[0];if(f){slipFile=f;showSlipPreview(f);}}
-function handleDrop(e){e.preventDefault();document.getElementById('upload-zone').classList.remove('dragover');const f=e.dataTransfer.files[0];if(f){slipFile=f;showSlipPreview(f);}}
-function showSlipPreview(file){
-  const zone=document.getElementById('upload-zone');
-  zone.classList.add('has-file');
-  document.getElementById('up-icon').textContent='✅';
-  document.getElementById('up-title').textContent=file.name;
-  document.getElementById('up-sub').textContent=(file.size/1024).toFixed(0)+' KB — คลิกเพื่อเปลี่ยน';
-  if(file.type.startsWith('image/')){
-    const r=new FileReader();
-    r.onload=e=>{document.getElementById('slip-img').src=e.target.result;document.getElementById('slip-preview').style.display='block';};
+// ─────────────────────────────────────────────────
+// SLIP UPLOAD
+// ─────────────────────────────────────────────────
+function onSlipSelect(e) { const f = e.target.files[0]; if (f) handleSlip(f); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) handleSlip(f);
+}
+function handleSlip(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('⚠️ ไฟล์ต้องไม่เกิน 5MB', 'err'); return; }
+  STATE.slipFile = file;
+  const zone = document.getElementById('upload-zone');
+  zone.classList.add('done');
+  setUploadState('✅', file.name, (file.size / 1024).toFixed(0) + ' KB — คลิกเพื่อเปลี่ยน');
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('slip-img');
+      const preview = document.getElementById('slip-preview');
+      img.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+  toast('📎 แนบสลิปแล้ว: ' + file.name, 'ok');
+}
+function setUploadState(icon, title, sub) {
+  ['up-icon','up-title','up-sub'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = [icon, title, sub][i];
+  });
+}
+function fileToB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
     r.readAsDataURL(file);
+  });
+}
+
+// ─────────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────────
+async function doLogin() {
+  const em = document.getElementById('l-em').value.trim();
+  if (!em) { toast('⚠️ กรอกอีเมล', 'err'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.classList.add('loading-btn'); btn.disabled = true;
+  try {
+    const res = await api('login', { email: em });
+    if (res?.success) {
+      closeModal('login');
+      loadPortal(res.user);
+      toast('✅ เข้าสู่ระบบสำเร็จ', 'ok');
+    } else {
+      toast('❌ ไม่พบสมาชิก Email นี้', 'err');
+    }
+  } catch (e) {
+    toast('❌ เกิดข้อผิดพลาด', 'err');
+  } finally {
+    btn.classList.remove('loading-btn'); btn.disabled = false;
   }
-  toast('📎 '+file.name,'success');
 }
-function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
 
-/* ════ AUTH ════ */
-async function doLogin(){
-  const btn=document.getElementById('btn-login');
-  const em=document.getElementById('l-em').value.trim();
-  const pw=document.getElementById('l-pw').value;
-  if(!em||!pw){toast('⚠️ กรอกข้อมูลให้ครบ','error');return;}
-  btn.innerHTML='<span class="spin spin-dark"></span>';btn.disabled=true;
-  try{
-    const res=await gasCall({action:'login',email:em,password:pw});
-    if(res?.success){user=res.user;}
-    else{user={firstName:'Demo',lastName:'User',email:em,plan:'quarter',memberId:'OwnP0001',sessions:5,fines:0,expiry:'30 มิ.ย. 2568'};}
-    closeModal('login');loadPortal(user);toast('✅ เข้าสู่ระบบสำเร็จ','success');
-  }catch(e){
-    user={firstName:'Demo',lastName:'User',email:em,plan:'quarter',memberId:'OwnP0001',sessions:0,fines:0,expiry:'30 มิ.ย. 2568'};
-    closeModal('login');loadPortal(user);toast('✅ Demo Mode','success');
-  }finally{btn.innerHTML='เข้าสู่ระบบ';btn.disabled=false;}
+function logout() {
+  STATE.user = null; STATE.bookings = [];
+  document.getElementById('nav-member-btn').style.display = 'none';
+  document.getElementById('nav-login-btn').style.display  = '';
+  showPage('landing');
+  toast('ออกจากระบบแล้ว', 'ok');
 }
-function logout(){user=null;myBookings=[];document.getElementById('nav-member-btn').style.display='none';document.getElementById('nav-login-btn').style.display='';showPage('landing');toast('ออกจากระบบแล้ว','success');}
 
-/* ════ PORTAL ════ */
-function loadPortal(u){
-  const name=u.firstName+' '+(u.lastName||'');
-  const mid=u.memberId||(u.plan==='quarter'?'OwnP0001':'OwnT0001');
-  document.getElementById('sb-av').textContent=(u.firstName||'O').charAt(0).toUpperCase();
-  document.getElementById('sb-name').textContent=name;
-  document.getElementById('sb-mid').textContent=mid;
-  document.getElementById('welcome-name').textContent=u.firstName;
-  document.getElementById('today-date').textContent='วันนี้: '+new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('d-plan').textContent=u.plan==='quarter'?'Quarter':'Trial';
-  document.getElementById('d-exp').textContent='หมดอายุ: '+(u.expiry||'นับจาก Check-in แรก');
-  document.getElementById('d-mid').textContent=mid;
-  document.getElementById('d-sessions').textContent=u.sessions||0;
-  document.getElementById('d-fines').textContent='฿'+(u.fines||0);
-  document.getElementById('qr-mid').textContent=mid;
-  document.getElementById('zoom-mid').textContent=CFG.ZOOM_ID;
-  document.getElementById('zoom-pw').textContent=CFG.ZOOM_PW;
-  document.getElementById('p-fn').value=u.firstName||'';
-  document.getElementById('p-ln').value=u.lastName||'';
-  document.getElementById('p-em').value=u.email||'';
-  document.getElementById('p-ph').value=u.phone||'';
-  document.getElementById('p-li').value=u.lineId||'';
-  document.getElementById('nav-member-btn').style.display='inline-flex';
-  document.getElementById('nav-login-btn').style.display='none';
-  generateQR(mid);
-  loadHistoryFromGAS(mid);
+// ─────────────────────────────────────────────────
+// PORTAL
+// ─────────────────────────────────────────────────
+async function loadPortal(user) {
+  STATE.user = user;
+  const mid  = user.memberId;
+  const name = user.firstName + ' ' + (user.lastName || '');
+
+  // Update UI
+  document.getElementById('p-av').textContent       = (user.firstName || 'O').charAt(0).toUpperCase();
+  document.getElementById('p-name').textContent     = name;
+  document.getElementById('p-mid').textContent      = mid;
+  document.getElementById('p-welcome').textContent  = user.firstName;
+  document.getElementById('p-today').textContent    = 'วันนี้: ' + new Date().toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? 'Quarter' : 'Trial';
+  document.getElementById('d-exp').textContent      = 'หมดอายุ: ' + (user.expiry || 'นับจาก Check-in แรก');
+  document.getElementById('d-mid').textContent      = mid;
+  document.getElementById('d-sessions').textContent = user.sessions || 0;
+  document.getElementById('d-fines').textContent    = '฿' + (user.fines || 0);
+  document.getElementById('qr-mid').textContent     = mid;
+  document.getElementById('z-mid').textContent      = STATE.zoomId;
+  document.getElementById('z-pw').textContent       = STATE.zoomPw;
+  document.getElementById('pf-fn').value  = user.firstName || '';
+  document.getElementById('pf-ln').value  = user.lastName  || '';
+  document.getElementById('pf-em').value  = user.email     || '';
+  document.getElementById('pf-ph').value  = user.phone     || '';
+  document.getElementById('pf-li').value  = user.lineId    || '';
+
+  document.getElementById('nav-member-btn').style.display = 'inline-flex';
+  document.getElementById('nav-login-btn').style.display  = 'none';
+
+  // Load data
+  drawQR(mid);
+  loadMemberSchedule();
+  loadMemberBookings(mid);
+  loadMemberHistory(mid);
   showPage('member');
 }
 
-/* ════ HISTORY from GAS ════ */
-async function loadHistoryFromGAS(memberId){
-  const res=await gasCall({action:'getCheckins',memberId,today:false});
-  const checkins=res?.checkins||[];
-  const tbody=document.getElementById('history-body');
-  if(!checkins.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:22px;">ยังไม่มีประวัติ</td></tr>';return;}
-  tbody.innerHTML=checkins.map(c=>`
+async function loadMemberSchedule() {
+  const res = await api('getClasses');
+  const tbody = document.getElementById('member-schedule');
+  if (!res?.success || !res.classes?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--c-muted);">ยังไม่มีตาราง</td></tr>';
+    return;
+  }
+  const typeMap = { online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid' };
+  const clsMap  = { online:'badge-online', onsite:'badge-onsite', hybrid:'badge-hybrid' };
+  tbody.innerHTML = res.classes.map(c => {
+    const left = Number(c.maxSeats) - Number(c.bookedSeats);
+    const seatsHtml = left <= 2
+      ? `<span style="color:var(--c-err);font-weight:700;">${left} เหลือ</span>`
+      : `<span style="color:var(--c-ok);">${c.bookedSeats}/${c.maxSeats}</span>`;
+    return `<tr>
+      <td>${c.day} ${c.time}</td>
+      <td>${c.name}</td>
+      <td><span class="badge ${clsMap[c.type]||''}">${typeMap[c.type]||c.type}</span></td>
+      <td>${seatsHtml}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="bookClass('${c.id}','${c.name}')">จอง</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadMemberBookings(memberId) {
+  const res = await api('getMemberBookings', { memberId });
+  const bookings = res?.bookings || [];
+  STATE.bookings = bookings;
+  renderBookings();
+}
+
+function renderBookings() {
+  const upcoming = STATE.bookings.filter(b => b.status !== 'cancelled');
+  const typeMap = { online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid' };
+  const mkItem = b => `
+    <div class="bk-item">
+      <div>
+        <div class="bk-name">${b.className}</div>
+        <div class="bk-meta">${b.day || ''} ${b.time || ''} | ${typeMap[b.type] || b.type}</div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;">
+        <span class="badge ${b.status==='confirmed'?'badge-ok':b.status==='cancelled'?'badge-err':'badge-warn'}">
+          ${b.status==='confirmed'?'✓ ยืนยัน':b.status==='cancelled'?'✕ ยกเลิก':'⏳ รอ'}
+        </span>
+        ${b.status!=='cancelled' ? `<button class="btn btn-ghost btn-xs" onclick="cancelBk('${b.id}')">ยกเลิก</button>` : ''}
+      </div>
+    </div>`;
+  document.getElementById('upcoming-list').innerHTML =
+    upcoming.map(mkItem).join('') || '<p class="text-muted text-sm" style="padding:14px 0;">ไม่มีการจองที่รออยู่</p>';
+  document.getElementById('my-bk-list').innerHTML =
+    STATE.bookings.map(mkItem).join('') || '<p class="text-muted text-sm" style="padding:14px 0;">ยังไม่มีการจอง</p>';
+}
+
+async function bookClass(classId, className) {
+  if (!STATE.user) { openModal('login'); return; }
+  const res = await api('booking', { memberId: STATE.user.memberId, classId, className });
+  if (res?.success) {
+    toast('✅ จอง "' + className + '" สำเร็จ!', 'ok');
+    loadMemberBookings(STATE.user.memberId);
+  } else {
+    toast('❌ ' + (res?.message || 'ไม่สามารถจองได้'), 'err');
+  }
+}
+
+async function cancelBk(bookingId) {
+  const res = await api('cancelBooking', { bookingId });
+  if (res?.success) {
+    toast('ยกเลิกการจองแล้ว', 'ok');
+    loadMemberBookings(STATE.user.memberId);
+  }
+}
+
+async function loadMemberHistory(memberId) {
+  const res = await api('getMemberHistory', { memberId });
+  const checkins = res?.checkins || [];
+  const tbody = document.getElementById('history-body');
+  if (!checkins.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--c-muted);">ยังไม่มีประวัติ</td></tr>';
+    return;
+  }
+  tbody.innerHTML = checkins.map(c => `
     <tr>
-      <td>${c.CheckInTime?new Date(c.CheckInTime).toLocaleDateString('th-TH'):'-'}</td>
-      <td>${c.ClassName||'-'}</td>
-      <td><span class="rb rb-on">Online</span></td>
-      <td><span class="sbadge sbok">✓ เข้าเรียน</span></td>
-      <td>—</td>
+      <td>${c.date ? new Date(c.date).toLocaleDateString('th-TH') : '—'}</td>
+      <td>${c.className || '—'}</td>
+      <td>${c.method === 'room_qr' ? '📷 QR หน้าห้อง' : '✅ ปกติ'}</td>
     </tr>`).join('');
 }
 
-/* ════ TABS ════ */
-function switchTab(name){
-  document.querySelectorAll('.p-tab').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.sb-menu a').forEach(el=>el.classList.remove('active'));
-  document.getElementById('portal-'+name)?.classList.add('active');
-  document.getElementById('tab-'+name)?.classList.add('active');
+async function saveProfile() {
+  if (!STATE.user) return;
+  const res = await api('updateProfile', {
+    memberId:  STATE.user.memberId,
+    firstName: document.getElementById('pf-fn').value,
+    lastName:  document.getElementById('pf-ln').value,
+    phone:     document.getElementById('pf-ph').value,
+  });
+  toast(res?.success ? '💾 บันทึกสำเร็จ' : '❌ เกิดข้อผิดพลาด', res?.success ? 'ok' : 'err');
 }
 
-/* ════ BOOKING ════ */
-function bookClass(name,time,type){
-  if(!user){openModal('login');return;}
-  if(myBookings.find(b=>b.name===name&&b.status!=='cancelled')){toast('⚠️ จองคลาสนี้แล้ว','error');return;}
-  myBookings.push({name,time,type,status:'confirmed',date:new Date().toLocaleDateString('th-TH')});
-  renderBookings();
-  gasCall({action:'booking',memberId:user.memberId||user.id,className:name,time,type});
-  toast('✅ จอง "'+name+'" สำเร็จ!','success');
+// ─────────────────────────────────────────────────
+// PORTAL TABS
+// ─────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.portal-menu a').forEach(a => a.classList.remove('active'));
+  document.getElementById('ptab-' + name)?.classList.add('active');
+  document.getElementById('tab-' + name)?.classList.add('active');
 }
-function renderBookings(){
-  const tl=t=>t==='online'?'🖥️ Online':t==='onsite'?'🏢 Onsite':'⚡ Hybrid';
-  const mk=b=>`<div class="bk-item">
-    <div><div class="bk-title">${b.name}</div><div class="bk-sub">${b.time} | ${tl(b.type)}</div></div>
-    <div style="display:flex;gap:7px;align-items:center;">
-      <span class="sbadge ${b.status==='confirmed'?'sbok':b.status==='cancelled'?'sbcancel':'sbwait'}">${b.status==='confirmed'?'✓ ยืนยัน':b.status==='cancelled'?'✕ ยกเลิก':'⏳ รอ'}</span>
-      ${b.status!=='cancelled'?`<button class="btn btn-danger btn-xs" onclick="cancelBk('${b.name}')">ยกเลิก</button>`:''}
-    </div>
-  </div>`;
-  const ul=document.getElementById('upcoming-list');
-  const mb=document.getElementById('my-bookings-list');
-  const active=myBookings.filter(b=>b.status!=='cancelled');
-  ul.innerHTML=active.map(mk).join('')||'<div style="color:var(--text-muted);font-size:14px;padding:14px 0;">ไม่มีการจองที่รออยู่</div>';
-  mb.innerHTML=myBookings.map(mk).join('')||'<div style="color:var(--text-muted);font-size:14px;padding:14px 0;">ยังไม่มีการจอง</div>';
-}
-function cancelBk(name){const b=myBookings.find(x=>x.name===name);if(b){b.status='cancelled';renderBookings();toast('ยกเลิกแล้ว','success');}}
 
-/* ════ QR ════ */
-function generateQR(memberId){
-  const id=memberId||document.getElementById('qr-mid').textContent;
-  const canvas=document.getElementById('qr-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,180,180);
-  ctx.fillStyle='#000';
-  const modules=21,cell=Math.floor(180/modules);
-  const seed=id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-  for(let r=0;r<modules;r++)for(let c=0;c<modules;c++){
-    const inF=(r<7&&c<7)||(r<7&&c>=14)||(r>=14&&c<7);
-    let bit=inF?((r===0||r===6||c===0||c===6||(r>1&&r<5&&c>1&&c<5)||(r>1&&r<5&&c>8&&c<12)||(r>8&&r<12&&c>1&&c<5))?1:0):((r*7+c*13+seed)%3===0?1:0);
-    if(bit)ctx.fillRect(c*cell+1,r*cell+1,cell-1,cell-1);
+// ─────────────────────────────────────────────────
+// QR CODE (canvas-based)
+// ─────────────────────────────────────────────────
+function drawQR(memberId) {
+  const id     = memberId || document.getElementById('qr-mid').textContent;
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const ctx    = canvas.getContext('2d');
+  const size   = 180;
+  const mods   = 21;
+  const cell   = Math.floor(size / mods);
+  const seed   = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000000';
+
+  for (let r = 0; r < mods; r++) {
+    for (let c = 0; c < mods; c++) {
+      const inFinder = (r < 7 && c < 7) || (r < 7 && c >= 14) || (r >= 14 && c < 7);
+      let bit;
+      if (inFinder) {
+        bit = (r===0||r===6||c===0||c===6||
+          (r>1&&r<5&&c>1&&c<5)||(r>1&&r<5&&c>8&&c<12)||(r>8&&r<12&&c>1&&c<5)) ? 1 : 0;
+      } else {
+        bit = ((r * 7 + c * 13 + seed) % 3 === 0) ? 1 : 0;
+      }
+      if (bit) ctx.fillRect(c * cell + 1, r * cell + 1, cell - 1, cell - 1);
+    }
   }
-  ctx.fillStyle='#1400FF';ctx.fillRect(72,72,36,36);
-  ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
-  ctx.fillText('OWN',90,86);ctx.fillText(id.slice(-4),90,99);
+  // Center logo
+  ctx.fillStyle = '#1400FF'; ctx.fillRect(72, 72, 36, 36);
+  ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('OWN', 90, 86);
+  ctx.fillText(id.slice(-4), 90, 99);
 }
 
-/* ════ ZOOM ════ */
-function joinZoom(){window.open('https://zoom.us/j/'+CFG.ZOOM_ID.replace(/\s/g,'')+'?pwd='+CFG.ZOOM_PW,'_blank');}
-function sendZoomLine(){const msg=`🎥 Zoom Class\nMeeting ID: ${CFG.ZOOM_ID}\nPassword: ${CFG.ZOOM_PW}`;if(typeof liff!=='undefined')liff.sendMessages([{type:'text',text:msg}]);toast('💚 ส่งข้อมูล Zoom ผ่าน LINE','success');}
-
-/* ════ UTILS ════ */
-function copyText(val,label){navigator.clipboard?.writeText(val.replace(/\s/g,''));toast('📋 Copy '+label,'success');}
-function copyBankAcc(){navigator.clipboard?.writeText(CFG.BANK_ACC.replace(/-/g,''));toast('📋 Copy เลขบัญชี','success');}
-async function saveProfile(){if(!user)return;Object.assign(user,{firstName:document.getElementById('p-fn').value,lastName:document.getElementById('p-ln').value,phone:document.getElementById('p-ph').value});await gasCall({action:'updateProfile',...user});toast('💾 บันทึกสำเร็จ','success');}
-function toast(msg,type='success'){const el=document.getElementById('toast');document.getElementById('t-msg').textContent=msg;el.className='toast show '+type;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3500);}
-async function gasCall(p){
-  if(!CFG.GAS_URL||CFG.GAS_URL==='https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec')return null;
-  try{const r=await fetch(CFG.GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});return await r.json();}catch(e){return null;}
+// ─────────────────────────────────────────────────
+// ROOM QR CHECK-IN
+// ─────────────────────────────────────────────────
+async function loadRoomCheckinInfo() {
+  const res = await api('getRoomQRs');
+  const qrs = res?.qrs || [];
+  const qr  = qrs.find(q => q.token === STATE.roomQrToken);
+  const el  = document.getElementById('rci-class-name');
+  if (qr && el) el.textContent = qr.className;
+  else if (el)  el.textContent = 'คลาสไม่ทราบชื่อ';
 }
 
-/* ════ INIT ════ */
-initLiff();
+async function doRoomCheckin() {
+  const memberId = document.getElementById('rci-member-id').value.trim().toUpperCase();
+  if (!memberId) { toast('⚠️ ใส่ Member ID', 'err'); return; }
+
+  const btn = document.getElementById('btn-rci');
+  btn.classList.add('loading-btn'); btn.disabled = true;
+
+  const res = await api('checkinByRoomQR', {
+    qrToken:  STATE.roomQrToken,
+    memberId,
+  });
+
+  const resultEl = document.getElementById('rci-result');
+  if (res?.success) {
+    resultEl.innerHTML = `
+      <div class="info-box ok">
+        <div class="info-box-icon">✅</div>
+        <div>
+          <div class="info-box-title" style="color:var(--c-ok);">Check-in สำเร็จ!</div>
+          <div class="info-box-text">${res.memberName || memberId} | ${res.className || '—'}
+            ${res.fine ? `<br>⚠️ ค่าปรับ Walk-in: ฿${res.fine}` : ''}
+          </div>
+        </div>
+      </div>`;
+    toast('✅ Check-in: ' + (res.memberName || memberId), 'ok');
+  } else {
+    resultEl.innerHTML = `
+      <div class="info-box err">
+        <div class="info-box-icon">❌</div>
+        <div><div class="info-box-text">${res?.message || 'ไม่พบ Member ID'}</div></div>
+      </div>`;
+    toast('❌ ' + (res?.message || 'ไม่พบ'), 'err');
+  }
+
+  btn.classList.remove('loading-btn'); btn.disabled = false;
+}
+
+// ─────────────────────────────────────────────────
+// ZOOM
+// ─────────────────────────────────────────────────
+function joinZoom() {
+  window.open('https://zoom.us/j/' + STATE.zoomId.replace(/\s/g, '') + '?pwd=' + STATE.zoomPw, '_blank');
+}
+function sendZoomLine() {
+  const msg = `🎥 Zoom Class\nMeeting ID: ${STATE.zoomId}\nPassword: ${STATE.zoomPw}`;
+  if (typeof liff !== 'undefined') liff.sendMessages([{ type: 'text', text: msg }]);
+  toast('💚 ส่งข้อมูล Zoom ผ่าน LINE', 'ok');
+}
+
+// ─────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────
+function copyText(val, label) {
+  navigator.clipboard?.writeText(String(val).replace(/\s/g, ''));
+  toast('📋 Copy ' + label + ': ' + val, 'ok');
+}
+function copyBankAcc() { copyText(CFG.bankAcc.replace(/-/g, ''), 'เลขบัญชี'); }
+function toggleFaq(btn) { btn.closest('.faq-item').classList.toggle('open'); }
+
+function toggleTheme() {
+  const html    = document.documentElement;
+  const isDark  = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.querySelectorAll('.nav-theme').forEach(el => el.textContent = isDark ? '🌙' : '☀️');
+}
+
+let _toastTimer;
+function toast(msg, type = 'ok') {
+  const el  = document.getElementById('toast');
+  const msg_el = document.getElementById('t-msg');
+  if (!el || !msg_el) return;
+  msg_el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ─────────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
