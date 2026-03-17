@@ -429,7 +429,22 @@ a{color:inherit;text-decoration:none;}
 .success-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:8px;}
 .success-sub{font-size:13px;color:var(--c-text-2);line-height:1.8;margin-bottom:18px;}
 
-/* ── PORTAL ──────────────────────────────────────── */
+/* ── FONT SIZE ACCESSIBILITY ─────────────────────── */
+:root { --fs-base: 15px; }
+body { font-size: var(--fs-base); }
+[data-fs="md"] { --fs-base: 17px; }
+[data-fs="lg"] { --fs-base: 19px; }
+[data-fs="xl"] { --fs-base: 21px; }
+#font-btn {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 15px;
+  width: 34px; height: 34px;
+}
+[data-fs="md"] #font-btn { font-size: 17px; }
+[data-fs="lg"] #font-btn { font-size: 19px; }
+
+/* ── PORTAL SIDEBAR MOBILE ────────────────────────── */
 #page-member{padding-top:62px;background:var(--c-bg);}
 .portal-wrap{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 62px);}
 .portal-sidebar{
@@ -438,23 +453,28 @@ a{color:inherit;text-decoration:none;}
 }
 .portal-profile{text-align:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--c-border);}
 .portal-av{
-  width:54px;height:54px;border-radius:50%;background:var(--c-brand);
+  width:60px;height:60px;border-radius:50%;background:var(--c-brand);
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-head);font-size:20px;font-weight:800;color:#fff;
+  font-family:var(--font-head);font-size:22px;font-weight:800;color:#fff;
   margin:0 auto 9px;box-shadow:0 4px 0 var(--c-brand-dk),0 8px 16px rgba(20,0,255,.18);
 }
-.portal-pname{font-size:13px;font-weight:700;color:var(--c-text);}
-.portal-pmid{font-family:var(--font-head);font-size:12px;color:var(--c-brand);margin-top:2px;font-weight:700;}
-.portal-pstatus{display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);color:var(--c-ok);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:5px;}
+.portal-pname{font-size:14px;font-weight:700;color:var(--c-text);}
+.portal-pmid{
+  font-family:var(--font-head);font-size:13px;color:var(--c-brand);
+  margin-top:3px;font-weight:800;
+  background:var(--c-brand-lt);padding:3px 10px;border-radius:999px;
+  display:inline-block;
+}
+.portal-pstatus{display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,.1);color:var(--c-ok);font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:6px;}
 .portal-menu{list-style:none;}
-.portal-menu li{margin-bottom:2px;}
+.portal-menu li{margin-bottom:3px;}
 .portal-menu a{
-  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);
-  color:var(--c-text-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--r-sm);
+  color:var(--c-text-2);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;
 }
 .portal-menu a:hover{background:var(--c-brand-lt);color:var(--c-brand);}
 .portal-menu a.active{background:var(--c-brand);color:#fff;box-shadow:0 3px 0 var(--c-brand-dk);}
-.portal-menu .pm-icon{font-size:14px;width:17px;text-align:center;}
+.portal-menu .pm-icon{font-size:16px;width:20px;text-align:center;}
 .portal-main{padding:24px;overflow-y:auto;}
 .ptab{display:none;}.ptab.active{display:block;}
 .ptab-header{margin-bottom:20px;}
@@ -563,14 +583,16 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
     </div>
   </div>
   <nav class="nav-links" aria-label="Main navigation">
-    <button class="nav-link" onclick="scrollToId('courses')">คอร์ส</button>
-    <button class="nav-link" onclick="scrollToId('pricing')">แพ็กเกจ</button>
-    <button class="nav-link" onclick="scrollToId('howto')">วิธีสมัคร</button>
-    <button class="nav-link" onclick="scrollToId('faq')">FAQ</button>
-    <button class="nav-link" id="nav-member-btn" onclick="showPage('member')" style="display:none">พอร์ทัล</button>
-    <button class="btn btn-line btn-sm" onclick="lineFlow()">💚 LINE</button>
+    <button class="nav-link" id="nav-courses-btn" onclick="scrollToId('courses')">คอร์ส</button>
+    <button class="nav-link" id="nav-pricing-btn" onclick="scrollToId('pricing')">แพ็กเกจ</button>
+    <button class="nav-link" id="nav-howto-btn" onclick="scrollToId('howto')">วิธีสมัคร</button>
+    <button class="nav-link" id="nav-faq-btn" onclick="scrollToId('faq')">FAQ</button>
+    <button class="nav-link" id="nav-member-btn" onclick="showPage('member')" style="display:none">🏠 พอร์ทัล</button>
+    <button class="btn btn-line btn-sm" id="nav-line-btn" onclick="lineFlow()">💚 LINE</button>
     <button class="nav-link" id="nav-login-btn" onclick="openModal('login')">เข้าสู่ระบบ</button>
     <button class="btn btn-primary btn-sm" id="nav-reg-btn" onclick="openModal('register')">สมัครเรียน</button>
+    <!-- ปุ่มขนาดตัวอักษร -->
+    <button class="nav-theme" onclick="cycleFontSize()" id="font-btn" title="ปรับขนาดตัวอักษร">A</button>
     <div class="nav-theme" onclick="toggleTheme()" aria-label="Toggle theme">🌙</div>
   </nav>
 </nav>
@@ -1473,10 +1495,30 @@ async function doLogin() {
 
 function logout() {
   STATE.user = null; STATE.bookings = [];
+  // Restore nav
   document.getElementById('nav-member-btn').style.display = 'none';
   document.getElementById('nav-login-btn').style.display  = '';
+  document.getElementById('nav-reg-btn').style.display    = '';
+  document.getElementById('nav-line-btn').style.display   = '';
+  ['nav-courses-btn','nav-pricing-btn','nav-howto-btn','nav-faq-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
   showPage('landing');
   toast('ออกจากระบบแล้ว', 'ok');
+}
+
+// ─── FONT SIZE CYCLE ───────────────────────────────
+const FS_SIZES = ['sm','md','lg','xl'];
+const FS_LABELS = { sm:'A', md:'A+', lg:'A++', xl:'A+++' };
+let fsCurrent = 0;
+function cycleFontSize() {
+  fsCurrent = (fsCurrent + 1) % FS_SIZES.length;
+  const size = FS_SIZES[fsCurrent];
+  document.documentElement.setAttribute('data-fs', size === 'sm' ? '' : size);
+  const btn = document.getElementById('font-btn');
+  if (btn) btn.textContent = FS_LABELS[size];
+  toast('ขนาดตัวอักษร: ' + FS_LABELS[size], 'ok');
 }
 
 // ─────────────────────────────────────────────────
@@ -1487,28 +1529,48 @@ async function loadPortal(user) {
   const mid  = user.memberId;
   const name = user.firstName + ' ' + (user.lastName || '');
 
-  // Update UI
+  // Update sidebar info
   document.getElementById('p-av').textContent       = (user.firstName || 'O').charAt(0).toUpperCase();
   document.getElementById('p-name').textContent     = name;
-  document.getElementById('p-mid').textContent      = mid;
+  document.getElementById('p-mid').textContent      = mid || '—';
   document.getElementById('p-welcome').textContent  = user.firstName;
   document.getElementById('p-today').textContent    = 'วันนี้: ' + new Date().toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? 'Quarter' : 'Trial';
+  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? '⭐ Quarter' : 'Trial';
   document.getElementById('d-exp').textContent      = 'หมดอายุ: ' + (user.expiry || 'นับจาก Check-in แรก');
-  document.getElementById('d-mid').textContent      = mid;
+  document.getElementById('d-mid').textContent      = mid || '—';
   document.getElementById('d-sessions').textContent = user.sessions || 0;
   document.getElementById('d-fines').textContent    = '฿' + (user.fines || 0);
-  document.getElementById('qr-mid').textContent     = mid;
-  document.getElementById('z-mid').textContent      = STATE.zoomId;
-  document.getElementById('z-pw').textContent       = STATE.zoomPw;
+  document.getElementById('qr-mid').textContent     = mid || '—';
   document.getElementById('pf-fn').value  = user.firstName || '';
   document.getElementById('pf-ln').value  = user.lastName  || '';
   document.getElementById('pf-em').value  = user.email     || '';
   document.getElementById('pf-ph').value  = user.phone     || '';
   document.getElementById('pf-li').value  = user.lineId    || '';
 
+  // Zoom — โหลดจาก settings ก่อน แล้วค่อย update
+  const zMid = document.getElementById('z-mid');
+  const zPw  = document.getElementById('z-pw');
+  if (zMid) zMid.textContent = STATE.zoomId || 'กำลังโหลด...';
+  if (zPw)  zPw.textContent  = STATE.zoomPw || 'กำลังโหลด...';
+
+  // โหลด settings ถ้ายังไม่มี Zoom
+  if (!STATE.zoomId || STATE.zoomId === '964 333 6086') {
+    loadSettings().then(() => {
+      if (zMid) zMid.textContent = STATE.zoomId;
+      if (zPw)  zPw.textContent  = STATE.zoomPw;
+    });
+  }
+
+  // ซ่อนปุ่มที่ไม่จำเป็นสำหรับสมาชิก Approved แล้ว
   document.getElementById('nav-member-btn').style.display = 'inline-flex';
   document.getElementById('nav-login-btn').style.display  = 'none';
+  document.getElementById('nav-reg-btn').style.display    = 'none';
+  document.getElementById('nav-line-btn').style.display   = 'none';
+  // ซ่อน landing-only links
+  ['nav-courses-btn','nav-pricing-btn','nav-howto-btn','nav-faq-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
 
   // Load data
   drawQR(mid);
@@ -1521,23 +1583,37 @@ async function loadPortal(user) {
 async function loadMemberSchedule() {
   const res = await api('getClasses');
   const tbody = document.getElementById('member-schedule');
-  if (!res?.success || !res.classes?.length) {
+  if (!tbody) return;
+
+  if (!res) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--c-muted);">❌ โหลดไม่ได้ กรุณา Refresh</td></tr>';
+    return;
+  }
+  if (!res.success || !res.classes?.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--c-muted);">ยังไม่มีตาราง</td></tr>';
     return;
   }
+
   const typeMap = { online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid' };
   const clsMap  = { online:'badge-online', onsite:'badge-onsite', hybrid:'badge-hybrid' };
+
   tbody.innerHTML = res.classes.map(c => {
     const left = Number(c.maxSeats) - Number(c.bookedSeats);
     const seatsHtml = left <= 2
-      ? `<span style="color:var(--c-err);font-weight:700;">${left} เหลือ</span>`
-      : `<span style="color:var(--c-ok);">${c.bookedSeats}/${c.maxSeats}</span>`;
+      ? `<span style="color:var(--c-err);font-weight:700;">${left} เหลือ ⚡</span>`
+      : `<span style="color:var(--c-ok);font-weight:600;">${c.bookedSeats}/${c.maxSeats}</span>`;
+    const canBook = left > 0;
+    // escape ชื่อสำหรับ onclick
+    const safeName = (c.name||'').replace(/'/g,"\\'");
     return `<tr>
-      <td>${c.day} ${c.time}</td>
-      <td>${c.name}</td>
+      <td style="font-size:13px;">${c.day||'—'} ${c.time||''}</td>
+      <td style="font-weight:600;">${c.name||'—'}</td>
       <td><span class="badge ${clsMap[c.type]||''}">${typeMap[c.type]||c.type}</span></td>
       <td>${seatsHtml}</td>
-      <td><button class="btn btn-primary btn-xs" onclick="bookClass('${c.id}','${c.name}')">จอง</button></td>
+      <td>${canBook
+        ? `<button class="btn btn-primary btn-xs" onclick="bookClass('${c.id}','${safeName}')">จอง</button>`
+        : `<span style="color:var(--c-muted);font-size:12px;">เต็ม</span>`
+      }</td>
     </tr>`;
   }).join('');
 }
