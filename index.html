@@ -1110,7 +1110,8 @@ async function loadSettings() {
     STATE.bankAcc   = s.bank_acc   || '';
     STATE.bankOwner = s.bank_owner || '';
     STATE.bankName  = s.bank_name  || 'Bangkok Bank';
-    STATE.bankQrUrl = s.bank_qr_url || ''; // URL รูป QR จาก Settings
+    STATE.bankQrUrl = s.bank_qr_url || '';
+
     // Update bank display
     const accEl  = document.getElementById('m-bank-acc');
     const ownEl  = document.getElementById('m-bank-owner');
@@ -1118,12 +1119,22 @@ async function loadSettings() {
     if (accEl)   accEl.textContent  = STATE.bankAcc  || '—';
     if (ownEl)   ownEl.textContent  = STATE.bankOwner || '';
     if (nameEl)  nameEl.textContent = STATE.bankName + ' — PromptPay';
-    // Show QR if URL set
-    if (STATE.bankQrUrl) {
-      const qrSec = document.getElementById('bank-qr-section');
-      const qrImg = document.getElementById('bank-qr-img');
-      if (qrSec) qrSec.style.display = 'block';
-      if (qrImg) qrImg.src = STATE.bankQrUrl;
+
+    // Generate PromptPay QR via external API
+    const qrSec = document.getElementById('bank-qr-section');
+    const qrImg = document.getElementById('bank-qr-img');
+    if (qrSec && qrImg) {
+      const phone = STATE.bankAcc.replace(/[^0-9]/g, '');
+      if (STATE.bankQrUrl) {
+        // ใช้ URL ที่กำหนดไว้
+        qrImg.src = STATE.bankQrUrl;
+        qrSec.style.display = 'block';
+      } else if (phone.length >= 9) {
+        // Auto-generate PromptPay QR จากเบอร์โทร
+        const qrUrl = `https://promptpay.io/${phone}.png`;
+        qrImg.src = qrUrl;
+        qrSec.style.display = 'block';
+      }
     }
   }
 }
@@ -1336,17 +1347,22 @@ function refreshBankDisplay() {
   const a = document.getElementById('m-bank-acc');
   const o = document.getElementById('m-bank-owner');
   const n = document.getElementById('m-bank-name');
-  if (a) a.textContent = STATE.bankAcc   || 'กำลังโหลด...';
+  if (a) a.textContent = STATE.bankAcc   || '...';
   if (o) o.textContent = STATE.bankOwner || '';
   if (n) n.textContent = (STATE.bankName || 'Bangkok Bank') + ' — PromptPay';
   updateAmountDisplay();
-  // ถ้ายังไม่มี ให้โหลดก่อน
+  // ถ้ายังไม่มีข้อมูล โหลดก่อน
   if (!STATE.bankAcc) {
-    loadSettings().then(() => {
-      if (a) a.textContent = STATE.bankAcc   || '—';
-      if (o) o.textContent = STATE.bankOwner || '';
-      if (n) n.textContent = (STATE.bankName || 'Bangkok Bank') + ' — PromptPay';
-    });
+    loadSettings(); // จะอัปเดต QR และ bank info ครบ
+  } else {
+    // แสดง QR ทันที
+    const phone = STATE.bankAcc.replace(/[^0-9]/g, '');
+    const qrSec = document.getElementById('bank-qr-section');
+    const qrImg = document.getElementById('bank-qr-img');
+    if (qrSec && qrImg && phone.length >= 9) {
+      qrImg.src = STATE.bankQrUrl || `https://promptpay.io/${phone}.png`;
+      qrSec.style.display = 'block';
+    }
   }
 }
 
@@ -1522,14 +1538,12 @@ async function doLogin() {
 }
 
 function downloadBankQR() {
-  const img = document.getElementById('bank-qr-img');
-  if (!img?.src || img.src === window.location.href || img.src.endsWith('#')) {
-    toast('⚠️ ยังไม่มีรูป QR — ใส่ URL รูป QR ในหน้าตั้งค่าระบบ (bank_qr_url)', 'err');
-    return;
-  }
-  const a = document.createElement('a');
-  a.href = img.src; a.download = 'promptpay-qr.jpg'; a.target = '_blank'; a.click();
-  toast('⬇️ บันทึก QR แล้ว', 'ok');
+  const phone = STATE.bankAcc.replace(/[^0-9]/g, '');
+  if (!phone) { toast('⚠️ ยังไม่มีเลขบัญชี', 'err'); return; }
+  // เปิด promptpay.io ในหน้าใหม่ให้ save เอง
+  const url = STATE.bankQrUrl || `https://promptpay.io/${phone}.png`;
+  window.open(url, '_blank');
+  toast('📱 เปิดรูป QR ในหน้าใหม่ — กดค้างที่รูปเพื่อบันทึก', 'ok');
 }
 
 // ─── LANGUAGE TOGGLE TH/EN ────────────────────────
@@ -1605,8 +1619,23 @@ async function loadPortal(user) {
   document.getElementById('p-today').textContent    = 'วันนี้: ' + new Date().toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   // Overview cards
-  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? '⭐ Quarter (3 เดือน)' : '🎫 Trial (รายครั้ง)';
-  document.getElementById('d-exp').textContent      = 'หมดอายุ: ' + (user.expiry || 'นับจาก Check-in แรก');
+  // ใช้ Member ID prefix เป็น source of truth (OwnP=quarter, OwnT=trial)
+  const midStr = String(mid || '');
+  const isQuarter = midStr.startsWith('OwnP') ||
+    String(user.plan || '').trim().toLowerCase() === 'quarter';
+  document.getElementById('d-plan').textContent = isQuarter
+    ? '⭐ Quarter (3 เดือน)' : '🎫 Trial (รายครั้ง)';
+  // Expiry display
+  const expiryRaw = user.expiry || '';
+  let expiryText;
+  if (expiryRaw && expiryRaw !== 'นับจาก Check-in แรก' && expiryRaw !== '') {
+    expiryText = 'หมดอายุ: ' + expiryRaw;
+  } else {
+    expiryText = isQuarter
+      ? 'หมดอายุ: 90 วัน นับจาก Check-in ครั้งแรก'
+      : 'หมดอายุ: 1 วัน นับจาก Check-in ครั้งแรก';
+  }
+  document.getElementById('d-exp').textContent = expiryText;
   document.getElementById('d-mid').textContent      = mid || '—';
   document.getElementById('d-sessions').textContent = user.sessions || 0;
   document.getElementById('d-fines').textContent    = '฿' + (user.fines || 0);

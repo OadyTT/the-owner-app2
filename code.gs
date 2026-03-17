@@ -187,13 +187,16 @@ function lineLogin(p) {
   return ok({user:sanitizeMember(m)});
 }
 function sanitizeMember(m) {
+  // normalize plan to lowercase
+  const plan = String(m.Plan||'trial').trim().toLowerCase();
   return {
     memberId:m.ID, firstName:m.FirstName, lastName:m.LastName,
     email:m.Email,
-    phone:String(m.Phone||'').replace(/^'/,''), // strip apostrophe
+    phone:String(m.Phone||'').replace(/^'/,''),
     lineId:m.LineId,
-    plan:m.Plan, status:m.Status,
-    expiry:m.ExpiryDate||'นับจาก Check-in แรก',
+    plan, // always lowercase: 'quarter' or 'trial'
+    status:m.Status,
+    expiry:m.ExpiryDate||'',
     sessions:Number(m.TotalSessions)||0, fines:Number(m.PendingFines)||0,
   };
 }
@@ -296,7 +299,8 @@ function approveRegistration(p) {
 }
 
 function generateMemberId(plan) {
-  const prefix=plan==='quarter'?'OwnP':'OwnT';
+  const isQuarter = String(plan||'').trim().toLowerCase() === 'quarter';
+  const prefix = isQuarter ? 'OwnP' : 'OwnT';
   let max=0;
   rows(getSheet(SHEET.MEMBERS)).forEach(m=>{
     if(String(m.ID).startsWith(prefix)){const n=parseInt(String(m.ID).replace(prefix,''),10);if(!isNaN(n)&&n>max)max=n;}
@@ -369,8 +373,20 @@ function cleanPhone(ph) {
   const s = String(ph).replace(/^'/,''); // strip apostrophe
   return s;
 }
+function makeClassId(name) {
+  const words = String(name).trim().split(/\s+/);
+  let letters = '', nums = '';
+  words.forEach(w => {
+    if (/^\d/.test(w)) nums += w;
+    else if (/[A-Za-z]/.test(w)) letters += w.charAt(0).toUpperCase();
+  });
+  const abbr = (letters + nums).slice(0, 6) || 'CLS';
+  const d = Utilities.formatDate(new Date(),'Asia/Bangkok','ddMMyyyy');
+  return abbr + '-' + d;
+}
+
 function addClass(p) {
-  const id=genId('CLS');
+  const id = makeClassId(p.name || 'CLS');
   getSheet(SHEET.CLASSES).appendRow([id,p.name,p.day,p.time,p.type||'onsite',
     p.maxSeats||10,0,'active',p.zoomLink||'',p.imageUrl||'',p.description||'',nowISO()]);
   return ok({id});
@@ -489,7 +505,8 @@ function processCheckin(p) {
     member.FirstName+' '+member.LastName,'',bookingName,new Date().toISOString(),p.method||'admin',p.adminId||'']);
   if(!member.StartDate||member.StartDate===''){
     const s=new Date(),ex=new Date();
-    if(member.Plan==='quarter') ex.setDate(ex.getDate()+90); else ex.setDate(ex.getDate()+1);
+    const isQuarter = String(member.Plan||'').trim().toLowerCase()==='quarter';
+    if(isQuarter) ex.setDate(ex.getDate()+90); else ex.setDate(ex.getDate()+1);
     setCell(memberSheet,memberRow,'StartDate',Utilities.formatDate(s,'Asia/Bangkok','yyyy-MM-dd'));
     setCell(memberSheet,memberRow,'ExpiryDate',Utilities.formatDate(ex,'Asia/Bangkok','yyyy-MM-dd'));
   }
