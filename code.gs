@@ -134,7 +134,7 @@ function setupAllSheets() {
 
 function initHeaders(sheet, name) {
   const defs = {
-    Members:       {cols:['ID','FirstName','LastName','Email','Phone','LineId','Plan','Status','StartDate','ExpiryDate','TotalSessions','PendingFines','CreatedAt'],bg:'#1400FF'},
+    Members:       {cols:['ID','FirstName','LastName','Email','Phone','LineId','Password','Plan','Status','StartDate','ExpiryDate','TotalSessions','PendingFines','CreatedAt'],bg:'#1400FF'},
     Registrations: {cols:['ID','FirstName','LastName','Email','Phone','LineId','LineDisplayName','Plan','Amount','SlipUrl','Status','AdminNote','CreatedAt','ApprovedAt','MemberId'],bg:'#1400FF'},
     Classes:       {cols:['ID','Name','Day','Time','Type','MaxSeats','BookedSeats','Status','ZoomLink','ImageUrl','Description','CreatedAt'],bg:'#1400FF'},
     Bookings:      {cols:['ID','MemberID','MemberName','ClassID','ClassName','ClassDay','ClassTime','Type','Status','CheckedIn','BookedAt'],bg:'#1400FF'},
@@ -153,9 +153,9 @@ function initHeaders(sheet, name) {
   if (name==='Settings') {
     [['zoom_id','964 333 6086','Zoom Meeting ID'],
      ['zoom_pw','12345','Zoom Password'],
-     ['bank_acc','089-xxx-2626','PromptPay'],
-     ['bank_owner','นาง สุพัตรา หงษ์วิเศษ','ชื่อบัญชี'],
-     ['bank_name','Bangkok Bank','ชื่อธนาคาร'],
+     ['bank_acc','014-7-128268','เลขบัญชีธนาคาร'],
+     ['bank_owner','สุพัตรา หงษ์วิเศษ','ชื่อบัญชี'],
+     ['bank_name','ธนาคารกรุงเทพ','ชื่อธนาคาร'],
      ['fine_online','20','ค่าปรับ Online'],
      ['fine_onsite','50','ค่าปรับ Onsite'],
      ['fine_hybrid','100','ค่าปรับ Hybrid'],
@@ -287,7 +287,7 @@ function approveRegistration(p) {
     setCell(regSheet,rowNum,'MemberId',memberId);
     const ph=reg.Phone?"'"+String(reg.Phone).replace(/^'/,''):reg.Phone;
     getSheet(SHEET.MEMBERS).appendRow([memberId,reg.FirstName,reg.LastName,
-      reg.Email,ph,reg.LineId,reg.Plan,'active','','',0,0,nowISO()]);
+      reg.Email,ph,reg.LineId,'',reg.Plan,'active','','',0,0,nowISO()]);
     if(reg.LineId) sendApproveMsg(reg.LineId,reg.FirstName,memberId,reg.Plan);
     return ok({memberId, message:'Approve สำเร็จ Member ID: '+memberId});
   }
@@ -320,7 +320,7 @@ function addMemberByAdmin(p) {
   if(rows(sheet).find(m=>m.Email===p.email)) return err('อีเมลนี้มีอยู่แล้ว');
   const id=generateMemberId(p.plan||'trial');
   const ph=p.phone?"'"+String(p.phone).replace(/[^0-9\-]/g,''):'';
-  sheet.appendRow([id,p.firstName,p.lastName||'',p.email,ph,p.lineId||'',p.plan||'trial','active','','',0,0,nowISO()]);
+  sheet.appendRow([id,p.firstName,p.lastName||'',p.email,ph,p.lineId||'','',p.plan||'trial','active','','',0,0,nowISO()]);
   return ok({memberId:id});
 }
 function updateMember(p) {
