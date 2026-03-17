@@ -430,19 +430,26 @@ a{color:inherit;text-decoration:none;}
 .success-sub{font-size:13px;color:var(--c-text-2);line-height:1.8;margin-bottom:18px;}
 
 /* ── FONT SIZE ACCESSIBILITY ─────────────────────── */
-:root { --fs-base: 15px; }
-body { font-size: var(--fs-base); }
-[data-fs="md"] { --fs-base: 17px; }
-[data-fs="lg"] { --fs-base: 19px; }
-[data-fs="xl"] { --fs-base: 21px; }
+:root { --fs-scale: 1; }
+[data-fs="md"] { --fs-scale: 1.13; }
+[data-fs="lg"] { --fs-scale: 1.27; }
+[data-fs="xl"] { --fs-scale: 1.4; }
+/* Scale ทุก text element ตาม --fs-scale */
+[data-fs="md"] body { font-size: calc(15px * 1.13); }
+[data-fs="lg"] body { font-size: calc(15px * 1.27); }
+[data-fs="xl"] body { font-size: calc(15px * 1.4); }
+[data-fs="md"] .btn, [data-fs="lg"] .btn, [data-fs="xl"] .btn { font-size: calc(14px * var(--fs-scale)); padding: calc(11px * var(--fs-scale)) calc(22px * var(--fs-scale)); }
+[data-fs="md"] .form-input, [data-fs="lg"] .form-input, [data-fs="xl"] .form-input { font-size: calc(14px * var(--fs-scale)); padding: calc(10px * var(--fs-scale)) calc(14px * var(--fs-scale)); }
+[data-fs="md"] .portal-menu a, [data-fs="lg"] .portal-menu a, [data-fs="xl"] .portal-menu a { font-size: calc(14px * var(--fs-scale)); padding: calc(10px * var(--fs-scale)) calc(12px * var(--fs-scale)); }
 #font-btn {
   font-family: var(--font-head);
   font-weight: 800;
-  font-size: 15px;
-  width: 34px; height: 34px;
+  font-size: 14px;
+  width: 38px; height: 38px;
+  background: var(--c-brand-lt);
+  border: 1.5px solid var(--c-border-2, rgba(20,0,255,.2));
+  color: var(--c-brand);
 }
-[data-fs="md"] #font-btn { font-size: 17px; }
-[data-fs="lg"] #font-btn { font-size: 19px; }
 
 /* ── PORTAL SIDEBAR MOBILE ────────────────────────── */
 #page-member{padding-top:62px;background:var(--c-bg);}
@@ -1024,17 +1031,13 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
 'use strict';
 
 // ─────────────────────────────────────────────────
-// CONFIG — values loaded from GAS at runtime
-// NEVER put sensitive keys here
+// CONFIG — GAS URL และ LIFF ID เท่านั้น
+// ❌ ไม่เก็บ password, zoom, bank ที่นี่
+// ✅ ค่าสำคัญโหลดจาก GAS ที่ login แล้วเท่านั้น
 // ─────────────────────────────────────────────────
 const CFG = {
-  GAS_URL:   'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
-  LIFF_ID:   '2009199519-UViGDRf7',
-  zoomId:    '964 333 6086',
-  zoomPw:    '12345',
-  bankAcc:   '',
-  bankOwner: '',
-  bankName:  '',
+  GAS_URL:  'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec',
+  LIFF_ID:  '2009199519-UViGDRf7',
 };
 
 // ─────────────────────────────────────────────────
@@ -1046,8 +1049,11 @@ const STATE = {
   slipFile:    null,
   lineProfile: null,
   bookings:    [],
-  zoomId:      CFG.zoomId,
-  zoomPw:      CFG.zoomPw,
+  zoomId:      '',   // โหลดจาก GAS เท่านั้น — ไม่เก็บใน code
+  zoomPw:      '',
+  bankAcc:     '',
+  bankOwner:   '',
+  bankName:    '',
   roomQrToken: null,
 };
 
@@ -1072,7 +1078,6 @@ async function api(action, data = {}) {
 // INIT
 // ─────────────────────────────────────────────────
 async function init() {
-  // Check for room QR check-in URL param
   const params = new URLSearchParams(window.location.search);
   if (params.get('action') === 'roomCheckin') {
     STATE.roomQrToken = params.get('token');
@@ -1080,14 +1085,8 @@ async function init() {
     loadRoomCheckinInfo();
     return;
   }
-
-  // Load settings (bank info etc.)
   loadSettings();
-
-  // Load public schedule
   loadPublicSchedule();
-
-  // Init LINE LIFF
   initLiff();
 }
 
@@ -1095,18 +1094,19 @@ async function loadSettings() {
   const res = await api('getSettings');
   if (res?.success) {
     const s = res.settings;
-    STATE.zoomId    = s.zoom_id    || CFG.zoomId;
-    STATE.zoomPw    = s.zoom_pw    || CFG.zoomPw;
-    CFG.bankAcc     = s.bank_acc   || '';
-    CFG.bankOwner   = s.bank_owner || '';
-    CFG.bankName    = s.bank_name  || 'Bangkok Bank';
-    // Update bank display
-    const accEl   = document.getElementById('m-bank-acc');
-    const ownEl   = document.getElementById('m-bank-owner');
-    const nameEl  = document.getElementById('m-bank-name');
-    if (accEl)   accEl.textContent   = CFG.bankAcc;
-    if (ownEl)   ownEl.textContent   = CFG.bankOwner;
-    if (nameEl)  nameEl.textContent  = CFG.bankName + ' — PromptPay';
+    // Zoom — โหลดจาก GAS เท่านั้น ไม่แสดงในหน้า Landing
+    STATE.zoomId   = s.zoom_id    || '';
+    STATE.zoomPw   = s.zoom_pw    || '';
+    STATE.bankAcc  = s.bank_acc   || '';
+    STATE.bankOwner= s.bank_owner || '';
+    STATE.bankName = s.bank_name  || 'Bangkok Bank';
+    // Update bank display in register modal
+    const accEl  = document.getElementById('m-bank-acc');
+    const ownEl  = document.getElementById('m-bank-owner');
+    const nameEl = document.getElementById('m-bank-name');
+    if (accEl)   accEl.textContent  = STATE.bankAcc;
+    if (ownEl)   ownEl.textContent  = STATE.bankOwner;
+    if (nameEl)  nameEl.textContent = STATE.bankName + ' — PromptPay';
   }
 }
 
@@ -1807,7 +1807,7 @@ function copyText(val, label) {
   navigator.clipboard?.writeText(String(val).replace(/\s/g, ''));
   toast('📋 Copy ' + label + ': ' + val, 'ok');
 }
-function copyBankAcc() { copyText(CFG.bankAcc.replace(/-/g, ''), 'เลขบัญชี'); }
+function copyBankAcc() { copyText(STATE.bankAcc.replace(/-/g, ''), 'เลขบัญชี'); }
 function toggleFaq(btn) { btn.closest('.faq-item').classList.toggle('open'); }
 
 function toggleTheme() {
