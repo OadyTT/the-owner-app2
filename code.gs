@@ -176,13 +176,13 @@ function initHeaders(sheet, name) {
 // ── AUTH MEMBER ───────────────────────────────────
 function loginMember(p) {
   if(!p.email) return err('กรุณาใส่อีเมล');
-  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.Email===p.email && x.Status==='active');
+  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.Email===p.email && ['active','Active',''].includes(String(x.Status).trim().toLowerCase()));
   if(!m) return err('ไม่พบสมาชิก');
   return ok({user:sanitizeMember(m)});
 }
 function lineLogin(p) {
   if(!p.lineUserId) return err('ไม่มี LINE User ID');
-  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.LineId===p.lineUserId && x.Status==='active');
+  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.LineId===p.lineUserId && ['active','Active',''].includes(String(x.Status).trim().toLowerCase()));
   if(!m) return {success:false, needRegister:true, displayName:p.displayName};
   return ok({user:sanitizeMember(m)});
 }
@@ -309,7 +309,7 @@ function generateMemberId(plan) {
 
 // ── MEMBERS CRUD ──────────────────────────────────
 function getMembers() {
-  return ok({members:rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status!=='deleted').map(sanitizeMember)});
+  return ok({members:rows(getSheet(SHEET.MEMBERS)).filter(m=>String(m.Status).toLowerCase()!=='deleted').map(sanitizeMember)});
 }
 function addMemberByAdmin(p) {
   const sheet=getSheet(SHEET.MEMBERS);
@@ -337,7 +337,7 @@ function deleteMember(p) {
 function searchMembers(p) {
   const q=(p.query||'').toLowerCase();
   return ok({members:rows(getSheet(SHEET.MEMBERS))
-    .filter(m=>m.Status!=='deleted')
+    .filter(m=>String(m.Status).toLowerCase()!=='deleted')
     .filter(m=>[m.FirstName,m.LastName,m.Email,m.ID,m.Phone].join(' ').toLowerCase().includes(q))
     .map(m=>({id:m.ID,name:m.FirstName+' '+m.LastName,plan:m.Plan,email:m.Email}))});
 }
@@ -354,7 +354,7 @@ function updateProfile(p) {
 // ── CLASSES ───────────────────────────────────────
 function getClasses() {
   return ok({classes:rows(getSheet(SHEET.CLASSES))
-    .filter(c=>c.Status==='active')
+    .filter(c=>['active','Active',''].includes(String(c.Status).trim().toLowerCase()))
     .map(c=>({
       id:c.ID, name:c.Name, day:c.Day, time:c.Time, type:c.Type,
       maxSeats:Number(c.MaxSeats)||0, bookedSeats:Number(c.BookedSeats)||0,
@@ -467,7 +467,7 @@ function processCheckin(p) {
     }
   }
   if(!member) return err('ไม่พบ Member ID: '+p.memberId);
-  if(member.Status!=='active') return err('สมาชิกถูกระงับ');
+  if(!['active','Active',''].includes(String(member.Status).trim().toLowerCase())) return err('สมาชิกถูกระงับ');
   if(member.ExpiryDate&&member.ExpiryDate!==''){
     const exp=new Date(member.ExpiryDate);
     if(!isNaN(exp)&&exp<new Date()) return err('แพ็กเกจหมดอายุ');
@@ -597,7 +597,7 @@ function getRoomQRs() {
 
 // ── STATS ─────────────────────────────────────────
 function getStats() {
-  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status!=='deleted');
+  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>String(m.Status).toLowerCase()!=='deleted');
   const checkins=rows(getSheet(SHEET.CHECKINS));
   const fines=rows(getSheet(SHEET.FINES));
   const regs=rows(getSheet(SHEET.REGISTRATIONS));
@@ -618,9 +618,9 @@ function getStats() {
     monthlyData.push({month:m,newMembers:newM,revenue:rev,checkins:ciCnt});
   }
   return ok({
-    totalMembers:members.filter(m=>m.Status==='active').length,
-    quarterMembers:members.filter(m=>m.Plan==='quarter'&&m.Status==='active').length,
-    trialMembers:members.filter(m=>m.Plan==='trial'&&m.Status==='active').length,
+    totalMembers:members.filter(m=>['active','Active',''].includes(String(m.Status).trim().toLowerCase())).length,
+    quarterMembers:members.filter(m=>m.Plan==='quarter'&&['active','Active',''].includes(String(m.Status).trim().toLowerCase())).length,
+    trialMembers:members.filter(m=>m.Plan==='trial'&&['active','Active',''].includes(String(m.Status).trim().toLowerCase())).length,
     todayCheckins:todayCI.length,
     pendingFines,pendingApprovals,
     monthlyData,
@@ -721,9 +721,9 @@ function sendClassReminders() {
   const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   const thDays=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
   const tomorrowDay=thDays[tomorrow.getDay()];
-  const classes=rows(getSheet(SHEET.CLASSES)).filter(c=>c.Status==='active'&&c.Day===tomorrowDay);
+  const classes=rows(getSheet(SHEET.CLASSES)).filter(c=>['active','Active',''].includes(String(c.Status).trim().toLowerCase())&&c.Day===tomorrowDay);
   if(!classes.length) return ok({message:'ไม่มีคลาสพรุ่งนี้'});
-  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status==='active'&&m.LineId);
+  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>['active','Active',''].includes(String(m.Status).trim().toLowerCase())&&m.LineId);
   let sent=0;
   classes.forEach(cls=>{
     const zoomId=cls.ZoomLink?'(ดูใน Zoom Link)':getSetting('zoom_id')||'964 333 6086';

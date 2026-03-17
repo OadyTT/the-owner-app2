@@ -443,7 +443,7 @@ button,input,select,textarea{font-family:inherit;}
         <div><div class="pt">📚 คอร์ส & ตารางเรียน</div><div class="ps">ข้อมูลจาก Google Sheet — แก้ไขได้โดยตรง</div></div>
         <div style="display:flex;gap:6px;">
           <button class="btn bo2 bsm" onclick="openGS()">📊 Google Sheet</button>
-          <button class="btn bp bsm" onclick="openModal('add-class')">+ เพิ่มคลาส</button>
+          <button class="btn bp bsm" onclick="openAddClass()">+ เพิ่มคลาสใหม่</button>
         </div>
       </div>
       <div class="tb2">
@@ -658,15 +658,54 @@ button,input,select,textarea{font-family:inherit;}
 
 <div id="modal-add-class" class="mo" onclick="if(event.target===this)closeModal('add-class')">
   <div class="md">
-    <div class="mdt">📚 เพิ่มคลาส</div><div class="mds">เพิ่มหรือแก้ไขตารางเรียน</div>
+    <div class="mdt" id="ac-modal-title">📚 เพิ่มคลาสใหม่</div>
+    <div class="mds">กรอกข้อมูลคลาสเรียน — บันทึกลง Google Sheet ทันที</div>
     <input type="hidden" id="ac-id">
-    <div class="fg"><label class="fl">ชื่อคอร์ส *</label><select class="fi" id="ac-nm"><option>Product Growth 101</option><option>Business Growth 101</option><option>Health Buddy Growth 101</option><option>Digital Growth 101</option></select></div>
-    <div class="fr"><div class="fg"><label class="fl">วัน *</label><select class="fi" id="ac-dy"><option>จันทร์</option><option>อังคาร</option><option>พุธ</option><option>พฤหัสบดี</option><option>ศุกร์</option><option>เสาร์</option><option>อาทิตย์</option></select></div><div class="fg"><label class="fl">เวลา *</label><input type="text" class="fi" id="ac-tm" placeholder="09:00-11:00"></div></div>
-    <div class="fr"><div class="fg"><label class="fl">ประเภท</label><select class="fi" id="ac-tp"><option value="online">🖥️ Online</option><option value="onsite">🏢 Onsite</option><option value="hybrid">⚡ Hybrid</option></select></div><div class="fg"><label class="fl">ที่นั่งสูงสุด</label><input type="number" class="fi" id="ac-st" value="20" min="1"></div></div>
-    <div class="fg"><label class="fl">Zoom Link (สำหรับ Online)</label><input type="url" class="fi" id="ac-zl" placeholder="https://zoom.us/j/..."></div>
-    <div class="fg"><label class="fl">URL รูปภาพ (Thumbnail)</label><input type="url" class="fi" id="ac-img" placeholder="https://drive.google.com/..."></div>
+    <div class="fg"><label class="fl">ชื่อคอร์ส *</label>
+      <select class="fi" id="ac-nm">
+        <option>Product Growth 101</option>
+        <option>Business Growth 101</option>
+        <option>Health Buddy Growth 101</option>
+        <option>Digital Growth 101</option>
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">วัน *</label>
+        <select class="fi" id="ac-dy">
+          <option>จันทร์</option><option>อังคาร</option><option>พุธ</option>
+          <option>พฤหัสบดี</option><option>ศุกร์</option><option>เสาร์</option><option>อาทิตย์</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">วันที่จัด (dd/mm/yyyy)</label>
+        <input type="text" class="fi" id="ac-date" placeholder="เช่น 18/03/2569">
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">เวลา *</label><input type="text" class="fi" id="ac-tm" placeholder="09:00-11:00"></div>
+      <div class="fg"><label class="fl">ประเภท</label>
+        <select class="fi" id="ac-tp">
+          <option value="online">🖥️ Online</option>
+          <option value="onsite">🏢 Onsite</option>
+          <option value="hybrid">⚡ Hybrid</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">ที่นั่งสูงสุด</label><input type="number" class="fi" id="ac-st" value="20" min="1"></div>
+      <div class="fg"><label class="fl">Zoom Meeting ID</label><input type="text" class="fi" id="ac-zid" placeholder="964 333 6086"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Zoom Password</label><input type="text" class="fi" id="ac-zpw" placeholder="12345"></div>
+      <div class="fg"><label class="fl">Zoom Link (เปิด App ตรง)</label><input type="url" class="fi" id="ac-zl" placeholder="https://zoom.us/j/..."></div>
+    </div>
+    <div class="fg"><label class="fl">URL รูปภาพ Thumbnail (Google Drive หรือ URL อื่น)</label><input type="url" class="fi" id="ac-img" placeholder="https://drive.google.com/..."></div>
     <div class="fg"><label class="fl">คำอธิบายสั้น</label><input type="text" class="fi" id="ac-desc" placeholder="เรียนรู้..."></div>
-    <div class="mdf"><button class="btn bg2" onclick="closeModal('add-class')">ยกเลิก</button><button class="btn bp" onclick="saveClass()"><span class="bxt">💾 บันทึก</span></button></div>
+    <div class="mdf">
+      <button class="btn bg2" onclick="closeModal('add-class')">ยกเลิก</button>
+      <button class="btn bp" onclick="saveClass()"><span class="bxt">💾 บันทึก</span></button>
+    </div>
   </div>
 </div>
 
@@ -716,10 +755,10 @@ button,input,select,textarea{font-family:inherit;}
 <script>
 'use strict';
 // ── CONFIG ──────────────────────────────────────────
-// GAS URL และ Sheet ID เก็บที่นี่ — ไม่เก็บ password
+// GAS URL และ Sheet ID เท่านั้น — ไม่เก็บ password ใน code
 const GAS = 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec';
 const SHEET_ID = '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0';
-const DEFAULT_ADMINS=[{u:'admin',p:'admin1234',name:'Super Admin',role:'super'}];
+// ❌ ลบ DEFAULT_ADMINS ออกแล้ว — Login ผ่าน GAS เท่านั้น
 
 // ── STATE ────────────────────────────────────────────
 let A=null, allMembers=[], pendingList=[], ciLog=[], selApproval=null;
@@ -738,19 +777,23 @@ async function doLogin() {
   const u=document.getElementById('a-user').value.trim();
   const p=document.getElementById('a-pass').value;
   const btn=document.getElementById('lbtn');
-  const err=document.getElementById('lerr');
-  err.style.display='none';
+  const errEl=document.getElementById('lerr');
+  errEl.style.display='none';
+  if(!u||!p){ errEl.textContent='กรุณากรอก Username และ Password'; errEl.style.display='block'; return; }
   btn.classList.add('ldg'); btn.disabled=true;
   try {
     const res=await api('adminLogin',{username:u,password:p});
-    if(res?.success) A=res.admin;
-    else {
-      const m=DEFAULT_ADMINS.find(x=>x.u===u&&x.p===p);
-      if(!m) throw new Error('invalid');
-      A={username:u,name:m.name,role:m.role};
+    if(res?.success) {
+      A=res.admin;
+      startApp();
+    } else {
+      errEl.textContent=res?.message||'Username หรือ Password ไม่ถูกต้อง';
+      errEl.style.display='block';
     }
-    startApp();
-  } catch(e){ err.style.display='block'; }
+  } catch(e){
+    errEl.textContent='เชื่อมต่อไม่ได้ กรุณาตรวจสอบ Internet';
+    errEl.style.display='block';
+  }
   finally { btn.classList.remove('ldg'); btn.disabled=false; }
 }
 
@@ -1134,28 +1177,57 @@ async function loadClasses() {
 }
 
 function openEditClass(c) {
-  document.getElementById('ac-id').value=c.id;
-  document.getElementById('ac-nm').value=c.name||'';
-  document.getElementById('ac-dy').value=c.day||'จันทร์';
-  document.getElementById('ac-tm').value=c.time||'';
-  document.getElementById('ac-tp').value=c.type||'online';
-  document.getElementById('ac-st').value=c.maxSeats||20;
-  document.getElementById('ac-zl').value=c.zoomLink||'';
-  document.getElementById('ac-img').value=c.imageUrl||'';
-  document.getElementById('ac-desc').value=c.description||'';
-  document.querySelector('#modal-add-class .mdt').textContent='✏️ แก้ไขคลาส';
+  document.getElementById('ac-id').value    = c.id;
+  document.getElementById('ac-nm').value    = c.name||'';
+  document.getElementById('ac-dy').value    = c.day||'จันทร์';
+  document.getElementById('ac-date').value  = c.classDate||'';
+  document.getElementById('ac-tm').value    = c.time||'';
+  document.getElementById('ac-tp').value    = c.type||'online';
+  document.getElementById('ac-st').value    = c.maxSeats||20;
+  document.getElementById('ac-zid').value   = c.zoomMeetingId||'';
+  document.getElementById('ac-zpw').value   = c.zoomPassword||'';
+  document.getElementById('ac-zl').value    = c.zoomLink||'';
+  document.getElementById('ac-img').value   = c.imageUrl||'';
+  document.getElementById('ac-desc').value  = c.description||'';
+  document.getElementById('ac-modal-title').textContent = '✏️ แก้ไขคลาส: ' + c.name;
+  openModal('add-class');
+}
+
+function openAddClass() {
+  // Reset form for new class
+  ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('ac-st').value = '20';
+  document.getElementById('ac-modal-title').textContent = '📚 เพิ่มคลาสใหม่';
   openModal('add-class');
 }
 
 async function saveClass() {
-  const id=document.getElementById('ac-id').value;
-  const data={name:document.getElementById('ac-nm').value,day:document.getElementById('ac-dy').value,time:document.getElementById('ac-tm').value,type:document.getElementById('ac-tp').value,maxSeats:Number(document.getElementById('ac-st').value),zoomLink:document.getElementById('ac-zl').value,imageUrl:document.getElementById('ac-img').value,description:document.getElementById('ac-desc').value};
-  const res=id?await api('updateClass',{id,...data}):await api('addClass',data);
+  const id   = document.getElementById('ac-id').value;
+  const name = document.getElementById('ac-nm').value;
+  const day  = document.getElementById('ac-dy').value;
+  const date = document.getElementById('ac-date').value;
+  const time = document.getElementById('ac-tm').value;
+  if (!name || !time) { toast('⚠️ กรอกชื่อและเวลา', 'er'); return; }
+  // สร้าง Day string แบบ "ศุกร์+20/03/2569"
+  const dayLabel = date ? `${day}+${date}` : day;
+  const data = {
+    name, day:dayLabel, time,
+    type:  document.getElementById('ac-tp').value,
+    maxSeats: Number(document.getElementById('ac-st').value),
+    zoomMeetingId: document.getElementById('ac-zid').value,
+    zoomPassword:  document.getElementById('ac-zpw').value,
+    zoomLink:      document.getElementById('ac-zl').value,
+    imageUrl:      document.getElementById('ac-img').value,
+    description:   document.getElementById('ac-desc').value,
+  };
+  const res = id ? await api('updateClass',{id,...data}) : await api('addClass',data);
   closeModal('add-class');
-  document.getElementById('ac-id').value='';
-  document.querySelector('#modal-add-class .mdt').textContent='📚 เพิ่มคลาส';
+  document.getElementById('ac-id').value = '';
+  document.getElementById('ac-modal-title').textContent = '📚 เพิ่มคลาสใหม่';
   await loadClasses();
-  toast(id?'💾 แก้ไขคลาสสำเร็จ':'✅ เพิ่มคลาสสำเร็จ','ok');
+  toast(id ? '💾 แก้ไขคลาสสำเร็จ' : '✅ เพิ่มคลาสสำเร็จ', 'ok');
 }
 
 async function delClass(id,name) {

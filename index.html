@@ -598,7 +598,9 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
     <button class="btn btn-line btn-sm" id="nav-line-btn" onclick="lineFlow()">💚 LINE</button>
     <button class="nav-link" id="nav-login-btn" onclick="openModal('login')">เข้าสู่ระบบ</button>
     <button class="btn btn-primary btn-sm" id="nav-reg-btn" onclick="openModal('register')">สมัครเรียน</button>
-    <!-- ปุ่มขนาดตัวอักษร -->
+    <!-- Language toggle -->
+    <button class="nav-theme" onclick="toggleLang()" id="lang-btn" title="เปลี่ยนภาษา / Language" style="font-size:12px;font-weight:700;font-family:var(--font-head);">EN</button>
+    <!-- Font size -->
     <button class="nav-theme" onclick="cycleFontSize()" id="font-btn" title="ปรับขนาดตัวอักษร">A</button>
     <div class="nav-theme" onclick="toggleTheme()" aria-label="Toggle theme">🌙</div>
   </nav>
@@ -968,21 +970,30 @@ footer p{font-size:12px;color:rgba(255,255,255,.45);}
       </div>
       <div class="form-group"><label class="form-label">LINE ID <span class="text-muted">(ใช้รับ Member ID)</span></label><input type="text" class="form-input" id="r-li" placeholder="@lineID ถ้ามี"></div>
       <div class="modal-hr"></div>
-      <!-- Bank -->
+      <!-- Bank + QR -->
       <div class="bank-card">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name" id="m-bank-name">Bangkok Bank — PromptPay</div>
           <div class="bank-acc-row">
-            <div class="bank-acc-num" id="m-bank-acc">—</div>
+            <div class="bank-acc-num" id="m-bank-acc">กำลังโหลด...</div>
             <button class="copy-btn" onclick="copyBankAcc()">📋 Copy</button>
           </div>
-          <div class="bank-owner" id="m-bank-owner">—</div>
+          <div class="bank-owner" id="m-bank-owner"></div>
         </div>
         <div class="bank-amount">
           <div class="bank-amt-lbl">ยอดโอน</div>
           <div class="bank-amt-val" id="m-amount">฿600</div>
           <div class="bank-amt-plan" id="m-plan-lbl">Quarter</div>
+        </div>
+      </div>
+      <!-- PromptPay QR -->
+      <div id="bank-qr-section" style="margin-top:12px;background:var(--c-surface-2);border:1.5px solid var(--c-border);border-radius:var(--r-md);padding:14px;text-align:center;display:none;">
+        <div style="font-size:12px;font-weight:700;color:var(--c-text-2);margin-bottom:10px;">📱 QR Code PromptPay</div>
+        <img id="bank-qr-img" src="" alt="PromptPay QR" style="width:160px;height:160px;border-radius:var(--r-sm);object-fit:contain;background:#fff;padding:8px;">
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+          <button class="btn btn-outline btn-xs" onclick="downloadBankQR()">⬇️ บันทึก QR</button>
+          <button class="btn btn-ghost btn-xs" onclick="copyBankAcc()">📋 Copy เลขบัญชี</button>
         </div>
       </div>
       <!-- Slip -->
@@ -1094,19 +1105,26 @@ async function loadSettings() {
   const res = await api('getSettings');
   if (res?.success) {
     const s = res.settings;
-    // Zoom — โหลดจาก GAS เท่านั้น ไม่แสดงในหน้า Landing
-    STATE.zoomId   = s.zoom_id    || '';
-    STATE.zoomPw   = s.zoom_pw    || '';
-    STATE.bankAcc  = s.bank_acc   || '';
-    STATE.bankOwner= s.bank_owner || '';
-    STATE.bankName = s.bank_name  || 'Bangkok Bank';
-    // Update bank display in register modal
+    STATE.zoomId    = s.zoom_id    || '';
+    STATE.zoomPw    = s.zoom_pw    || '';
+    STATE.bankAcc   = s.bank_acc   || '';
+    STATE.bankOwner = s.bank_owner || '';
+    STATE.bankName  = s.bank_name  || 'Bangkok Bank';
+    STATE.bankQrUrl = s.bank_qr_url || ''; // URL รูป QR จาก Settings
+    // Update bank display
     const accEl  = document.getElementById('m-bank-acc');
     const ownEl  = document.getElementById('m-bank-owner');
     const nameEl = document.getElementById('m-bank-name');
-    if (accEl)   accEl.textContent  = STATE.bankAcc;
-    if (ownEl)   ownEl.textContent  = STATE.bankOwner;
+    if (accEl)   accEl.textContent  = STATE.bankAcc  || '—';
+    if (ownEl)   ownEl.textContent  = STATE.bankOwner || '';
     if (nameEl)  nameEl.textContent = STATE.bankName + ' — PromptPay';
+    // Show QR if URL set
+    if (STATE.bankQrUrl) {
+      const qrSec = document.getElementById('bank-qr-section');
+      const qrImg = document.getElementById('bank-qr-img');
+      if (qrSec) qrSec.style.display = 'block';
+      if (qrImg) qrImg.src = STATE.bankQrUrl;
+    }
   }
 }
 
@@ -1489,18 +1507,58 @@ async function doLogin() {
   btn.classList.add('loading-btn'); btn.disabled = true;
   try {
     const res = await api('login', { email: em });
-    if (res?.success) {
+    if (res?.success && res.user) {
       closeModal('login');
-      loadPortal(res.user);
+      await loadPortal(res.user);
       toast('✅ เข้าสู่ระบบสำเร็จ', 'ok');
     } else {
-      toast('❌ ไม่พบสมาชิก Email นี้', 'err');
+      toast('❌ ' + (res?.message || 'ไม่พบสมาชิก Email นี้'), 'err');
     }
   } catch (e) {
-    toast('❌ เกิดข้อผิดพลาด', 'err');
+    toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'err');
   } finally {
     btn.classList.remove('loading-btn'); btn.disabled = false;
   }
+}
+
+function downloadBankQR() {
+  const img = document.getElementById('bank-qr-img');
+  if (!img?.src || img.src === window.location.href || img.src.endsWith('#')) {
+    toast('⚠️ ยังไม่มีรูป QR — ใส่ URL รูป QR ในหน้าตั้งค่าระบบ (bank_qr_url)', 'err');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = img.src; a.download = 'promptpay-qr.jpg'; a.target = '_blank'; a.click();
+  toast('⬇️ บันทึก QR แล้ว', 'ok');
+}
+
+// ─── LANGUAGE TOGGLE TH/EN ────────────────────────
+let _lang = 'th';
+const _LANG = {
+  th: { reg:'สมัครเรียน', login:'เข้าสู่ระบบ', portal:'🏠 พอร์ทัล',
+        dashboard:'🏠 ภาพรวม', zoom:'🎥 Zoom Class', sched:'📅 จองที่นั่ง',
+        mybookings:'📋 การจองของฉัน', checkin:'✅ QR Check-in',
+        history:'📊 ประวัติ', profile:'👤 โปรไฟล์', logout:'🚪 ออกจากระบบ' },
+  en: { reg:'Register', login:'Login', portal:'🏠 Portal',
+        dashboard:'🏠 Dashboard', zoom:'🎥 Zoom Class', sched:'📅 Book Seat',
+        mybookings:'📋 My Bookings', checkin:'✅ QR Check-in',
+        history:'📊 History', profile:'👤 Profile', logout:'🚪 Logout' },
+};
+function toggleLang() {
+  _lang = _lang === 'th' ? 'en' : 'th';
+  const L = _LANG[_lang];
+  const btn = document.getElementById('lang-btn');
+  if (btn) btn.textContent = _lang === 'th' ? 'EN' : 'TH';
+  // Nav
+  const rb = document.getElementById('nav-reg-btn');   if (rb) rb.textContent = L.reg;
+  const lb = document.getElementById('nav-login-btn'); if (lb) lb.textContent = L.login;
+  const mb = document.getElementById('nav-member-btn');if (mb) mb.textContent = L.portal;
+  // Portal tabs
+  [['tab-dashboard',L.dashboard],['tab-zoom',L.zoom],['tab-sched',L.sched],
+   ['tab-mybookings',L.mybookings],['tab-checkin',L.checkin],
+   ['tab-history',L.history],['tab-profile',L.profile]
+  ].forEach(([id,txt])=>{ const el=document.getElementById(id); if(el) el.innerHTML=`<span class="pm-icon">${txt.split(' ')[0]}</span>${txt.split(' ').slice(1).join(' ')}`; });
+  toast(_lang==='en'?'🇺🇸 English':'🇹🇭 ภาษาไทย','ok');
 }
 
 function logout() {
