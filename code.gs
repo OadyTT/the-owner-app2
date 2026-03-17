@@ -1,679 +1,767 @@
-// ═══════════════════════════════════════════════════════════════
-// THE OWNER — Google Apps Script Backend (code.gs)
-// Version: 2.0 | Deploy as Web App (Anyone can access)
-// ═══════════════════════════════════════════════════════════════
+/**
+ * THE OWNER — Google Apps Script Backend v4.0
+ * SETUP: Run setupAllSheets() once
+ * DEPLOY: Deploy > Web App > Anyone > Deploy
+ */
 
-const SHEETS = {
-  MEMBERS:  'Members',
-  CLASSES:  'Classes',
-  BOOKINGS: 'Bookings',
-  CHECKINS: 'CheckIns',
-  FINES:    'Fines',
-  ADMINS:   'Admins',
-  SETTINGS: 'Settings',
+const SHEET = {
+  MEMBERS:'Members', REGISTRATIONS:'Registrations', CLASSES:'Classes',
+  BOOKINGS:'Bookings', CHECKINS:'CheckIns', FINES:'Fines',
+  ADMINS:'Admins', SETTINGS:'Settings', ROOM_QR:'RoomQR',
 };
 
-// ════════════════════════════════════════════════════════════
-// ENTRY POINTS
-// ════════════════════════════════════════════════════════════
-
+// ── ENTRY POINTS ──────────────────────────────────
 function doGet(e)  { return handleRequest(e); }
 function doPost(e) { return handleRequest(e); }
 
+function testDeploy() {
+  Logger.log('✅ TheOwner GAS v4.0 — Working!');
+  return { success:true, message:'GAS v4.0 working!' };
+}
+
 function handleRequest(e) {
-  const output = ContentService.createTextOutput();
-  output.setMimeType(ContentService.MimeType.JSON);
-
+  const out = ContentService.createTextOutput();
+  out.setMimeType(ContentService.MimeType.JSON);
   try {
+    if (!e) { out.setContent(JSON.stringify(err('No request'))); return out; }
     let p = {};
-    if (e.postData && e.postData.contents) {
-      p = JSON.parse(e.postData.contents);
-    } else if (e.parameter) {
-      p = e.parameter;
-    }
-
-    const action = p.action;
-    let result = { success: false, message: 'Unknown action: ' + action };
-
-    switch (action) {
-      case 'register':      result = registerMember(p); break;
-      case 'login':         result = loginMember(p); break;
-      case 'adminLogin':    result = adminLogin(p); break;
-      case 'lineLogin':     result = lineLogin(p); break;
-      case 'getMembers':    result = getMembers(); break;
-      case 'addMember':     result = registerMember(p); break;
-      case 'updateProfile': result = updateProfile(p); break;
-      case 'deleteMember':  result = deleteMember(p); break;
-      case 'searchMembers': result = searchMembers(p); break;
-      case 'getClasses':    result = getClasses(); break;
-      case 'addClass':      result = addClass(p); break;
-      case 'updateClass':   result = updateClass(p); break;
-      case 'deleteClass':   result = deleteClass(p); break;
-      case 'booking':       result = createBooking(p); break;
-      case 'cancelBooking': result = cancelBooking(p); break;
-      case 'getBookings':   result = getBookings(p); break;
-      case 'checkin':       result = processCheckin(p); break;
-      case 'getCheckins':   result = getCheckins(p); break;
-      case 'getFines':      result = getFines(p); break;
-      case 'addFine':       result = addFine(p); break;
-      case 'payFine':       result = markFinePaid(p); break;
-      case 'getStats':      result = getStats(); break;
-      case 'getReports':    result = getReports(p); break;
-      case 'addAdmin':      result = addAdmin(p); break;
-      case 'getAdmins':     result = getAdmins(); break;
-      case 'setupSheets':   result = setupAllSheets(); break;
-    }
-
-    output.setContent(JSON.stringify(result));
-  } catch (err) {
-    output.setContent(JSON.stringify({ success: false, message: err.message }));
+    if (e.postData?.contents) p = JSON.parse(e.postData.contents);
+    else if (e.parameter) p = { ...e.parameter };
+    out.setContent(JSON.stringify(route(p)));
+  } catch(ex) {
+    Logger.log('ERROR: '+ex.message);
+    out.setContent(JSON.stringify(err('Server error: '+ex.message)));
   }
-
-  return output;
+  return out;
 }
 
-// ════════════════════════════════════════════════════════════
-// SHEET HELPERS
-// ════════════════════════════════════════════════════════════
-
-function getSheet(name) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    initSheetHeaders(sheet, name);
-  }
-  return sheet;
-}
-
-function initSheetHeaders(sheet, name) {
-  const headers = {
-    Members:  ['ID','FirstName','LastName','Email','Phone','LineId','Password','Plan','Status','StartDate','ExpiryDate','TotalSessions','Fines','CreatedAt'],
-    Classes:  ['ID','Name','Day','Time','Type','MaxSeats','BookedSeats','Status','ZoomLink','CreatedAt'],
-    Bookings: ['ID','MemberID','ClassID','ClassName','BookDate','ClassDate','ClassTime','Type','Status','CheckedIn','CreatedAt'],
-    CheckIns: ['ID','MemberID','MemberName','ClassID','ClassName','CheckInTime','Method','AdminID'],
-    Fines:    ['ID','MemberID','MemberName','ClassID','ClassName','Date','Amount','Status','PaidDate'],
-    Admins:   ['Username','Password','Name','Role','CreatedAt'],
-    Settings: ['Key','Value'],
+function route(p) {
+  const a = (p.action||'').trim();
+  const map = {
+    // Public
+    registerWithSlip: ()=>registerWithSlip(p),
+    lineLogin:        ()=>lineLogin(p),
+    login:            ()=>loginMember(p),
+    getClasses:       ()=>getClasses(),
+    checkinByRoomQR:  ()=>checkinByRoomQR(p),
+    getSettings:      ()=>getSettingsPublic(),
+    // Member
+    booking:          ()=>createBooking(p),
+    cancelBooking:    ()=>cancelBooking(p),
+    getMemberBookings:()=>getMemberBookings(p),
+    updateProfile:    ()=>updateProfile(p),
+    getMemberHistory: ()=>getMemberHistory(p),
+    // Admin
+    adminLogin:           ()=>adminLogin(p),
+    getStats:             ()=>getStats(),
+    getPendingApprovals:  ()=>getPendingApprovals(),
+    approveRegistration:  ()=>approveRegistration(p),
+    getMembers:           ()=>getMembers(),
+    addMember:            ()=>addMemberByAdmin(p),
+    updateMember:         ()=>updateMember(p),
+    deleteMember:         ()=>deleteMember(p),
+    searchMembers:        ()=>searchMembers(p),
+    getBookings:          ()=>getBookings(p),
+    updateBooking:        ()=>updateBooking(p),
+    checkin:              ()=>processCheckin(p),
+    getCheckins:          ()=>getCheckins(p),
+    getFines:             ()=>getFines(p),
+    addFine:              ()=>addFine(p),
+    updateFine:           ()=>updateFine(p),
+    payFine:              ()=>markFinePaid(p),
+    getReports:           ()=>getReports(p),
+    addAdmin:             ()=>addAdmin(p),
+    getAdmins:            ()=>getAdmins(),
+    deleteAdmin:          ()=>deleteAdmin(p),
+    addClass:             ()=>addClass(p),
+    updateClass:          ()=>updateClass(p),
+    deleteClass:          ()=>deleteClass(p),
+    generateRoomQR:       ()=>generateRoomQR(p),
+    getRoomQRs:           ()=>getRoomQRs(),
+    saveSettings:         ()=>saveSettings(p),
+    getSettingsAll:       ()=>getSettingsAll(),
+    setupSheets:          ()=>setupAllSheets(),
+    sendClassReminders:   ()=>sendClassReminders(),
   };
-  if (!headers[name]) return;
-  sheet.appendRow(headers[name]);
-  sheet.getRange(1,1,1,headers[name].length)
-    .setFontWeight('bold')
-    .setBackground('#C9A84C')
-    .setFontColor('#0D0D0D');
-  sheet.setFrozenRows(1);
-
-  if (name === 'Admins') {
-    sheet.appendRow(['admin', hashPw('admin1234'), 'Super Admin', 'super', now()]);
-  }
-  if (name === 'Settings') {
-    [['fine_online','20'],['fine_onsite','50'],['fine_hybrid','100'],['cancel_hours','2']].forEach(r => sheet.appendRow(r));
-  }
-  if (name === 'Classes') {
-    sheet.appendRow([genId('CLS'),'Business Model Canvas','จันทร์','09:00-11:00','hybrid',12,0,'active','',now()]);
-    sheet.appendRow([genId('CLS'),'Digital Marketing','อังคาร','19:00-21:00','online',30,0,'active','https://zoom.us/j/example',now()]);
-    sheet.appendRow([genId('CLS'),'Financial Planning','พุธ','09:00-12:00','onsite',10,0,'active','',now()]);
-    sheet.appendRow([genId('CLS'),'Sales Psychology','พฤหัสบดี','19:00-21:00','online',50,0,'active','https://meet.google.com/example',now()]);
-    sheet.appendRow([genId('CLS'),'Leadership Workshop','ศุกร์','10:00-12:00','hybrid',8,0,'active','',now()]);
-  }
+  return map[a] ? map[a]() : err('Unknown action: '+a);
 }
 
-// Run once to setup all sheets
-function setupAllSheets() {
-  Object.values(SHEETS).forEach(name => getSheet(name));
-  return { success: true, message: 'All sheets created successfully!' };
+// ── SHEET HELPERS ─────────────────────────────────
+function ss() { return SpreadsheetApp.getActiveSpreadsheet(); }
+function getSheet(name) {
+  let s = ss().getSheetByName(name);
+  if (!s) { s = ss().insertSheet(name); initHeaders(s, name); }
+  return s;
 }
-
-function sheetToObjects(sheet) {
-  const data = sheet.getDataRange().getValues();
-  if (data.length < 2) return [];
-  const headers = data[0].map(h => String(h).trim());
-  return data.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i]; });
-    return obj;
-  });
+function rows(sheet) {
+  const d = sheet.getDataRange().getValues();
+  if (d.length < 2) return [];
+  const h = d[0].map(x=>String(x).trim());
+  return d.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]??'');return o;});
 }
-
+function findRow(sheet, col, val) {
+  const d = sheet.getDataRange().getValues();
+  for (let i=1;i<d.length;i++) if(String(d[i][col])===String(val)) return i+1;
+  return -1;
+}
+function setCell(sheet, row, colName, val) {
+  const h = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
+  const i = h.indexOf(colName);
+  if (i>=0) sheet.getRange(row, i+1).setValue(val);
+}
 function genId(prefix) {
-  return prefix + '-' + Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyyyMMddHHmmss') + Math.floor(Math.random()*100);
+  return prefix+'-'+Utilities.formatDate(new Date(),'Asia/Bangkok','yyyyMMddHHmmss')+
+    Math.floor(Math.random()*100).toString().padStart(2,'0');
 }
-
-function now() {
-  return new Date().toISOString();
-}
-
+function nowISO() { return new Date().toISOString(); }
+function todayStr() { return Utilities.formatDate(new Date(),'Asia/Bangkok','yyyy-MM-dd'); }
 function hashPw(pw) {
   return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, pw)
-    .map(b => (b < 0 ? b + 256 : b).toString(16).padStart(2,'0')).join('');
+    .map(b=>(b<0?b+256:b).toString(16).padStart(2,'0')).join('');
+}
+function getSetting(key) {
+  const r = rows(getSheet(SHEET.SETTINGS)).find(x=>x.Key===key);
+  return r ? String(r.Value) : null;
+}
+function ok(d)  { return {success:true,...d}; }
+function err(m) { return {success:false, message:m}; }
+
+// ── SETUP ─────────────────────────────────────────
+function setupAllSheets() {
+  Object.values(SHEET).forEach(n=>getSheet(n));
+  return ok({message:'All sheets ready!'});
 }
 
-function thaiDate(d) {
-  return Utilities.formatDate(d || new Date(), 'Asia/Bangkok', 'dd/MM/yyyy');
-}
-
-function todayStr() {
-  return Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyyy-MM-dd');
-}
-
-// ════════════════════════════════════════════════════════════
-// AUTH — MEMBER
-// ════════════════════════════════════════════════════════════
-
-function registerMember(p) {
-  if (!p.firstName || !p.email || !p.password)
-    return { success: false, message: 'กรุณากรอกข้อมูลให้ครบ' };
-
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const members = sheetToObjects(sheet);
-
-  if (members.find(m => m.Email === p.email))
-    return { success: false, message: 'อีเมลนี้ถูกใช้งานแล้ว' };
-
-  const id = 'THE-' + String(Date.now()).slice(-5);
-  sheet.appendRow([
-    id, p.firstName, p.lastName||'', p.email, p.phone||'', p.lineId||'',
-    hashPw(p.password), p.plan||'trial', 'active', '', '', 0, 0, now()
-  ]);
-
-  return {
-    success: true,
-    user: { id, firstName:p.firstName, lastName:p.lastName||'', email:p.email,
-            phone:p.phone||'', lineId:p.lineId||'', plan:p.plan||'trial',
-            sessions:0, fines:0, expiry:'นับจาก Check-in แรก' }
+function initHeaders(sheet, name) {
+  const defs = {
+    Members:       {cols:['ID','FirstName','LastName','Email','Phone','LineId','Plan','Status','StartDate','ExpiryDate','TotalSessions','PendingFines','CreatedAt'],bg:'#1400FF'},
+    Registrations: {cols:['ID','FirstName','LastName','Email','Phone','LineId','LineDisplayName','Plan','Amount','SlipUrl','Status','AdminNote','CreatedAt','ApprovedAt','MemberId'],bg:'#1400FF'},
+    Classes:       {cols:['ID','Name','Day','Time','Type','MaxSeats','BookedSeats','Status','ZoomLink','ImageUrl','Description','CreatedAt'],bg:'#1400FF'},
+    Bookings:      {cols:['ID','MemberID','MemberName','ClassID','ClassName','ClassDay','ClassTime','Type','Status','CheckedIn','BookedAt'],bg:'#1400FF'},
+    CheckIns:      {cols:['ID','MemberID','MemberName','ClassID','ClassName','CheckInTime','Method','AdminID'],bg:'#1400FF'},
+    Fines:         {cols:['ID','MemberID','MemberName','ClassID','ClassName','Date','Amount','Type','Reason','Status','PaidDate'],bg:'#EF4444'},
+    Admins:        {cols:['Username','Password','Name','Role','CreatedAt'],bg:'#EF4444'},
+    Settings:      {cols:['Key','Value','Description'],bg:'#10B981'},
+    RoomQR:        {cols:['ID','ClassID','ClassName','QRToken','CreatedAt','ExpiresAt','Active'],bg:'#1400FF'},
   };
+  const def = defs[name]; if(!def) return;
+  sheet.appendRow(def.cols);
+  sheet.getRange(1,1,1,def.cols.length).setFontWeight('bold').setBackground(def.bg).setFontColor('#FFFFFF');
+  sheet.setFrozenRows(1);
+  // Seed defaults
+  if (name==='Admins')   sheet.appendRow(['admin',hashPw('admin1234'),'Super Admin','super',nowISO()]);
+  if (name==='Settings') {
+    [['zoom_id','964 333 6086','Zoom Meeting ID'],
+     ['zoom_pw','12345','Zoom Password'],
+     ['bank_acc','089-xxx-2626','PromptPay'],
+     ['bank_owner','นาง สุพัตรา หงษ์วิเศษ','ชื่อบัญชี'],
+     ['bank_name','Bangkok Bank','ชื่อธนาคาร'],
+     ['fine_online','20','ค่าปรับ Online'],
+     ['fine_onsite','50','ค่าปรับ Onsite'],
+     ['fine_hybrid','100','ค่าปรับ Hybrid'],
+     ['cancel_hours','2','ยกเลิกล่วงหน้า(ชม.)'],
+     ['line_token','','LINE Messaging Token'],
+     ['site_url','https://the-owner-app2.vercel.app','Site URL'],
+    ].forEach(r=>sheet.appendRow(r));
+  }
+  if (name==='Classes') {
+    [['Product Growth 101','จันทร์','09:00-11:00','hybrid',12],
+     ['Business Growth 101','อังคาร','19:00-21:00','online',30],
+     ['Health Buddy Growth 101','พุธ','09:00-12:00','onsite',10],
+     ['Digital Growth 101','พฤหัสบดี','19:00-21:00','online',50],
+    ].forEach(([n,d,t,tp,s])=>sheet.appendRow([genId('CLS'),n,d,t,tp,s,0,'active','','','',nowISO()]));
+  }
 }
 
+// ── AUTH MEMBER ───────────────────────────────────
 function loginMember(p) {
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const members = sheetToObjects(sheet);
-  const hashed = hashPw(p.password);
-  const m = members.find(x => x.Email === p.email && x.Password === hashed);
-
-  if (!m) return { success: false, message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' };
-  if (m.Status !== 'active') return { success: false, message: 'บัญชีถูกระงับ กรุณาติดต่อ Admin' };
-
-  return {
-    success: true,
-    user: {
-      id: m.ID, firstName: m.FirstName, lastName: m.LastName,
-      email: m.Email, phone: m.Phone, lineId: m.LineId,
-      plan: m.Plan, sessions: Number(m.TotalSessions)||0,
-      fines: Number(m.Fines)||0,
-      expiry: m.ExpiryDate || 'นับจาก Check-in แรก'
-    }
-  };
+  if(!p.email) return err('กรุณาใส่อีเมล');
+  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.Email===p.email && x.Status==='active');
+  if(!m) return err('ไม่พบสมาชิก');
+  return ok({user:sanitizeMember(m)});
 }
-
 function lineLogin(p) {
-  if (!p.lineUserId) return { success: false, message: 'ไม่มี LINE User ID' };
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const members = sheetToObjects(sheet);
-  const m = members.find(x => x.LineId === p.lineUserId);
-
-  if (!m) return { success: false, message: 'ไม่พบสมาชิก', needRegister: true, displayName: p.displayName };
-
+  if(!p.lineUserId) return err('ไม่มี LINE User ID');
+  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.LineId===p.lineUserId && x.Status==='active');
+  if(!m) return {success:false, needRegister:true, displayName:p.displayName};
+  return ok({user:sanitizeMember(m)});
+}
+function sanitizeMember(m) {
   return {
-    success: true,
-    user: {
-      id: m.ID, firstName: m.FirstName, lastName: m.LastName,
-      email: m.Email, phone: m.Phone, lineId: m.LineId,
-      plan: m.Plan, sessions: Number(m.TotalSessions)||0,
-      fines: Number(m.Fines)||0, expiry: m.ExpiryDate||'นับจาก Check-in แรก'
-    }
+    memberId:m.ID, firstName:m.FirstName, lastName:m.LastName,
+    email:m.Email,
+    phone:String(m.Phone||'').replace(/^'/,''), // strip apostrophe
+    lineId:m.LineId,
+    plan:m.Plan, status:m.Status,
+    expiry:m.ExpiryDate||'นับจาก Check-in แรก',
+    sessions:Number(m.TotalSessions)||0, fines:Number(m.PendingFines)||0,
   };
 }
 
-// ════════════════════════════════════════════════════════════
-// AUTH — ADMIN
-// ════════════════════════════════════════════════════════════
-
+// ── AUTH ADMIN ────────────────────────────────────
 function adminLogin(p) {
-  const sheet = getSheet(SHEETS.ADMINS);
-  const admins = sheetToObjects(sheet);
-  const hashed = hashPw(p.password);
-  const a = admins.find(x => x.Username === p.username && x.Password === hashed);
-
-  if (!a) return { success: false, message: 'Username หรือ Password ไม่ถูกต้อง' };
-  return { success: true, admin: { username: a.Username, name: a.Name, role: a.Role } };
+  if(!p.username||!p.password) return err('กรอก Username และ Password');
+  const a = rows(getSheet(SHEET.ADMINS)).find(x=>x.Username===p.username&&x.Password===hashPw(p.password));
+  if(!a) return err('Username หรือ Password ไม่ถูกต้อง');
+  return ok({admin:{username:a.Username, name:a.Name, role:a.Role}});
 }
-
 function addAdmin(p) {
-  if (!p.username || !p.password) return { success: false, message: 'กรอก Username และ Password' };
-  const sheet = getSheet(SHEETS.ADMINS);
-  const admins = sheetToObjects(sheet);
-  if (admins.find(a => a.Username === p.username))
-    return { success: false, message: 'Username นี้มีอยู่แล้ว' };
-  sheet.appendRow([p.username, hashPw(p.password), p.name||p.username, p.role||'staff', now()]);
-  return { success: true };
+  if(!p.username||!p.password) return err('ข้อมูลไม่ครบ');
+  const sheet=getSheet(SHEET.ADMINS);
+  if(rows(sheet).find(a=>a.Username===p.username)) return err('Username นี้มีอยู่แล้ว');
+  sheet.appendRow([p.username,hashPw(p.password),p.name||p.username,p.role||'staff',nowISO()]);
+  return ok({});
 }
-
 function getAdmins() {
-  const sheet = getSheet(SHEETS.ADMINS);
-  const admins = sheetToObjects(sheet).map(a => ({
-    username: a.Username, name: a.Name, role: a.Role, createdAt: a.CreatedAt
-  }));
-  return { success: true, admins };
+  return ok({admins:rows(getSheet(SHEET.ADMINS)).map(a=>({username:a.Username,name:a.Name,role:a.Role,createdAt:a.CreatedAt}))});
+}
+function deleteAdmin(p) {
+  if(p.username==='admin') return err('ไม่สามารถลบ super admin หลักได้');
+  const sheet=getSheet(SHEET.ADMINS);
+  const row=findRow(sheet,0,p.username);
+  if(row<0) return err('ไม่พบ Admin');
+  sheet.deleteRow(row);
+  return ok({});
 }
 
-// ════════════════════════════════════════════════════════════
-// MEMBERS CRUD
-// ════════════════════════════════════════════════════════════
+// ── REGISTER WITH SLIP ────────────────────────────
+function registerWithSlip(p) {
+  const req=['firstName','email','phone','plan'];
+  for(const f of req) if(!p[f]) return err('กรุณากรอก: '+f);
+  const regSheet=getSheet(SHEET.REGISTRATIONS);
+  const dup=rows(regSheet).find(r=>r.Status==='waiting'&&(r.Email===p.email||(p.lineId&&r.LineId===p.lineId)));
+  if(dup) return err('มีคำขอรอ Approve อยู่แล้ว');
+  let slipUrl='';
+  if(p.slipBase64) slipUrl=saveSlipToDrive(p.slipBase64, p.slipName||'slip.jpg', genId('SLIP'));
+  const id=genId('REG');
+  const ph=p.phone?"'"+String(p.phone).replace(/[^0-9\-]/g,''):'';
+  regSheet.appendRow([id,p.firstName,p.lastName||'',p.email,ph,
+    p.lineId||'',p.lineDisplayName||'',p.plan,
+    p.amount||(p.plan==='quarter'?600:150),slipUrl,
+    'waiting','',nowISO(),'','']);
+  return ok({registrationId:id, message:'ส่งข้อมูลสำเร็จ รอ Admin Approve'});
+}
 
+function saveSlipToDrive(base64, filename, id) {
+  try {
+    const folder=getOrCreateFolder('TheOwner-Slips');
+    const blob=Utilities.newBlob(Utilities.base64Decode(base64),'image/jpeg',id+'_'+filename);
+    const file=folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return 'https://drive.google.com/thumbnail?id='+file.getId()+'&sz=w800';
+  } catch(e){ Logger.log('Drive: '+e.message); return ''; }
+}
+function getOrCreateFolder(name) {
+  const f=DriveApp.getFoldersByName(name);
+  return f.hasNext()?f.next():DriveApp.createFolder(name);
+}
+
+// ── PENDING APPROVALS ─────────────────────────────
+function getPendingApprovals() {
+  return ok({pending:rows(getSheet(SHEET.REGISTRATIONS)).map(r=>({
+    id:r.ID, firstName:r.FirstName, lastName:r.LastName,
+    email:r.Email, phone:String(r.Phone).replace(/^'/,''),
+    lineId:r.LineId, lineDisplayName:r.LineDisplayName,
+    plan:r.Plan, amount:r.Amount, slipUrl:r.SlipUrl,
+    status:r.Status||'waiting', adminNote:r.AdminNote,
+    createdAt:r.CreatedAt, memberId:r.MemberId,
+  }))});
+}
+
+function approveRegistration(p) {
+  if(!p.registrationId||!p.status) return err('ข้อมูลไม่ครบ');
+  const regSheet=getSheet(SHEET.REGISTRATIONS);
+  const regs=rows(regSheet);
+  const idx=regs.findIndex(r=>r.ID===p.registrationId);
+  if(idx<0) return err('ไม่พบรายการ');
+  const rowNum=idx+2;
+  const reg=regs[idx];
+  setCell(regSheet,rowNum,'Status',p.status);
+  setCell(regSheet,rowNum,'AdminNote',p.note||'');
+  setCell(regSheet,rowNum,'ApprovedAt',nowISO());
+  if(p.status==='approved') {
+    const memberId=generateMemberId(reg.Plan);
+    setCell(regSheet,rowNum,'MemberId',memberId);
+    const ph=reg.Phone?"'"+String(reg.Phone).replace(/^'/,''):reg.Phone;
+    getSheet(SHEET.MEMBERS).appendRow([memberId,reg.FirstName,reg.LastName,
+      reg.Email,ph,reg.LineId,reg.Plan,'active','','',0,0,nowISO()]);
+    if(reg.LineId) sendApproveMsg(reg.LineId,reg.FirstName,memberId,reg.Plan);
+    return ok({memberId, message:'Approve สำเร็จ Member ID: '+memberId});
+  }
+  if(p.status==='rejected') {
+    if(reg.LineId) sendRejectMsg(reg.LineId,reg.FirstName,p.note||'');
+    return ok({message:'Rejected แล้ว'});
+  }
+  return ok({});
+}
+
+function generateMemberId(plan) {
+  const prefix=plan==='quarter'?'OwnP':'OwnT';
+  let max=0;
+  rows(getSheet(SHEET.MEMBERS)).forEach(m=>{
+    if(String(m.ID).startsWith(prefix)){const n=parseInt(String(m.ID).replace(prefix,''),10);if(!isNaN(n)&&n>max)max=n;}
+  });
+  rows(getSheet(SHEET.REGISTRATIONS)).forEach(r=>{
+    if(String(r.MemberId).startsWith(prefix)){const n=parseInt(String(r.MemberId).replace(prefix,''),10);if(!isNaN(n)&&n>max)max=n;}
+  });
+  return prefix+String(max+1).padStart(4,'0');
+}
+
+// ── MEMBERS CRUD ──────────────────────────────────
 function getMembers() {
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const members = sheetToObjects(sheet).map(m => ({
-    id: m.ID, firstName: m.FirstName, lastName: m.LastName,
-    email: m.Email, phone: m.Phone, plan: m.Plan,
-    status: m.Status, expiry: m.ExpiryDate,
-    sessions: Number(m.TotalSessions)||0, fines: Number(m.Fines)||0
-  }));
-  return { success: true, members };
+  return ok({members:rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status!=='deleted').map(sanitizeMember)});
 }
-
-function updateProfile(p) {
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.id) {
-      if (p.firstName) sheet.getRange(i+1,2).setValue(p.firstName);
-      if (p.lastName)  sheet.getRange(i+1,3).setValue(p.lastName);
-      if (p.phone)     sheet.getRange(i+1,5).setValue(p.phone);
-      return { success: true };
-    }
-  }
-  return { success: false, message: 'ไม่พบสมาชิก' };
+function addMemberByAdmin(p) {
+  const sheet=getSheet(SHEET.MEMBERS);
+  if(rows(sheet).find(m=>m.Email===p.email)) return err('อีเมลนี้มีอยู่แล้ว');
+  const id=generateMemberId(p.plan||'trial');
+  const ph=p.phone?"'"+String(p.phone).replace(/[^0-9\-]/g,''):'';
+  sheet.appendRow([id,p.firstName,p.lastName||'',p.email,ph,p.lineId||'',p.plan||'trial','active','','',0,0,nowISO()]);
+  return ok({memberId:id});
 }
-
+function updateMember(p) {
+  const sheet=getSheet(SHEET.MEMBERS);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบสมาชิก');
+  const fields={FirstName:p.firstName,LastName:p.lastName,Email:p.email,Phone:p.phone,Plan:p.plan,Status:p.status,ExpiryDate:p.expiryDate};
+  Object.entries(fields).forEach(([k,v])=>{if(v!==undefined)setCell(sheet,row,k,v);});
+  return ok({});
+}
 function deleteMember(p) {
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.id) {
-      sheet.getRange(i+1,9).setValue('deleted');
-      return { success: true };
-    }
-  }
-  return { success: false };
+  const sheet=getSheet(SHEET.MEMBERS);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบสมาชิก');
+  setCell(sheet,row,'Status','deleted');
+  return ok({});
 }
-
 function searchMembers(p) {
-  const q = (p.query||'').toLowerCase();
-  const sheet = getSheet(SHEETS.MEMBERS);
-  const result = sheetToObjects(sheet)
-    .filter(m => m.Status !== 'deleted')
-    .filter(m => (m.FirstName+' '+m.LastName+m.Email+m.ID).toLowerCase().includes(q))
-    .map(m => ({ id:m.ID, name:m.FirstName+' '+m.LastName, plan:m.Plan }));
-  return { success: true, members: result };
+  const q=(p.query||'').toLowerCase();
+  return ok({members:rows(getSheet(SHEET.MEMBERS))
+    .filter(m=>m.Status!=='deleted')
+    .filter(m=>[m.FirstName,m.LastName,m.Email,m.ID,m.Phone].join(' ').toLowerCase().includes(q))
+    .map(m=>({id:m.ID,name:m.FirstName+' '+m.LastName,plan:m.Plan,email:m.Email}))});
+}
+function updateProfile(p) {
+  const sheet=getSheet(SHEET.MEMBERS);
+  const row=findRow(sheet,0,p.memberId);
+  if(row<0) return err('ไม่พบสมาชิก');
+  if(p.firstName) setCell(sheet,row,'FirstName',p.firstName);
+  if(p.lastName)  setCell(sheet,row,'LastName',p.lastName);
+  if(p.phone)     setCell(sheet,row,'Phone',p.phone);
+  return ok({});
 }
 
-// ════════════════════════════════════════════════════════════
-// CLASSES CRUD
-// ════════════════════════════════════════════════════════════
-
+// ── CLASSES ───────────────────────────────────────
 function getClasses() {
-  const sheet = getSheet(SHEETS.CLASSES);
-  const classes = sheetToObjects(sheet)
-    .filter(c => c.Status === 'active')
-    .map(c => ({
-      id: c.ID, name: c.Name, day: c.Day, time: c.Time,
-      type: c.Type, maxSeats: Number(c.MaxSeats)||0,
-      bookedSeats: Number(c.BookedSeats)||0, zoomLink: c.ZoomLink||''
-    }));
-  return { success: true, classes };
+  return ok({classes:rows(getSheet(SHEET.CLASSES))
+    .filter(c=>c.Status==='active')
+    .map(c=>({
+      id:c.ID, name:c.Name, day:c.Day, time:c.Time, type:c.Type,
+      maxSeats:Number(c.MaxSeats)||0, bookedSeats:Number(c.BookedSeats)||0,
+      zoomLink:c.ZoomLink||'', zoomId:c.ZoomId||'', zoomPw:c.ZoomPw||'',
+      imageUrl:c.ImageUrl||'', description:c.Description||'',
+    }))});
 }
 
+// Helper to clean phone — keep digits and dashes, preserve leading 0
+function cleanPhone(ph) {
+  if(!ph) return '';
+  const s = String(ph).replace(/^'/,''); // strip apostrophe
+  return s;
+}
 function addClass(p) {
-  const sheet = getSheet(SHEETS.CLASSES);
-  const id = genId('CLS');
-  sheet.appendRow([id, p.name, p.day, p.time, p.type||'onsite', p.maxSeats||10, 0, 'active', p.zoomLink||'', now()]);
-  return { success: true, id };
+  const id=genId('CLS');
+  getSheet(SHEET.CLASSES).appendRow([id,p.name,p.day,p.time,p.type||'onsite',
+    p.maxSeats||10,0,'active',p.zoomLink||'',p.imageUrl||'',p.description||'',nowISO()]);
+  return ok({id});
 }
-
 function updateClass(p) {
-  const sheet = getSheet(SHEETS.CLASSES);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.id) {
-      if (p.name)     sheet.getRange(i+1,2).setValue(p.name);
-      if (p.day)      sheet.getRange(i+1,3).setValue(p.day);
-      if (p.time)     sheet.getRange(i+1,4).setValue(p.time);
-      if (p.maxSeats) sheet.getRange(i+1,6).setValue(p.maxSeats);
-      if (p.status)   sheet.getRange(i+1,8).setValue(p.status);
-      if (p.zoomLink) sheet.getRange(i+1,9).setValue(p.zoomLink);
-      return { success: true };
-    }
-  }
-  return { success: false };
+  const sheet=getSheet(SHEET.CLASSES);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบคลาส');
+  const fields={Name:p.name,Day:p.day,Time:p.time,Type:p.type,MaxSeats:p.maxSeats,
+    Status:p.status,ZoomLink:p.zoomLink,ImageUrl:p.imageUrl,Description:p.description};
+  Object.entries(fields).forEach(([k,v])=>{if(v!==undefined&&v!=='')setCell(sheet,row,k,v);});
+  return ok({});
 }
-
 function deleteClass(p) {
-  const sheet = getSheet(SHEETS.CLASSES);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.id) {
-      sheet.getRange(i+1,8).setValue('deleted');
-      return { success: true };
-    }
-  }
-  return { success: false };
+  const sheet=getSheet(SHEET.CLASSES);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบคลาส');
+  setCell(sheet,row,'Status','deleted');
+  return ok({});
 }
 
-// ════════════════════════════════════════════════════════════
-// BOOKINGS
-// ════════════════════════════════════════════════════════════
-
+// ── BOOKINGS ──────────────────────────────────────
 function createBooking(p) {
-  if (!p.memberId || !p.className)
-    return { success: false, message: 'ข้อมูลไม่ครบ' };
-
-  const sheet = getSheet(SHEETS.BOOKINGS);
-  const bookings = sheetToObjects(sheet);
-
-  const dup = bookings.find(b =>
-    b.MemberID === p.memberId &&
-    b.ClassName === p.className &&
-    b.Status !== 'cancelled'
-  );
-  if (dup) return { success: false, message: 'คุณจองคลาสนี้แล้ว' };
-
-  // Check seat availability
-  if (p.classId) {
-    const classSheet = getSheet(SHEETS.CLASSES);
-    const classes = sheetToObjects(classSheet);
-    const cls = classes.find(c => c.ID === p.classId);
-    if (cls && Number(cls.BookedSeats) >= Number(cls.MaxSeats))
-      return { success: false, message: 'ที่นั่งเต็มแล้ว' };
-  }
-
-  const id = genId('BKG');
-  sheet.appendRow([
-    id, p.memberId, p.classId||'', p.className,
-    now(), p.classDate||'', p.time||'', p.type||'',
-    'pending', false, now()
-  ]);
-
-  // Increment booked seats
-  if (p.classId) {
-    const classSheet = getSheet(SHEETS.CLASSES);
-    const data = classSheet.getDataRange().getValues();
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === p.classId) {
-        classSheet.getRange(i+1,7).setValue(Number(data[i][6]||0)+1);
-        break;
-      }
-    }
-  }
-
-  return { success: true, bookingId: id };
+  if(!p.memberId||!p.classId) return err('ข้อมูลไม่ครบ');
+  const bookSheet=getSheet(SHEET.BOOKINGS);
+  const dup=rows(bookSheet).find(b=>b.MemberID===p.memberId&&b.ClassID===p.classId&&b.Status!=='cancelled');
+  if(dup) return err('คุณจองคลาสนี้แล้ว');
+  const classes=rows(getSheet(SHEET.CLASSES));
+  const cls=classes.find(c=>c.ID===p.classId);
+  if(!cls) return err('ไม่พบคลาส');
+  if(Number(cls.BookedSeats)>=Number(cls.MaxSeats)) return err('ที่นั่งเต็มแล้ว');
+  // Get member name
+  const mem=rows(getSheet(SHEET.MEMBERS)).find(m=>m.ID===p.memberId);
+  const memName=mem?(mem.FirstName+' '+mem.LastName).trim():p.memberId;
+  const id=genId('BKG');
+  bookSheet.appendRow([id,p.memberId,memName,p.classId,cls.Name,cls.Day,cls.Time,cls.Type,'confirmed',false,nowISO()]);
+  const classSheet=getSheet(SHEET.CLASSES);
+  const classRow=findRow(classSheet,0,p.classId);
+  if(classRow>0) setCell(classSheet,classRow,'BookedSeats',Number(cls.BookedSeats)+1);
+  return ok({bookingId:id,className:cls.Name});
 }
-
 function cancelBooking(p) {
-  const sheet = getSheet(SHEETS.BOOKINGS);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.bookingId) {
-      sheet.getRange(i+1,9).setValue('cancelled');
-      // Decrement seat count
-      if (data[i][2]) {
-        const classSheet = getSheet(SHEETS.CLASSES);
-        const cd = classSheet.getDataRange().getValues();
-        for (let j = 1; j < cd.length; j++) {
-          if (cd[j][0] === data[i][2]) {
-            classSheet.getRange(j+1,7).setValue(Math.max(0, Number(cd[j][6]||0)-1));
-            break;
-          }
-        }
-      }
-      return { success: true };
-    }
+  const sheet=getSheet(SHEET.BOOKINGS);
+  const bks=rows(sheet);
+  const idx=bks.findIndex(b=>b.ID===p.bookingId);
+  if(idx<0) return err('ไม่พบการจอง');
+  setCell(sheet,idx+2,'Status','cancelled');
+  const b=bks[idx];
+  if(b.ClassID){
+    const cs=getSheet(SHEET.CLASSES);
+    const cr=findRow(cs,0,b.ClassID);
+    if(cr>0){const cl=rows(cs).find(c=>c.ID===b.ClassID);if(cl)setCell(cs,cr,'BookedSeats',Math.max(0,Number(cl.BookedSeats)-1));}
   }
-  return { success: false };
+  return ok({});
 }
-
 function getBookings(p) {
-  const sheet = getSheet(SHEETS.BOOKINGS);
-  let bookings = sheetToObjects(sheet);
-  if (p.memberId) bookings = bookings.filter(b => b.MemberID === p.memberId);
-  if (p.status)   bookings = bookings.filter(b => b.Status === p.status);
-  return { success: true, bookings };
+  let bks=rows(getSheet(SHEET.BOOKINGS));
+  if(p.memberId) bks=bks.filter(b=>b.MemberID===p.memberId);
+  if(p.status)   bks=bks.filter(b=>b.Status===p.status);
+  return ok({bookings:bks});
+}
+function getMemberBookings(p) {
+  if(!p.memberId) return err('ไม่มี memberId');
+  return ok({bookings:rows(getSheet(SHEET.BOOKINGS))
+    .filter(b=>b.MemberID===p.memberId)
+    .map(b=>({id:b.ID,classId:b.ClassID,className:b.ClassName,
+      day:b.ClassDay,time:b.ClassTime,type:b.Type,
+      status:b.Status,checkedIn:b.CheckedIn,bookedAt:b.BookedAt}))});
+}
+function updateBooking(p) {
+  const sheet=getSheet(SHEET.BOOKINGS);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบการจอง');
+  if(p.status) setCell(sheet,row,'Status',p.status);
+  if(p.checkedIn!==undefined) setCell(sheet,row,'CheckedIn',p.checkedIn);
+  return ok({});
 }
 
-// ════════════════════════════════════════════════════════════
-// CHECK-IN
-// ════════════════════════════════════════════════════════════
-
+// ── CHECK-IN ──────────────────────────────────────
 function processCheckin(p) {
-  if (!p.memberId) return { success: false, message: 'ไม่มี Member ID' };
-
-  // 1. Validate member
-  const memberSheet = getSheet(SHEETS.MEMBERS);
-  const memberData = memberSheet.getDataRange().getValues();
-  let memberRow = -1, member = null;
-
-  for (let i = 1; i < memberData.length; i++) {
-    if (memberData[i][0] === p.memberId) {
-      memberRow = i + 1;
-      member = {
-        id: memberData[i][0], firstName: memberData[i][1], lastName: memberData[i][2],
-        plan: memberData[i][7], status: memberData[i][8],
-        startDate: memberData[i][9], expiryDate: memberData[i][10],
-        sessions: Number(memberData[i][11])||0
-      };
+  if(!p.memberId) return err('ไม่มี Member ID');
+  const memberSheet=getSheet(SHEET.MEMBERS);
+  const memberData=memberSheet.getDataRange().getValues();
+  const headers=memberData[0];
+  const idIdx=headers.indexOf('ID');
+  // Case-insensitive search
+  const searchId = String(p.memberId).trim().toUpperCase();
+  let memberRow=-1, member=null;
+  for(let i=1;i<memberData.length;i++){
+    if(String(memberData[i][idIdx]).trim().toUpperCase()===searchId){
+      memberRow=i+1; member={};
+      headers.forEach((h,j)=>{member[h]=memberData[i][j];});
       break;
     }
   }
-
-  if (!member) return { success: false, message: 'ไม่พบ Member ID: ' + p.memberId };
-  if (member.status !== 'active') return { success: false, message: 'สมาชิกถูกระงับ' };
-
-  // 2. Check membership not expired
-  if (member.expiryDate) {
-    const expiry = new Date(member.expiryDate);
-    if (expiry < new Date()) return { success: false, message: 'แพ็กเกจหมดอายุแล้ว กรุณาต่ออายุ' };
+  if(!member) return err('ไม่พบ Member ID: '+p.memberId);
+  if(member.Status!=='active') return err('สมาชิกถูกระงับ');
+  if(member.ExpiryDate&&member.ExpiryDate!==''){
+    const exp=new Date(member.ExpiryDate);
+    if(!isNaN(exp)&&exp<new Date()) return err('แพ็กเกจหมดอายุ');
   }
-
-  // 3. Find today's confirmed booking
-  const bookingSheet = getSheet(SHEETS.BOOKINGS);
-  const bookingData = bookingSheet.getDataRange().getValues();
-  let bookingRow = -1, bookingName = p.className || 'Walk-in';
-
-  for (let i = 1; i < bookingData.length; i++) {
-    if (bookingData[i][1] === p.memberId &&
-        bookingData[i][8] === 'confirmed' &&
-        !bookingData[i][9]) {
-      bookingRow = i + 1;
-      bookingName = bookingData[i][3] || bookingName;
-      bookingSheet.getRange(bookingRow, 10).setValue(true);
+  const bookSheet=getSheet(SHEET.BOOKINGS);
+  const bookData=bookSheet.getDataRange().getValues();
+  const bookHdrs=bookData[0];
+  let bookingName=p.className||'Walk-in';
+  for(let i=1;i<bookData.length;i++){
+    if(String(bookData[i][bookHdrs.indexOf('MemberID')]).toUpperCase()===searchId&&
+       String(bookData[i][bookHdrs.indexOf('Status')])  ==='confirmed'&&
+       !bookData[i][bookHdrs.indexOf('CheckedIn')]){
+      bookingName=String(bookData[i][bookHdrs.indexOf('ClassName')])||bookingName;
+      bookSheet.getRange(i+1,bookHdrs.indexOf('CheckedIn')+1).setValue(true);
       break;
     }
   }
-
-  // 4. Log check-in
-  const checkinSheet = getSheet(SHEETS.CHECKINS);
-  checkinSheet.appendRow([
-    genId('CHK'),
-    member.id,
-    member.firstName + ' ' + member.lastName,
-    '',
-    bookingName,
-    new Date().toISOString(),
-    p.method || 'qr',
-    p.adminId || ''
-  ]);
-
-  // 5. Start membership period on first check-in
-  if (!member.startDate) {
-    const startDate = new Date();
-    const expiryDate = new Date();
-    if (member.plan === 'quarter') expiryDate.setDate(expiryDate.getDate() + 90);
-    else expiryDate.setDate(expiryDate.getDate() + 1);
-    memberSheet.getRange(memberRow, 10).setValue(Utilities.formatDate(startDate,'Asia/Bangkok','yyyy-MM-dd'));
-    memberSheet.getRange(memberRow, 11).setValue(Utilities.formatDate(expiryDate,'Asia/Bangkok','yyyy-MM-dd'));
+  getSheet(SHEET.CHECKINS).appendRow([genId('CHK'),member.ID,
+    member.FirstName+' '+member.LastName,'',bookingName,new Date().toISOString(),p.method||'admin',p.adminId||'']);
+  if(!member.StartDate||member.StartDate===''){
+    const s=new Date(),ex=new Date();
+    if(member.Plan==='quarter') ex.setDate(ex.getDate()+90); else ex.setDate(ex.getDate()+1);
+    setCell(memberSheet,memberRow,'StartDate',Utilities.formatDate(s,'Asia/Bangkok','yyyy-MM-dd'));
+    setCell(memberSheet,memberRow,'ExpiryDate',Utilities.formatDate(ex,'Asia/Bangkok','yyyy-MM-dd'));
   }
+  const sessions=Number(member.TotalSessions||0)+1;
+  setCell(memberSheet,memberRow,'TotalSessions',sessions);
+  return ok({memberName:member.FirstName+' '+member.LastName,memberId:member.ID,
+    plan:member.Plan,className:bookingName,sessions,
+    checkinTime:Utilities.formatDate(new Date(),'Asia/Bangkok','HH:mm')});
+}
 
-  // 6. Increment session count
-  memberSheet.getRange(memberRow, 12).setValue(member.sessions + 1);
-
-  return {
-    success: true,
-    memberName: member.firstName + ' ' + member.lastName,
-    memberId: member.id,
-    plan: member.plan,
-    className: bookingName,
-    sessions: member.sessions + 1,
-    checkinTime: Utilities.formatDate(new Date(),'Asia/Bangkok','HH:mm')
-  };
+function checkinByRoomQR(p) {
+  if(!p.qrToken||!p.memberId) return err('ข้อมูลไม่ครบ');
+  const qrs=rows(getSheet(SHEET.ROOM_QR));
+  const qr=qrs.find(q=>q.QRToken===p.qrToken&&(q.Active===true||q.Active==='TRUE'));
+  if(!qr) return err('QR Code ไม่ถูกต้อง');
+  if(qr.ExpiresAt&&new Date(qr.ExpiresAt)<new Date()) return err('QR Code หมดอายุ');
+  const result=processCheckin({memberId:p.memberId,classId:qr.ClassID,className:qr.ClassName,method:'room_qr'});
+  if(!result.success) return result;
+  const cls=rows(getSheet(SHEET.CLASSES)).find(c=>c.ID===qr.ClassID);
+  const type=cls?.Type||'onsite';
+  const amt={online:Number(getSetting('fine_online')||20),onsite:Number(getSetting('fine_onsite')||50),hybrid:Number(getSetting('fine_hybrid')||100)};
+  addFine({memberId:p.memberId,memberName:result.memberName,classId:qr.ClassID,className:qr.ClassName,type,amount:amt[type]||50,reason:'Walk-in ไม่ได้จองล่วงหน้า'});
+  return {...result, fine:amt[type]||50, fineAdded:true};
 }
 
 function getCheckins(p) {
-  const sheet = getSheet(SHEETS.CHECKINS);
-  let checkins = sheetToObjects(sheet);
-  if (p.today) checkins = checkins.filter(c => String(c.CheckInTime).startsWith(todayStr()));
-  if (p.memberId) checkins = checkins.filter(c => c.MemberID === p.memberId);
-  return { success: true, checkins };
+  let ci=rows(getSheet(SHEET.CHECKINS));
+  if(p.today) ci=ci.filter(c=>String(c.CheckInTime).startsWith(todayStr()));
+  if(p.memberId) ci=ci.filter(c=>c.MemberID===p.memberId);
+  return ok({checkins:ci});
 }
 
-// ════════════════════════════════════════════════════════════
-// FINES
-// ════════════════════════════════════════════════════════════
+function getMemberHistory(p) {
+  if(!p.memberId) return err('ไม่มี memberId');
+  const ci=rows(getSheet(SHEET.CHECKINS)).filter(c=>c.MemberID===p.memberId)
+    .map(c=>({date:c.CheckInTime,className:c.ClassName,method:c.Method}));
+  const fi=rows(getSheet(SHEET.FINES)).filter(f=>f.MemberID===p.memberId)
+    .map(f=>({date:f.Date,amount:f.Amount,status:f.Status,class:f.ClassName}));
+  return ok({checkins:ci,fines:fi});
+}
 
-const FINE_AMOUNTS = { online: 20, onsite: 50, hybrid: 100 };
-
+// ── FINES ─────────────────────────────────────────
 function getFines(p) {
-  const sheet = getSheet(SHEETS.FINES);
-  let fines = sheetToObjects(sheet);
-  if (p.memberId) fines = fines.filter(f => f.MemberID === p.memberId);
-  if (p.status)   fines = fines.filter(f => f.Status === p.status);
-  const totalPending = fines.filter(f=>f.Status==='pending').reduce((s,f)=>s+Number(f.Amount||0),0);
-  return { success: true, fines, totalPending };
+  let fi=rows(getSheet(SHEET.FINES));
+  if(p.memberId) fi=fi.filter(f=>f.MemberID===p.memberId);
+  if(p.status)   fi=fi.filter(f=>f.Status===p.status);
+  const total=fi.filter(f=>f.Status==='pending').reduce((s,f)=>s+Number(f.Amount||0),0);
+  return ok({fines:fi, totalPending:total});
 }
-
 function addFine(p) {
-  const sheet = getSheet(SHEETS.FINES);
-  const amount = p.amount || FINE_AMOUNTS[p.type||'onsite'] || 50;
-  const id = genId('FNE');
-  sheet.appendRow([id, p.memberId, p.memberName||'', p.classId||'', p.className||'', todayStr(), amount, 'pending', '']);
-
-  // Update member fines total
-  const mSheet = getSheet(SHEETS.MEMBERS);
-  const mData = mSheet.getDataRange().getValues();
-  for (let i = 1; i < mData.length; i++) {
-    if (mData[i][0] === p.memberId) {
-      mSheet.getRange(i+1,13).setValue(Number(mData[i][12]||0) + amount);
-      break;
-    }
-  }
-  return { success: true, id, amount };
+  const fineMap={online:20,onsite:50,hybrid:100};
+  const amount=p.amount||fineMap[p.type||'onsite']||50;
+  const id=genId('FNE');
+  getSheet(SHEET.FINES).appendRow([id,p.memberId,p.memberName||'',p.classId||'',p.className||'',
+    todayStr(),amount,p.type||'onsite',p.reason||'',  'pending','']);
+  const ms=getSheet(SHEET.MEMBERS);
+  const mr=findRow(ms,0,p.memberId);
+  if(mr>0){const m=rows(ms).find(x=>x.ID===p.memberId);if(m)setCell(ms,mr,'PendingFines',Number(m.PendingFines||0)+amount);}
+  return ok({id,amount});
 }
-
+function updateFine(p) {
+  const sheet=getSheet(SHEET.FINES);
+  const row=findRow(sheet,0,p.id);
+  if(row<0) return err('ไม่พบรายการ');
+  if(p.amount!==undefined) setCell(sheet,row,'Amount',p.amount);
+  if(p.reason!==undefined) setCell(sheet,row,'Reason',p.reason);
+  if(p.status!==undefined) setCell(sheet,row,'Status',p.status);
+  return ok({});
+}
 function markFinePaid(p) {
-  const sheet = getSheet(SHEETS.FINES);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === p.fineId) {
-      sheet.getRange(i+1,8).setValue('paid');
-      sheet.getRange(i+1,9).setValue(todayStr());
-      return { success: true };
-    }
-  }
-  return { success: false };
+  const sheet=getSheet(SHEET.FINES);
+  const row=findRow(sheet,0,p.fineId);
+  if(row<0) return err('ไม่พบรายการ');
+  setCell(sheet,row,'Status','paid');
+  setCell(sheet,row,'PaidDate',todayStr());
+  return ok({});
 }
-
-// Auto-fine for no-shows (run via Time Trigger, e.g. every night 23:00)
 function autoFineNoShows() {
-  const bookingSheet = getSheet(SHEETS.BOOKINGS);
-  const bookings = sheetToObjects(bookingSheet);
-  const classSheet = getSheet(SHEETS.CLASSES);
-  const classes = sheetToObjects(classSheet);
-
-  bookings.forEach(b => {
-    if (b.Status === 'confirmed' && !b.CheckedIn && b.ClassDate === todayStr()) {
-      const cls = classes.find(c => c.ID === b.ClassID);
-      const type = cls ? cls.Type : 'onsite';
-      addFine({
-        memberId: b.MemberID,
-        memberName: b.MemberID,
-        classId: b.ClassID,
-        className: b.ClassName,
-        type: type
-      });
-      // Cancel the booking
-      const bData = bookingSheet.getDataRange().getValues();
-      for (let i = 1; i < bData.length; i++) {
-        if (bData[i][0] === b.ID) { bookingSheet.getRange(i+1,9).setValue('no-show'); break; }
-      }
-    }
+  rows(getSheet(SHEET.BOOKINGS)).filter(b=>b.Status==='confirmed'&&!b.CheckedIn).forEach(b=>{
+    const cls=rows(getSheet(SHEET.CLASSES)).find(c=>c.ID===b.ClassID);
+    addFine({memberId:b.MemberID,memberName:b.MemberName,classId:b.ClassID,className:b.ClassName,type:cls?.Type||'onsite'});
+    const s=getSheet(SHEET.BOOKINGS);const r=findRow(s,0,b.ID);if(r>0)setCell(s,r,'Status','no-show');
   });
 }
 
-// ════════════════════════════════════════════════════════════
-// STATS & REPORTS
-// ════════════════════════════════════════════════════════════
-
-function getStats() {
-  const members = sheetToObjects(getSheet(SHEETS.MEMBERS));
-  const checkins = sheetToObjects(getSheet(SHEETS.CHECKINS));
-  const fines = sheetToObjects(getSheet(SHEETS.FINES));
-  const bookings = sheetToObjects(getSheet(SHEETS.BOOKINGS));
-
-  const today = todayStr();
-  const todayCI = checkins.filter(c => String(c.CheckInTime).startsWith(today));
-  const pendingFines = fines.filter(f=>f.Status==='pending').reduce((s,f)=>s+Number(f.Amount||0),0);
-  const pendingBk = bookings.filter(b=>b.Status==='confirmed'&&!b.CheckedIn);
-
-  return {
-    success: true,
-    totalMembers: members.filter(m=>m.Status==='active').length,
-    quarterMembers: members.filter(m=>m.Plan==='quarter'&&m.Status==='active').length,
-    trialMembers: members.filter(m=>m.Plan==='trial'&&m.Status==='active').length,
-    todayCheckins: todayCI.length,
-    pendingFines,
-    pendingBookings: pendingBk.length,
-    recentCheckins: todayCI.slice(-5).reverse().map(c => ({
-      name: c.MemberName, class: c.ClassName,
-      time: c.CheckInTime ? new Date(c.CheckInTime).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '—'
-    })),
-    pendingCheckins: pendingBk.slice(0,10).map(b => ({
-      name: b.MemberID, class: b.ClassName, memberId: b.MemberID
-    }))
-  };
-} 
-
-function getReports(p) {
-  const month = p.month || Utilities.formatDate(new Date(),'Asia/Bangkok','yyyy-MM');
-  const members = sheetToObjects(getSheet(SHEETS.MEMBERS));
-  const checkins = sheetToObjects(getSheet(SHEETS.CHECKINS));
-  const fines = sheetToObjects(getSheet(SHEETS.FINES));
-
-  const newMembers = members.filter(m => String(m.CreatedAt).startsWith(month));
-  const monthSessions = checkins.filter(c => String(c.CheckInTime).startsWith(month));
-  const newQ = newMembers.filter(m=>m.Plan==='quarter').length;
-  const newT = newMembers.filter(m=>m.Plan==='trial').length;
-  const fineRevenue = fines.filter(f=>f.Status==='paid'&&String(f.PaidDate).startsWith(month)).reduce((s,f)=>s+Number(f.Amount||0),0);
-
-  return {
-    success: true,
-    monthRevenue: (newQ * 600) + (newT * 150) + fineRevenue,
-    newMembers: newMembers.length,
-    sessions: monthSessions.length,
-    quarterRevenue: newQ * 600,
-    trialRevenue: newT * 150,
-    fineRevenue
-  };
+// ── ROOM QR ───────────────────────────────────────
+function generateRoomQR(p) {
+  if(!p.classId) return err('ไม่มี classId');
+  const cls=rows(getSheet(SHEET.CLASSES)).find(c=>c.ID===p.classId);
+  if(!cls) return err('ไม่พบคลาส');
+  const qrSheet=getSheet(SHEET.ROOM_QR);
+  rows(qrSheet).forEach((q,i)=>{if(q.ClassID===p.classId&&q.Active)setCell(qrSheet,i+2,'Active',false);});
+  const token=Utilities.getUuid();
+  const expiry=new Date(); expiry.setHours(expiry.getHours()+(Number(p.validHours)||24));
+  const id=genId('QR');
+  qrSheet.appendRow([id,p.classId,cls.Name,token,nowISO(),expiry.toISOString(),true]);
+  const siteUrl=getSetting('site_url')||'https://the-owner-app2.vercel.app';
+  return ok({id,token,qrUrl:siteUrl+'/index.html?action=roomCheckin&token='+token,className:cls.Name,expiresAt:expiry.toISOString()});
+}
+function getRoomQRs() {
+  return ok({qrs:rows(getSheet(SHEET.ROOM_QR))
+    .filter(q=>q.Active===true||q.Active==='TRUE')
+    .map(q=>({id:q.ID,classId:q.ClassID,className:q.ClassName,token:q.QRToken,createdAt:q.CreatedAt,expiresAt:q.ExpiresAt}))});
 }
 
-// ════════════════════════════════════════════════════════════
-// SETUP TRIGGER (run once manually)
-// ════════════════════════════════════════════════════════════
+// ── STATS ─────────────────────────────────────────
+function getStats() {
+  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status!=='deleted');
+  const checkins=rows(getSheet(SHEET.CHECKINS));
+  const fines=rows(getSheet(SHEET.FINES));
+  const regs=rows(getSheet(SHEET.REGISTRATIONS));
+  const today=todayStr();
+  const todayCI=checkins.filter(c=>String(c.CheckInTime).startsWith(today));
+  const pendingFines=fines.filter(f=>f.Status==='pending').reduce((s,f)=>s+Number(f.Amount||0),0);
+  const pendingApprovals=regs.filter(r=>r.Status==='waiting').length;
+  // Monthly data for chart
+  const now=new Date();
+  const monthlyData=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const m=Utilities.formatDate(d,'Asia/Bangkok','yyyy-MM');
+    const newM=regs.filter(r=>String(r.CreatedAt).startsWith(m)&&r.Status==='approved').length;
+    const rev=regs.filter(r=>String(r.CreatedAt).startsWith(m)&&r.Status==='approved')
+      .reduce((s,r)=>s+Number(r.Amount||0),0);
+    const ciCnt=checkins.filter(c=>String(c.CheckInTime).startsWith(m)).length;
+    monthlyData.push({month:m,newMembers:newM,revenue:rev,checkins:ciCnt});
+  }
+  return ok({
+    totalMembers:members.filter(m=>m.Status==='active').length,
+    quarterMembers:members.filter(m=>m.Plan==='quarter'&&m.Status==='active').length,
+    trialMembers:members.filter(m=>m.Plan==='trial'&&m.Status==='active').length,
+    todayCheckins:todayCI.length,
+    pendingFines,pendingApprovals,
+    monthlyData,
+    recentPending:regs.filter(r=>r.Status==='waiting').slice(-5).reverse().map(r=>({
+      name:r.FirstName+' '+r.LastName, plan:r.Plan,
+      time:r.CreatedAt?new Date(r.CreatedAt).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—',
+    })),
+    recentCheckins:todayCI.slice(-5).reverse().map(c=>({
+      name:c.MemberName, class:c.ClassName,
+      time:c.CheckInTime?new Date(c.CheckInTime).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—',
+    })),
+  });
+}
 
+// ── REPORTS ───────────────────────────────────────
+function getReports(p) {
+  const month=p.month||Utilities.formatDate(new Date(),'Asia/Bangkok','yyyy-MM');
+  const regs=rows(getSheet(SHEET.REGISTRATIONS));
+  const fines=rows(getSheet(SHEET.FINES));
+  const checkins=rows(getSheet(SHEET.CHECKINS));
+  const newRegs=regs.filter(r=>String(r.CreatedAt).startsWith(month)&&r.Status==='approved');
+  const newQ=newRegs.filter(r=>r.Plan==='quarter').length;
+  const newT=newRegs.filter(r=>r.Plan==='trial').length;
+  const fineRevenue=fines.filter(f=>f.Status==='paid'&&String(f.PaidDate).startsWith(month))
+    .reduce((s,f)=>s+Number(f.Amount||0),0);
+  const memberRevenue=(newQ*600)+(newT*150);
+  return ok({
+    monthRevenue:memberRevenue+fineRevenue,
+    memberRevenue, fineRevenue,
+    newMembers:newRegs.length, sessions:checkins.filter(c=>String(c.CheckInTime).startsWith(month)).length,
+    quarterRevenue:newQ*600, trialRevenue:newT*150,
+  });
+}
+
+// ── SETTINGS ──────────────────────────────────────
+function getSettingsPublic() {
+  const s={};
+  rows(getSheet(SHEET.SETTINGS)).forEach(r=>{
+    // ไม่ส่ง sensitive keys ออกไป
+    if(!['line_token'].includes(r.Key)) s[r.Key]=r.Value;
+  });
+  return ok({settings:s});
+}
+function getSettingsAll() {
+  const s={};
+  rows(getSheet(SHEET.SETTINGS)).forEach(r=>{s[r.Key]=r.Value;});
+  return ok({settings:s});
+}
+function saveSettings(p) {
+  if(!p.settings) return err('ไม่มีข้อมูล');
+  const sheet=getSheet(SHEET.SETTINGS);
+  const data=sheet.getDataRange().getValues();
+  const headers=data[0];
+  const ki=headers.indexOf('Key'), vi=headers.indexOf('Value');
+  Object.entries(p.settings).forEach(([key,value])=>{
+    let found=false;
+    for(let i=1;i<data.length;i++){
+      if(data[i][ki]===key){sheet.getRange(i+1,vi+1).setValue(value);found=true;break;}
+    }
+    if(!found) sheet.appendRow([key,value,'']);
+  });
+  return ok({message:'บันทึกสำเร็จ'});
+}
+
+// ── LINE MESSAGING ────────────────────────────────
+function sendApproveMsg(lineUserId, firstName, memberId, plan) {
+  const token=getSetting('line_token'); if(!token) return;
+  const zoomId=getSetting('zoom_id')||'964 333 6086';
+  const zoomPw=getSetting('zoom_pw')||'12345';
+  const planLabel=plan==='quarter'?'Quarter (3 เดือน)':'Trial (รายครั้ง)';
+  pushLine(lineUserId,[
+    '🎉 ยินดีต้อนรับสู่ The Owner!',
+    '',`สวัสดี คุณ${firstName}`,
+    'การสมัครของคุณได้รับการ Approve แล้ว ✅','',
+    '━━━━━━━━━━━━━━━━━━',
+    `🆔 Member ID: ${memberId}`,
+    `📦 แพ็กเกจ: ${planLabel}`,'',
+    '🎥 Zoom Class Info:',
+    `Meeting ID: ${zoomId}`,
+    `Password: ${zoomPw}`,
+    '━━━━━━━━━━━━━━━━━━','',
+    '⚠️ อายุสมาชิกเริ่มนับตั้งแต่วัน Check-in ครั้งแรก',
+    'ติดต่อ: LINE OA @theowner',
+  ].join('\n'),token);
+}
+function sendRejectMsg(lineUserId, firstName, note) {
+  const token=getSetting('line_token'); if(!token) return;
+  pushLine(lineUserId,['❌ The Owner — การสมัครไม่ผ่าน','',
+    `สวัสดี คุณ${firstName}`,
+    'ขออภัย Slip ของคุณไม่ผ่านการตรวจสอบ',
+    note?'เหตุผล: '+note:'',
+    '','กรุณาติดต่อ Admin ผ่าน LINE OA @theowner'].join('\n'),token);
+}
+
+// ── CLASS REMINDER (รัน Daily Trigger 13:00) ──────
+function sendClassReminders() {
+  const token=getSetting('line_token'); if(!token) return {success:false,message:'ไม่มี LINE token'};
+  const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const thDays=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const tomorrowDay=thDays[tomorrow.getDay()];
+  const classes=rows(getSheet(SHEET.CLASSES)).filter(c=>c.Status==='active'&&c.Day===tomorrowDay);
+  if(!classes.length) return ok({message:'ไม่มีคลาสพรุ่งนี้'});
+  const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>m.Status==='active'&&m.LineId);
+  let sent=0;
+  classes.forEach(cls=>{
+    const zoomId=cls.ZoomLink?'(ดูใน Zoom Link)':getSetting('zoom_id')||'964 333 6086';
+    const zoomPw=cls.ZoomLink?'':getSetting('zoom_pw')||'12345';
+    const msg=[
+      `🔔 แจ้งเตือน: มีคลาสพรุ่งนี้!`,``,
+      `📚 ${cls.Name}`,
+      `📅 ${tomorrowDay} เวลา ${cls.Time}`,
+      `📍 ประเภท: ${cls.Type==='online'?'Online 🖥️':cls.Type==='onsite'?'Onsite 🏢':'Hybrid ⚡'}`,
+      cls.Type!=='onsite'?`🎥 Zoom: ${zoomId}${zoomPw?' / '+zoomPw:''}`:'',
+      ``,`อย่าลืม Check-in นะครับ 😊`,
+    ].filter(Boolean).join('\n');
+    members.forEach(m=>{
+      try{ pushLine(m.LineId,msg,token); sent++; }catch(e){}
+      Utilities.sleep(100);
+    });
+  });
+  return ok({message:`ส่งแจ้งเตือน ${sent} คน สำหรับ ${classes.length} คลาส`});
+}
+
+function pushLine(userId, text, token) {
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push',{
+      method:'post',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      payload:JSON.stringify({to:userId,messages:[{type:'text',text}]}),
+      muteHttpExceptions:true,
+    });
+  } catch(e){ Logger.log('LINE: '+e.message); }
+}
+
+// ── TRIGGERS ──────────────────────────────────────
 function createTriggers() {
-  // Auto-fine no-shows every night at 23:00
-  ScriptApp.newTrigger('autoFineNoShows')
-    .timeBased()
-    .atHour(23)
-    .everyDays(1)
-    .create();
-  Logger.log('Triggers created!');
+  // ลบ trigger เก่า
+  ScriptApp.getProjectTriggers().forEach(t=>ScriptApp.deleteTrigger(t));
+  // แจ้งเตือนล่วงหน้า 1 วัน เวลา 13:00
+  ScriptApp.newTrigger('sendClassReminders').timeBased().atHour(13).everyDays(1).create();
+  // ค่าปรับ no-show ทุกคืน 23:00
+  ScriptApp.newTrigger('autoFineNoShows').timeBased().atHour(23).everyDays(1).create();
+  Logger.log('✅ Triggers created');
 }

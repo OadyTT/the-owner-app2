@@ -1008,12 +1008,20 @@ function printQR(id,name) {
   w.document.write(`<html><body style="text-align:center;font-family:sans-serif;padding:20px;"><h2>THE OWNER</h2><h3>${name}</h3><p style="color:#666;font-size:13px;">Walk-in Check-in QR — มีค่าปรับ</p><img src="${canvas.toDataURL()}" style="width:200px;margin:16px 0;"><p style="font-size:12px;color:#999;">i am because we are</p><script>window.print();<\/script></body></html>`);
 }
 
-function openGenQR() {
-  api('getClasses').then(res=>{
-    const sel=document.getElementById('gq-cl');
-    if(sel&&res?.classes) sel.innerHTML=res.classes.map(c=>`<option value="${c.id}">${c.name} (${c.day} ${c.time})</option>`).join('');
-  });
+async function openGenQR() {
+  const sel = document.getElementById('gq-cl');
+  if (sel) sel.innerHTML = '<option>กำลังโหลด...</option>';
   openModal('gen-qr');
+  const res = await api('getClasses');
+  if (sel) {
+    if (res?.classes?.length) {
+      sel.innerHTML = res.classes.map(c =>
+        `<option value="${c.id}">${c.name} (${c.day} ${c.time})</option>`
+      ).join('');
+    } else {
+      sel.innerHTML = '<option value="">ไม่มีคลาส — กรุณาเพิ่มคลาสก่อน</option>';
+    }
+  }
 }
 
 async function genQR() {

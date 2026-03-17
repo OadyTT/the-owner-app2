@@ -1317,9 +1317,19 @@ function handleOverlayClick(e, name) {
 function refreshBankDisplay() {
   const a = document.getElementById('m-bank-acc');
   const o = document.getElementById('m-bank-owner');
-  if (a) a.textContent = CFG.bankAcc  || 'กำลังโหลด...';
-  if (o) o.textContent = CFG.bankOwner || '';
+  const n = document.getElementById('m-bank-name');
+  if (a) a.textContent = STATE.bankAcc   || 'กำลังโหลด...';
+  if (o) o.textContent = STATE.bankOwner || '';
+  if (n) n.textContent = (STATE.bankName || 'Bangkok Bank') + ' — PromptPay';
   updateAmountDisplay();
+  // ถ้ายังไม่มี ให้โหลดก่อน
+  if (!STATE.bankAcc) {
+    loadSettings().then(() => {
+      if (a) a.textContent = STATE.bankAcc   || '—';
+      if (o) o.textContent = STATE.bankOwner || '';
+      if (n) n.textContent = (STATE.bankName || 'Bangkok Bank') + ' — PromptPay';
+    });
+  }
 }
 
 // ─────────────────────────────────────────────────
@@ -1527,57 +1537,55 @@ function cycleFontSize() {
 async function loadPortal(user) {
   STATE.user = user;
   const mid  = user.memberId;
-  const name = user.firstName + ' ' + (user.lastName || '');
+  const name = (user.firstName + ' ' + (user.lastName || '')).trim();
 
-  // Update sidebar info
+  // Update sidebar
   document.getElementById('p-av').textContent       = (user.firstName || 'O').charAt(0).toUpperCase();
   document.getElementById('p-name').textContent     = name;
   document.getElementById('p-mid').textContent      = mid || '—';
   document.getElementById('p-welcome').textContent  = user.firstName;
   document.getElementById('p-today').textContent    = 'วันนี้: ' + new Date().toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? '⭐ Quarter' : 'Trial';
+
+  // Overview cards
+  document.getElementById('d-plan').textContent     = user.plan === 'quarter' ? '⭐ Quarter (3 เดือน)' : '🎫 Trial (รายครั้ง)';
   document.getElementById('d-exp').textContent      = 'หมดอายุ: ' + (user.expiry || 'นับจาก Check-in แรก');
   document.getElementById('d-mid').textContent      = mid || '—';
   document.getElementById('d-sessions').textContent = user.sessions || 0;
   document.getElementById('d-fines').textContent    = '฿' + (user.fines || 0);
   document.getElementById('qr-mid').textContent     = mid || '—';
+
+  // Profile
   document.getElementById('pf-fn').value  = user.firstName || '';
   document.getElementById('pf-ln').value  = user.lastName  || '';
   document.getElementById('pf-em').value  = user.email     || '';
   document.getElementById('pf-ph').value  = user.phone     || '';
   document.getElementById('pf-li').value  = user.lineId    || '';
 
-  // Zoom — โหลดจาก settings ก่อน แล้วค่อย update
-  const zMid = document.getElementById('z-mid');
-  const zPw  = document.getElementById('z-pw');
-  if (zMid) zMid.textContent = STATE.zoomId || 'กำลังโหลด...';
-  if (zPw)  zPw.textContent  = STATE.zoomPw || 'กำลังโหลด...';
-
-  // โหลด settings ถ้ายังไม่มี Zoom
-  if (!STATE.zoomId || STATE.zoomId === '964 333 6086') {
-    loadSettings().then(() => {
-      if (zMid) zMid.textContent = STATE.zoomId;
-      if (zPw)  zPw.textContent  = STATE.zoomPw;
-    });
-  }
-
-  // ซ่อนปุ่มที่ไม่จำเป็นสำหรับสมาชิก Approved แล้ว
+  // Nav buttons
   document.getElementById('nav-member-btn').style.display = 'inline-flex';
   document.getElementById('nav-login-btn').style.display  = 'none';
   document.getElementById('nav-reg-btn').style.display    = 'none';
   document.getElementById('nav-line-btn').style.display   = 'none';
-  // ซ่อน landing-only links
   ['nav-courses-btn','nav-pricing-btn','nav-howto-btn','nav-faq-btn'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
   });
 
-  // Load data
+  // โหลด settings (zoom, bank) ก่อนแสดง portal
+  await loadSettings();
+
+  // อัปเดต Zoom display หลังโหลด settings
+  const zMid = document.getElementById('z-mid');
+  const zPw  = document.getElementById('z-pw');
+  if (zMid) zMid.textContent = STATE.zoomId || '—';
+  if (zPw)  zPw.textContent  = STATE.zoomPw || '—';
+
+  // Load data ทั้งหมด
   drawQR(mid);
+  showPage('member');
+  // โหลดข้อมูลหลังแสดงหน้าแล้ว
   loadMemberSchedule();
   loadMemberBookings(mid);
   loadMemberHistory(mid);
-  showPage('member');
 }
 
 async function loadMemberSchedule() {
@@ -1792,12 +1800,27 @@ async function doRoomCheckin() {
 // ZOOM
 // ─────────────────────────────────────────────────
 function joinZoom() {
-  window.open('https://zoom.us/j/' + STATE.zoomId.replace(/\s/g, '') + '?pwd=' + STATE.zoomPw, '_blank');
+  if (!STATE.zoomId) { toast('⚠️ ยังไม่มีข้อมูล Zoom กรุณารอสักครู่', 'err'); return; }
+  const id  = STATE.zoomId.replace(/\s/g, '');
+  const pw  = STATE.zoomPw;
+  const displayName = STATE.user
+    ? (STATE.user.memberId + '_' + STATE.user.firstName).replace(/[^a-zA-Z0-9ก-๙_]/g, '')
+    : '';
+  // Zoom deep link พร้อม Meeting ID + Password
+  const url = `zoommtg://zoom.us/join?confno=${id}&pwd=${pw}&uname=${encodeURIComponent(displayName)}`;
+  // fallback to web
+  const webUrl = `https://zoom.us/j/${id}?pwd=${pw}`;
+  // ลองเปิด app ก่อน fallback web
+  window.open(webUrl, '_blank');
 }
 function sendZoomLine() {
-  const msg = `🎥 Zoom Class\nMeeting ID: ${STATE.zoomId}\nPassword: ${STATE.zoomPw}`;
-  if (typeof liff !== 'undefined') liff.sendMessages([{ type: 'text', text: msg }]);
-  toast('💚 ส่งข้อมูล Zoom ผ่าน LINE', 'ok');
+  const msg = `🎥 Zoom Class — The Owner\nMeeting ID: ${STATE.zoomId}\nPassword: ${STATE.zoomPw}\n\n👤 ชื่อเข้าห้อง: ${STATE.user?.memberId || ''} ${STATE.user?.firstName || ''}`;
+  if (typeof window.liff !== 'undefined' && window.liff.isInClient()) {
+    window.liff.sendMessages([{ type:'text', text:msg }]);
+  } else {
+    navigator.clipboard?.writeText(msg);
+    toast('📋 Copy ข้อมูล Zoom แล้ว', 'ok');
+  }
 }
 
 // ─────────────────────────────────────────────────
