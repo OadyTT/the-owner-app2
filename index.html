@@ -26,6 +26,14 @@
   --nav-h:58px;
 }
 body { font-family:var(--fth); padding-top:var(--nav-h); }
+.page-container { max-width:960px; margin:0 auto; }
+@media(min-width:768px){
+  .hero-section { padding:60px 40px 60px; }
+  .hero-title { font-size:44px !important; }
+  .hero-cta-wrap { flex-direction:row !important; justify-content:center; }
+  .hero-cta-wrap .btn { min-width:220px; }
+  .screen .container { max-width:960px; }
+}
 h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
 
 /* ── NAV ─────────────────────────────────────── */
@@ -86,6 +94,7 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
 }
 .hero-logo .the { font-size:10px; opacity:.85; letter-spacing:2px; }
 .hero-logo .own { font-size:22px; font-weight:800; }
+@media(min-width:768px){.hero-logo{width:96px;height:96px;}.hero-logo .own{font-size:28px;}.hero-logo .the{font-size:12px;}}
 .hero-title { font-family:var(--fhd); font-size:clamp(26px,7vw,38px); font-weight:800; line-height:1.2; }
 .hero-title mark { color:var(--brand); background:none; }
 .btn-line { background:var(--line-color); color:#fff; border:none; }
@@ -170,6 +179,30 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
 .zoom-copy-btn { background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:12px; padding:5px 12px; border-radius:7px; cursor:pointer; }
 
 /* ── STEP ITEM ───────────────────────────────── */
+.status-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 14px; border-radius:999px; font-size:12px; font-weight:700;
+}
+.status-guest  { background:#f3f4f6; color:#6b7280; border:1.5px solid #e5e7eb; }
+.status-member { background:#d1fae5; color:#065f46; border:1.5px solid #6ee7b7; }
+.status-admin  { background:#ede9fe; color:#5b21b6; border:1.5px solid #c4b5fd; }
+/* Score badge */
+.score-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,#fbbf24,#f59e0b);
+  color:#78350f; border-radius:999px; padding:4px 12px;
+  font-size:12px; font-weight:800; font-family:var(--fhd);
+  box-shadow:0 2px 8px rgba(245,158,11,.3);
+}
+.score-card {
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  border:1.5px solid #fcd34d; border-radius:14px; padding:16px;
+}
+[data-bs-theme="dark"] .score-card { background:linear-gradient(135deg,#3d2c00,#4d3500); border-color:#fbbf24; }
+.score-progress { height:8px; border-radius:999px; background:#e5e7eb; overflow:hidden; }
+.score-progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#fbbf24,#f59e0b); transition:width .8s ease; }
+/* Version tap zone */
+.version-tap { cursor:pointer; user-select:none; }
 .step-num { width:36px; height:36px; border-radius:50%; background:var(--brand); color:#fff; font-family:var(--fhd); font-size:16px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 0 var(--bdk); }
 
 /* ── OFFCANVAS OVERRIDE ──────────────────────── */
@@ -193,6 +226,7 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
     <div class="brand-mark">THE<br>OWN</div>
     <span class="brand-title d-none d-sm-inline">THE OWNER</span>
   </a>
+  <div id="nav-status-pill" class="me-auto ms-2 d-none d-sm-flex"></div>
   <div class="ms-auto d-flex align-items-center gap-2">
     <button class="btn btn-light btn-sm" onclick="cycleFontSize()" id="font-btn" title="ขนาดตัวอักษร"><small class="fw-bold">A</small></button>
     <button class="btn btn-light btn-sm" onclick="toggleTheme()"><i class="bi bi-moon-stars" id="theme-icon"></i></button>
@@ -260,7 +294,7 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
     <div class="hero-logo mb-3 mx-auto"><div class="the">THE</div><div class="own">OWNER</div></div>
     <h1 class="hero-title mb-2">เรียนรู้ธุรกิจ<br><mark>ที่ทำได้จริง</mark></h1>
     <p class="text-secondary mb-4">4 คอร์สพรีเมียม Online & Onsite<br>โดยผู้เชี่ยวชาญที่ทำจริง</p>
-    <div class="d-flex flex-column gap-3 mx-auto" style="max-width:320px;">
+    <div class="hero-cta-wrap d-flex flex-column gap-3 mx-auto" style="max-width:460px;">
       <button class="btn btn-line btn-lg fw-bold rounded-3 shadow-sm" onclick="lineFlow()">
         <i class="bi bi-line fs-5 me-2"></i>เข้าสู่ระบบ / สมัคร ผ่าน LINE
       </button>
@@ -285,6 +319,7 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
       <span class="fw-brand fw-bold">THE OWNER</span>
     </div>
     <p class="text-white-50 small mb-0">LINE OA: @theowner | © 2025</p>
+    <p class="version-tap text-white-50 mb-0" style="font-size:10px;margin-top:4px;" onclick="adminTap()">v5.0 — i am because we are</p>
   </footer>
 </div>
 
@@ -393,6 +428,7 @@ h1,h2,h3,h4,h5,.fw-brand { font-family:var(--fhd); }
       <div class="col-6"><div class="card ic-card"><div class="card-body"><div class="ic-label">หมดอายุ</div><div class="ic-val text-primary" id="d-exp" style="font-size:13px;">—</div></div></div></div>
       <div class="col-6"><div class="card ic-card"><div class="card-body"><div class="ic-label">ค่าปรับ</div><div class="ic-val text-danger" id="d-fines">฿0</div></div></div></div>
     </div>
+    <div id="score-card-wrap" class="mb-3"></div>
     <div class="card mb-3">
       <div class="card-header fw-bold"><i class="bi bi-calendar-event me-2"></i>การจองถัดไป</div>
       <div class="card-body p-0" id="upcoming-list"><div class="text-center text-muted py-3"><small>ยังไม่มีการจอง</small></div></div>
@@ -666,6 +702,7 @@ async function init() {
   loadSettings();
   loadHomeSchedule();
   initLiff();
+  renderStatusPill();
 }
 
 /* ── SETTINGS ────────────────────────────────── */
@@ -766,7 +803,12 @@ async function loadPortal(user) {
   document.getElementById('d-mid').textContent      = mid;
   document.getElementById('d-sessions').textContent = user.sessions||0;
   document.getElementById('d-fines').textContent    = '฿'+(user.fines||0);
-  document.getElementById('d-exp').textContent      = user.expiry || (isQ?'90 วัน หลัง Check-in':'1 วัน หลัง Check-in');
+  const expEl = document.getElementById('d-exp');
+  if (expEl) expEl.innerHTML = fmtExpiry(user.expiry) || (isQ?'90 วัน หลัง Check-in':'1 วัน หลัง Check-in');
+  // Score card
+  const scoreEl = document.getElementById('score-card-wrap');
+  if (scoreEl) scoreEl.innerHTML = renderScoreBadge(user);
+  renderStatusPill();
   // Profile
   document.getElementById('pf-fn').value = user.firstName||'';
   document.getElementById('pf-ln').value = user.lastName||'';
@@ -801,6 +843,7 @@ function logout() {
     document.getElementById('menu-member').style.display = 'none';
     document.getElementById('portal-btn').classList.remove('show');
     goScreen('home');
+    renderStatusPill();
     toast('ออกจากระบบแล้ว','success');
   });
 }
@@ -820,7 +863,7 @@ function renderSchedCards(classes, containerId, isLoggedIn) {
       <div class="d-flex justify-content-between align-items-center gap-3">
         <div class="flex-grow-1 min-w-0">
           <div class="fw-bold mb-1">${c.name||'—'}</div>
-          <div class="text-muted small mb-2"><i class="bi bi-calendar3 me-1"></i>${c.day||'—'} &nbsp;<i class="bi bi-clock me-1"></i>${c.time||'—'}</div>
+          <div class="text-muted small mb-2"><i class="bi bi-calendar3 me-1"></i><strong>${c.day||'—'}</strong> &nbsp;⏰ ${c.time||'—'}</div>
           <div class="mb-2">${tMap[c.type]||`<span class="badge bg-secondary">${c.type}</span>`}</div>
           <div class="sched-progress"><div class="sched-progress-fill" style="width:${pct}%;background:${left<=3?'#ef4444':'var(--brand)'}"></div></div>
         </div>
@@ -906,7 +949,7 @@ async function loadMemberHistory(mid) {
   const ci = res?.checkins||[];
   document.getElementById('history-body').innerHTML = ci.map(c=>`
     <tr>
-      <td class="small">${c.date?new Date(c.date).toLocaleDateString('th-TH'):'—'}</td>
+      <td class="small">${fmtDateTime(c.date)}</td>
       <td>${c.className||'—'}</td>
       <td><span class="badge ${c.method==='room_qr'?'bg-warning text-dark':'bg-success'}">${c.method==='room_qr'?'📷 QR':'✅ ปกติ'}</span></td>
     </tr>`).join('') || '<tr><td colspan="3" class="text-center text-muted py-3">ยังไม่มีประวัติ</td></tr>';
@@ -1049,6 +1092,104 @@ document.getElementById('modal-register').addEventListener('hidden.bs.modal',()=
   document.getElementById('up-sub').textContent='JPG, PNG — ไม่เกิน 5MB';
   ['r-fn','r-ln','r-em','r-ph'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 });
+
+/* ── FORMAT HELPERS ──────────────────────────── */
+function fmtDate(iso) {
+  if (!iso || iso === '—') return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('th-TH', {day:'2-digit', month:'short', year:'numeric'});
+  } catch(e) { return iso; }
+}
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('th-TH',{day:'2-digit',month:'short'}) + ' ' +
+           d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  } catch(e) { return iso; }
+}
+function fmtExpiry(exp) {
+  if (!exp || exp.includes('Check-in')) return exp||'—';
+  try {
+    const d = new Date(exp);
+    const now = new Date();
+    const diff = Math.ceil((d - now) / (1000*60*60*24));
+    const dateStr = d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
+    if (diff < 0)  return `<span class="text-danger">⛔ หมดอายุแล้ว (${dateStr})</span>`;
+    if (diff <= 7) return `<span class="text-warning">⚠️ เหลือ ${diff} วัน (${dateStr})</span>`;
+    return `<span class="text-success">✅ ${dateStr} (เหลือ ${diff} วัน)</span>`;
+  } catch(e) { return exp; }
+}
+
+/* ── SCORE SYSTEM ─────────────────────────────── */
+function calcScore(user) {
+  let score = 0;
+  score += (user.sessions||0) * 50;   // 50 คะแนน/ครั้งที่เรียน
+  const plan = String(user.memberId||'').startsWith('OwnP') ? 'quarter' : 'trial';
+  if (plan === 'quarter') score += 200;  // bonus Quarter
+  score -= (user.fines||0);              // หักค่าปรับ
+  return Math.max(0, score);
+}
+function scoreLevel(score) {
+  if (score >= 1000) return {label:'💎 Diamond', color:'#3b82f6', next:2000};
+  if (score >= 500)  return {label:'🥇 Gold',    color:'#f59e0b', next:1000};
+  if (score >= 200)  return {label:'🥈 Silver',  color:'#9ca3af', next:500};
+  return {label:'🥉 Bronze', color:'#92400e', next:200};
+}
+function renderScoreBadge(user) {
+  const score = calcScore(user);
+  const lvl   = scoreLevel(score);
+  const pct   = Math.min(100, Math.round((score / lvl.next) * 100));
+  return `<div class="score-card mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-brand fw-bold"><i class="bi bi-star-fill text-warning me-2"></i>Score & Level</div>
+      <div class="score-badge">${lvl.label} &nbsp; ${score.toLocaleString()} pts</div>
+    </div>
+    <div class="score-progress mb-1">
+      <div class="score-progress-fill" style="width:${pct}%;" id="score-fill"></div>
+    </div>
+    <div class="d-flex justify-content-between">
+      <small class="text-muted">${score.toLocaleString()} pts</small>
+      <small class="text-muted">ถัดไป: ${lvl.next.toLocaleString()} pts</small>
+    </div>
+    <div class="mt-2 d-flex gap-2 flex-wrap">
+      <span class="badge bg-secondary-subtle text-secondary"><i class="bi bi-camera-video me-1"></i>เรียน ${user.sessions||0} ครั้ง × 50</span>
+      ${String(user.memberId||'').startsWith('OwnP')?'<span class="badge bg-primary-subtle text-primary"><i class="bi bi-star me-1"></i>Quarter Bonus +200</span>':''}
+      ${(user.fines||0)>0?`<span class="badge bg-danger-subtle text-danger"><i class="bi bi-exclamation-triangle me-1"></i>ค่าปรับ -${user.fines}</span>`:''}
+    </div>
+  </div>`;
+}
+
+/* ── STATUS INDICATOR ─────────────────────────── */
+function renderStatusPill() {
+  const nav = document.getElementById('nav-status-pill');
+  if (!nav) return;
+  if (!STATE.user) {
+    nav.innerHTML = '<span class="status-pill status-guest"><i class="bi bi-person"></i>ยังไม่ได้สมัคร</span>';
+  } else {
+    const isQ = String(STATE.user.memberId||'').startsWith('OwnP');
+    nav.innerHTML = `<span class="status-pill status-member"><i class="bi bi-patch-check-fill"></i>${STATE.user.firstName||'สมาชิก'} ${isQ?'⭐':''}</span>`;
+  }
+}
+
+/* ── ADMIN SECRET TAP ─────────────────────────── */
+let _tapCount = 0, _tapTimer;
+function adminTap() {
+  _tapCount++;
+  clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(()=>{ _tapCount=0; }, 2000);
+  if (_tapCount >= 5) {
+    _tapCount = 0;
+    Swal.fire({
+      icon:'info', title:'🔐 Admin Access',
+      text:'กำลังไปหน้า Admin...', timer:1200, showConfirmButton:false,
+      didClose:()=>{ window.location.href='/admin.html'; }
+    });
+  } else if (_tapCount >= 3) {
+    toast(`กด ${5-_tapCount} ครั้งอีกครั้งเพื่อเข้า Admin`,'info');
+  }
+}
 
 /* ── START ───────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', init);
