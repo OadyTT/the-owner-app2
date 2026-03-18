@@ -787,14 +787,35 @@ function loading(text='กำลังโหลด...') { Swal.fire({title:text,
 function closeLoading() { Swal.close(); }
 
 /* ── DATATABLE HELPER ────────────────────────── */
+/* ── THAI LANGUAGE FOR DATATABLES ───────────────── */
+const DT_LANG_TH = {
+  sEmptyTable:'ไม่มีข้อมูลในตาราง', sInfo:'แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ',
+  sInfoEmpty:'แสดง 0 ถึง 0 จาก 0 รายการ', sInfoFiltered:'(กรองจาก _MAX_ รายการทั้งหมด)',
+  sSearch:'ค้นหา:', sLengthMenu:'แสดง _MENU_ รายการ', sLoadingRecords:'กำลังโหลด...',
+  sProcessing:'กำลังประมวลผล...', sZeroRecords:'ไม่พบรายการที่ค้นหา',
+  oPaginate:{sFirst:'แรก', sLast:'สุดท้าย', sNext:'ถัดไป', sPrevious:'ก่อนหน้า'},
+};
+
 function mkDT(id, opts={}) {
-  if (dtInstances[id]) { dtInstances[id].destroy(); }
-  dtInstances[id] = new DataTable('#'+id, {
-    language:{url:'https://cdn.datatables.net/plug-ins/2.0.8/i18n/th.json'},
-    pageLength:25, dom:"<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-    responsive:true, ...opts
-  });
-  return dtInstances[id];
+  try {
+    if (dtInstances[id]) {
+      try { dtInstances[id].destroy(); } catch(e) {}
+      delete dtInstances[id];
+    }
+    const el = document.getElementById(id);
+    if (!el) return null;
+    dtInstances[id] = new DataTable('#'+id, {
+      language: DT_LANG_TH,
+      pageLength: 25,
+      responsive: true,
+      dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      ...opts
+    });
+    return dtInstances[id];
+  } catch(e) {
+    console.error('DataTable error:', id, e.message);
+    return null;
+  }
 }
 
 /* ── LOGIN ───────────────────────────────────── */
@@ -836,14 +857,22 @@ function goPanel(name) {
   loadPanel(name); closeSB(); setLup();
 }
 function loadPanel(n) {
-  if(n==='overview')  loadOverview();
-  else if(n==='approve')  loadPending();
-  else if(n==='members')  loadMembers();
-  else if(n==='classes')  loadClasses();
-  else if(n==='bookings') loadBookings();
-  else if(n==='fines')    loadFines();
-  else if(n==='reports')  loadReports();
-  else if(n==='roomqr')   loadRoomQRs();
+  try {
+    if(n==='overview')       loadOverview();
+    else if(n==='approve')   loadPending();
+    else if(n==='members')   loadMembers();
+    else if(n==='classes')   loadClasses();
+    else if(n==='bookings')  loadBookings();
+    else if(n==='fines')     loadFines();
+    else if(n==='reports')   loadReports();
+    else if(n==='roomqr')    loadRoomQRs();
+    else if(n==='settings')  loadSettings();
+    else if(n==='admins')    loadAdmins();
+    // checkin, tutorial: no load needed
+  } catch(e) {
+    console.error('loadPanel error:', n, e);
+    toast('โหลดข้อมูลไม่ได้: ' + n, 'error');
+  }
 }
 function refresh() {
   const ico=document.getElementById('rfi');
@@ -1068,13 +1097,14 @@ async function loadMembers() {
       <td class="text-muted small">${m.expiry||'—'}</td>
       <td class="text-center">${m.sessions||0}</td>
       <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick='openEditMember(${JSON.stringify(m)})'><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openEditMemberById('${m.memberId}')"><i class="bi bi-pencil"></i></button>
         <button class="btn btn-outline-danger btn-sm" onclick="delMember('${m.memberId}','${(m.firstName||'')+(m.lastName||'')}')"><i class="bi bi-trash"></i></button>
       </td>
     </tr>`;
   }).join('');
   mkDT('dt-members');
 }
+function openEditMemberById(id){ const m=_memberData[id]; if(!m){toast('ไม่พบสมาชิก','error');return;} openEditMember(m); }
 function openEditMember(m){
   document.getElementById('em-id').value=m.memberId;
   document.getElementById('em-mid-lbl').textContent='Member ID: '+m.memberId;
@@ -1111,25 +1141,41 @@ function exportMembersCSV(){
 }
 
 /* ── CLASSES ─────────────────────────────────── */
+let _classData = {}; // cache class data
+
 async function loadClasses(){
-  const res=await api('getClasses');
-  const tMap={online:'🖥️ Online',onsite:'🏢 Onsite',hybrid:'⚡ Hybrid'};
-  const bCls={online:'bg-info',onsite:'bg-success',hybrid:'bg-primary'};
-  document.getElementById('cl-body').innerHTML=(res?.classes||[]).map(c=>`
+  const res = await api('getClasses');
+  const classes = res?.classes || [];
+  _classData = {};
+  classes.forEach(c => { _classData[c.id] = c; });
+
+  const tMap = {online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid'};
+  const bCls = {online:'bg-info', onsite:'bg-success', hybrid:'bg-primary'};
+
+  document.getElementById('cl-body').innerHTML = classes.map(c => `
     <tr>
-      <td>${c.imageUrl?`<img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;">`:
-        `<div style="width:44px;height:44px;border-radius:8px;background:#eef0ff;display:flex;align-items:center;justify-content:center;">📚</div>`}</td>
-      <td><strong>${c.name}</strong>${c.description?`<div class="text-muted small">${c.description}</div>`:''}</td>
+      <td>${c.imageUrl
+        ? `<img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">`
+        : `<div style="width:44px;height:44px;border-radius:8px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:18px;">📚</div>`
+      }</td>
+      <td>
+        <strong>${c.name||'—'}</strong>
+        ${c.description ? `<div class="text-muted small">${c.description}</div>` : ''}
+      </td>
       <td class="small">${c.day||'—'} ${c.time||''}</td>
       <td><span class="badge ${bCls[c.type]||'bg-primary'}">${tMap[c.type]||c.type}</span></td>
-      <td class="small">${c.bookedSeats}/${c.maxSeats}</td>
-      <td>${c.zoomLink?`<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="bi bi-camera-video-fill"></i></a>`:'—'}</td>
+      <td class="small text-center">${c.bookedSeats}/${c.maxSeats}</td>
+      <td class="text-center">${c.zoomLink
+        ? `<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="bi bi-camera-video-fill"></i></a>`
+        : '<span class="text-muted">—</span>'
+      }</td>
       <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick='openEditClass(${JSON.stringify(c)})'><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-outline-danger btn-sm" onclick="delClass('${c.id}','${c.name}')"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openEditClass('${c.id}')"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-outline-danger btn-sm" onclick="delClass('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="bi bi-trash"></i></button>
       </td>
-    </tr>`).join('')||'<tr><td colspan="7" class="text-center text-muted py-3">ยังไม่มีคลาส</td></tr>';
-  mkDT('dt-classes',{columnDefs:[{orderable:false,targets:[0,6]}]});
+    </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted py-3">ยังไม่มีคลาส</td></tr>';
+
+  mkDT('dt-classes', {columnDefs:[{orderable:false, targets:[0,6]}]});
 }
 function openAddClass(){
   ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -1137,21 +1183,27 @@ function openAddClass(){
   resetClassImgUpload();
   openModal('add-class');
 }
-function openEditClass(c){
-  document.getElementById('ac-id').value=c.id;document.getElementById('ac-nm').value=c.name||'';
-  const parts=(c.day||'').split('+');document.getElementById('ac-dy').value=parts[0];document.getElementById('ac-date').value=parts[1]||'';
-  document.getElementById('ac-tm').value=c.time||'';document.getElementById('ac-tp').value=c.type||'online';
-  document.getElementById('ac-st').value=c.maxSeats||20;document.getElementById('ac-zl').value=c.zoomLink||'';
-  document.getElementById('ac-img').value=c.imageUrl||'';document.getElementById('ac-desc').value=c.description||'';
+function openEditClass(classId){
+  const c = _classData[classId]; if (!c) { toast('ไม่พบข้อมูลคลาส','error'); return; }
+  document.getElementById('ac-id').value=c.id;
+  document.getElementById('ac-nm').value=c.name||'';
+  const parts=(c.day||'').split('+');
+  document.getElementById('ac-dy').value=parts[0];
+  document.getElementById('ac-date').value=parts[1]||'';
+  document.getElementById('ac-tm').value=c.time||'';
+  document.getElementById('ac-tp').value=c.type||'online';
+  document.getElementById('ac-st').value=c.maxSeats||20;
+  document.getElementById('ac-zl').value=c.zoomLink||'';
+  document.getElementById('ac-img').value=c.imageUrl||'';
+  document.getElementById('ac-desc').value=c.description||'';
   document.getElementById('ac-title').textContent='✏️ แก้ไข: '+c.name;
   resetClassImgUpload();
-  // แสดง preview ถ้ามี URL รูปอยู่แล้ว
   if (c.imageUrl) {
-    const preview = document.getElementById('class-img-preview');
-    const img = document.getElementById('class-preview-img');
-    if (preview && img) { img.src = c.imageUrl; preview.style.display='block'; }
-    const status = document.getElementById('class-upload-status');
-    if (status) status.innerHTML='<span class="badge bg-success"><i class="bi bi-image me-1"></i>มีรูปเดิมอยู่แล้ว</span>';
+    const preview=document.getElementById('class-img-preview');
+    const img=document.getElementById('class-preview-img');
+    if(preview&&img){img.src=c.imageUrl;preview.style.display='block';}
+    const status=document.getElementById('class-upload-status');
+    if(status)status.innerHTML='<span class="badge bg-success"><i class="bi bi-image me-1"></i>มีรูปเดิมอยู่แล้ว</span>';
   }
   openModal('add-class');
 }
@@ -1259,6 +1311,24 @@ function exportReportCSV(){
 }
 
 /* ── ADMINS ──────────────────────────────────── */
+async function loadAdmins() {
+  const res = await api('getAdmins');
+  if (!res?.admins?.length) return;
+  const rMap={staff:'Staff',manager:'Manager',super:'Super Admin'};
+  const rCls={staff:'bg-info',manager:'bg-warning text-dark',super:'bg-danger'};
+  document.getElementById('ad-body').innerHTML = res.admins.map(a=>`
+    <tr>
+      <td><strong>${a.username}</strong></td>
+      <td>${a.name||a.username}</td>
+      <td><span class="badge ${rCls[a.role]||'bg-secondary'}">${rMap[a.role]||a.role}</span></td>
+      <td class="text-muted small">${a.createdAt?new Date(a.createdAt).toLocaleDateString('th-TH'):'—'}</td>
+      <td>${a.username==='admin'?'':
+        `<button class="btn btn-outline-danger btn-sm" onclick="delAdmin('${a.username}',this)"><i class="bi bi-trash"></i></button>`
+      }</td>
+    </tr>`).join('');
+  mkDT('dt-admins', {columnDefs:[{orderable:false, targets:[4]}]});
+}
+
 async function addAdmin(){
   const u=document.getElementById('aa-us').value.trim();const p=document.getElementById('aa-pw').value;
   if(!u||!p){toast('กรอก Username/Password','error');return;}
