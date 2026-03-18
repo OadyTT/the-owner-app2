@@ -668,6 +668,24 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
         <div class="col-6"><label class="form-label small fw-bold">URL รูป Thumbnail</label><input type="url" class="form-control" id="ac-img" placeholder="https://..."></div>
         <div class="col-6"><label class="form-label small fw-bold">คำอธิบาย</label><input type="text" class="form-control" id="ac-desc"></div>
       </div>
+      <!-- Image Upload Zone -->
+      <div class="mt-3">
+        <label class="form-label small fw-bold"><i class="bi bi-image me-1"></i>หรืออัปโหลดรูปจากเครื่อง → Google Drive/Projects The Owner/Pics</label>
+        <div id="class-upload-zone"
+          style="border:2px dashed #c7d2fe;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#eef0ff;position:relative;transition:all .3s;"
+          ondragover="event.preventDefault();this.style.borderColor='#1400FF';"
+          ondragleave="this.style.borderColor='#c7d2fe';"
+          ondrop="onClassImgDrop(event)">
+          <input type="file" id="class-img-input" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="onClassImgSelect(event)">
+          <i class="bi bi-cloud-arrow-up fs-2 text-primary mb-2 d-block" id="class-up-icon"></i>
+          <div class="fw-bold small" id="class-up-title">คลิกหรือลากรูปมาวาง</div>
+          <div class="text-muted small" id="class-up-sub">JPG, PNG, WEBP — สูงสุด 5MB</div>
+        </div>
+        <div id="class-img-preview" class="mt-2" style="display:none;">
+          <img id="class-preview-img" src="" alt="Preview" style="max-height:120px;border-radius:8px;border:2px solid #10b981;">
+        </div>
+        <div id="class-upload-status" class="mt-2"></div>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('add-class')">ยกเลิก</button><button class="btn btn-brand" onclick="saveClass()">💾 บันทึก</button></div>
   </div></div>
@@ -1104,6 +1122,7 @@ async function loadClasses(){
 function openAddClass(){
   ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ac-st').value='20';document.getElementById('ac-title').textContent='📚 เพิ่มคลาสใหม่';
+  resetClassImgUpload();
   openModal('add-class');
 }
 function openEditClass(c){
@@ -1112,15 +1131,29 @@ function openEditClass(c){
   document.getElementById('ac-tm').value=c.time||'';document.getElementById('ac-tp').value=c.type||'online';
   document.getElementById('ac-st').value=c.maxSeats||20;document.getElementById('ac-zl').value=c.zoomLink||'';
   document.getElementById('ac-img').value=c.imageUrl||'';document.getElementById('ac-desc').value=c.description||'';
-  document.getElementById('ac-title').textContent='✏️ แก้ไข: '+c.name;openModal('add-class');
+  document.getElementById('ac-title').textContent='✏️ แก้ไข: '+c.name;
+  resetClassImgUpload();
+  // แสดง preview ถ้ามี URL รูปอยู่แล้ว
+  if (c.imageUrl) {
+    const preview = document.getElementById('class-img-preview');
+    const img = document.getElementById('class-preview-img');
+    if (preview && img) { img.src = c.imageUrl; preview.style.display='block'; }
+    const status = document.getElementById('class-upload-status');
+    if (status) status.innerHTML='<span class="badge bg-success"><i class="bi bi-image me-1"></i>มีรูปเดิมอยู่แล้ว</span>';
+  }
+  openModal('add-class');
 }
 async function saveClass(){
   loading('กำลังบันทึก...');
+  // อัปโหลดรูปก่อนถ้ามี
+  await uploadClassImageIfNeeded();
   const id=document.getElementById('ac-id').value;
   const day=document.getElementById('ac-dy').value;const date=document.getElementById('ac-date').value;
   const data={name:document.getElementById('ac-nm').value,day:date?`${day}+${date}`:day,time:document.getElementById('ac-tm').value,type:document.getElementById('ac-tp').value,maxSeats:Number(document.getElementById('ac-st').value),zoomLink:document.getElementById('ac-zl').value,imageUrl:document.getElementById('ac-img').value,description:document.getElementById('ac-desc').value};
   await (id?api('updateClass',{id,...data}):api('addClass',data));
-  closeLoading();closeModal('add-class');await loadClasses();alertSuccess(id?'แก้ไขสำเร็จ!':'เพิ่มคลาสสำเร็จ!');
+  closeLoading();closeModal('add-class');
+  resetClassImgUpload();
+  await loadClasses();alertSuccess(id?'แก้ไขสำเร็จ!':'เพิ่มคลาสสำเร็จ!');
 }
 async function delClass(id,name){
   if(!await confirm('ลบคลาส "'+name+'"?')) return;
@@ -1130,15 +1163,18 @@ async function delClass(id,name){
 /* ── BOOKINGS ────────────────────────────────── */
 async function loadBookings(status=''){
   const res=await api('getBookings',status?{status}:{});
-  const tMap={online:'🖥️',onsite:'🏢',hybrid:'⚡'};
+  const tMap={online:'<span class="badge bg-info-subtle text-info"><i class="bi bi-display me-1"></i>Online</span>',onsite:'<span class="badge bg-success-subtle text-success"><i class="bi bi-building me-1"></i>Onsite</span>',hybrid:'<span class="badge bg-primary-subtle text-primary"><i class="bi bi-lightning-charge-fill me-1"></i>Hybrid</span>'};
   document.getElementById('bk-body').innerHTML=(res?.bookings||[]).map(b=>`
     <tr>
       <td class="fw-brand small text-primary">${b.MemberID||'—'}</td>
       <td class="small">${b.MemberName||'—'}</td>
-      <td>${b.ClassName||'—'}</td>
+      <td>
+        <div class="fw-bold">${b.ClassName||'—'}</div>
+        <div class="text-muted small">${b.ClassID||''}</div>
+      </td>
       <td class="small">${b.ClassDay||''} ${b.ClassTime||''}</td>
-      <td>${tMap[b.Type]||''} ${b.Type||'—'}</td>
-      <td><span class="badge ${b.CheckedIn?'bg-success':'bg-warning text-dark'}">${b.CheckedIn?'✓':'รอ'}</span></td>
+      <td>${tMap[b.Type]||`<span class="badge bg-secondary">${b.Type||'—'}</span>`}</td>
+      <td><span class="badge ${b.CheckedIn?'bg-success':'bg-warning text-dark'}">${b.CheckedIn?'✓ เข้าเรียน':'รอ'}</span></td>
       <td><span class="badge ${b.Status==='confirmed'?'bg-success':b.Status==='cancelled'?'bg-danger':'bg-warning text-dark'}">${b.Status==='confirmed'?'✓ ยืนยัน':b.Status==='cancelled'?'✕ ยกเลิก':b.Status||'—'}</span></td>
       <td>
         ${b.Status==='confirmed'&&!b.CheckedIn?`<button class="btn btn-success btn-sm me-1" onclick="checkInBk('${b.ID}','${b.MemberID}','${b.ClassName}')"><i class="bi bi-check-lg"></i></button>`:''}
@@ -1274,7 +1310,70 @@ function renderTutorial(){
     </div>`).join('');
 }
 
-/* ── MODAL (Bootstrap) ───────────────────────── */
+/* ── CLASS IMAGE UPLOAD ──────────────────────── */
+let _classImgFile = null;
+
+function onClassImgSelect(e) {
+  const f = e.target.files[0]; if (f) handleClassImg(f);
+}
+function onClassImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('class-upload-zone').style.borderColor='#c7d2fe';
+  const f = e.dataTransfer.files[0]; if (f) handleClassImg(f);
+}
+function handleClassImg(file) {
+  if (file.size > 5*1024*1024) { Swal.fire({icon:'error',title:'ไฟล์ใหญ่เกิน 5MB',confirmButtonColor:'var(--brand)'}); return; }
+  _classImgFile = file;
+  const zone = document.getElementById('class-upload-zone');
+  zone.style.borderColor = '#10b981'; zone.style.background = 'rgba(16,185,129,.05)';
+  document.getElementById('class-up-icon').className = 'bi bi-check-circle-fill fs-2 text-success mb-2 d-block';
+  document.getElementById('class-up-title').textContent = file.name;
+  document.getElementById('class-up-sub').textContent = (file.size/1024).toFixed(0)+' KB — พร้อมอัปโหลด';
+  // Preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('class-preview-img').src = e.target.result;
+    document.getElementById('class-img-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('class-upload-status').innerHTML =
+    '<span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>รอการ Save เพื่ออัปโหลดไป Google Drive</span>';
+}
+
+async function uploadClassImageIfNeeded() {
+  if (!_classImgFile) return null;
+  const statusEl = document.getElementById('class-upload-status');
+  statusEl.innerHTML = '<span class="badge bg-primary"><i class="bi bi-cloud-arrow-up me-1"></i>กำลังอัปโหลดไป Google Drive...</span>';
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(_classImgFile);
+  });
+  const result = await api('saveClassImage', { imageBase64: base64, imageName: _classImgFile.name });
+  if (result?.success) {
+    statusEl.innerHTML = `<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>อัปโหลดสำเร็จ! → Google Drive/Projects The Owner/Pics</span>`;
+    document.getElementById('ac-img').value = result.url;
+    _classImgFile = null;
+    return result.url;
+  } else {
+    statusEl.innerHTML = `<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>${result?.message||'อัปโหลดไม่สำเร็จ'}</span>`;
+    return null;
+  }
+}
+
+function resetClassImgUpload() {
+  _classImgFile = null;
+  const zone = document.getElementById('class-upload-zone');
+  if (zone) { zone.style.borderColor='#c7d2fe'; zone.style.background='#eef0ff'; }
+  const icon = document.getElementById('class-up-icon');
+  if (icon) icon.className='bi bi-cloud-arrow-up fs-2 text-primary mb-2 d-block';
+  const title = document.getElementById('class-up-title');
+  if (title) title.textContent='คลิกหรือลากรูปมาวาง';
+  const sub = document.getElementById('class-up-sub');
+  if (sub) sub.textContent='JPG, PNG, WEBP — สูงสุด 5MB';
+  const preview = document.getElementById('class-img-preview');
+  if (preview) preview.style.display='none';
+  const status = document.getElementById('class-upload-status');
+  if (status) status.innerHTML='';
+}
 function openModal(name){new bootstrap.Modal(document.getElementById('modal-'+name)).show();}
 function closeModal(name){bootstrap.Modal.getInstance(document.getElementById('modal-'+name))?.hide();}
 

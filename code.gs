@@ -76,6 +76,7 @@ function route(p) {
     addClass:             ()=>addClass(p),
     updateClass:          ()=>updateClass(p),
     deleteClass:          ()=>deleteClass(p),
+    saveClassImage:       ()=>saveClassImage(p),
     generateRoomQR:       ()=>generateRoomQR(p),
     getRoomQRs:           ()=>getRoomQRs(),
     saveSettings:         ()=>saveSettings(p),
@@ -257,6 +258,44 @@ function saveSlipToDrive(base64, filename, id) {
 function getOrCreateFolder(name) {
   const f=DriveApp.getFoldersByName(name);
   return f.hasNext()?f.next():DriveApp.createFolder(name);
+}
+
+// อัปโหลดรูปคลาสไปยัง My Drive/Projects The Owner/Pics
+function saveClassImage(p) {
+  if (!p.imageBase64 || !p.imageName) return err('ไม่มีข้อมูลรูป');
+  try {
+    // หาโฟลเดอร์ Projects The Owner ก่อน
+    let projectFolder;
+    const projectFolders = DriveApp.getFoldersByName('Projects The Owner');
+    if (projectFolders.hasNext()) {
+      projectFolder = projectFolders.next();
+    } else {
+      projectFolder = DriveApp.createFolder('Projects The Owner');
+    }
+    // หา Pics folder ข้างใน
+    let picsFolder;
+    const picsFolders = projectFolder.getFoldersByName('Pics');
+    if (picsFolders.hasNext()) {
+      picsFolder = picsFolders.next();
+    } else {
+      picsFolder = projectFolder.createFolder('Pics');
+    }
+    // ตรวจ mime type
+    const ext = String(p.imageName).split('.').pop().toLowerCase();
+    const mimeMap = {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'};
+    const mime = mimeMap[ext] || 'image/jpeg';
+    // สร้างไฟล์
+    const decoded = Utilities.base64Decode(p.imageBase64);
+    const blob = Utilities.newBlob(decoded, mime, p.imageName);
+    const file = picsFolder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const fileId = file.getId();
+    const url = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w400';
+    return ok({ url, fileId, message: 'อัปโหลดรูปสำเร็จ' });
+  } catch(e) {
+    Logger.log('saveClassImage error: ' + e.message);
+    return err('อัปโหลดรูปไม่สำเร็จ: ' + e.message);
+  }
 }
 
 // ── PENDING APPROVALS ─────────────────────────────
@@ -443,9 +482,22 @@ function cancelBooking(p) {
   return ok({});
 }
 function getBookings(p) {
-  let bks=rows(getSheet(SHEET.BOOKINGS));
-  if(p.memberId) bks=bks.filter(b=>b.MemberID===p.memberId);
-  if(p.status)   bks=bks.filter(b=>b.Status===p.status);
+  let bks = rows(getSheet(SHEET.BOOKINGS));
+  if (p.memberId) bks = bks.filter(b => b.MemberID === p.memberId);
+  if (p.status)   bks = bks.filter(b => b.Status   === p.status);
+  // Enrich: join class name from Classes sheet
+  const classes = {};
+  rows(getSheet(SHEET.CLASSES)).forEach(c => { classes[c.ID] = c.Name; });
+  bks = bks.map(b => {
+    const realName = classes[b.ClassID] || b.ClassName || b.ClassID || '—';
+    return {
+      ID:b.ID, MemberID:b.MemberID, MemberName:b.MemberName,
+      ClassID:b.ClassID, ClassName:realName,
+      ClassDay:b.ClassDay, ClassTime:b.ClassTime,
+      Type:b.Type, Status:b.Status,
+      CheckedIn:b.CheckedIn, BookedAt:b.BookedAt,
+    };
+  });
   return ok({bookings:bks});
 }
 function getMemberBookings(p) {
