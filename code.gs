@@ -82,6 +82,7 @@ function route(p) {
     saveSettings:         ()=>saveSettings(p),
     getSettingsAll:       ()=>getSettingsAll(),
     setupSheets:          ()=>setupAllSheets(),
+    migrateClasses:       ()=>migrateClassesSheet(),
     sendClassReminders:   ()=>sendClassReminders(),
   };
   return map[a] ? map[a]() : err('Unknown action: '+a);
@@ -131,6 +132,24 @@ function err(m) { return {success:false, message:m}; }
 function setupAllSheets() {
   Object.values(SHEET).forEach(n=>getSheet(n));
   return ok({message:'All sheets ready!'});
+}
+
+// Migrate: เพิ่มคอลัม ImageUrl + Description ให้ Classes sheet ที่มีอยู่แล้ว
+function migrateClassesSheet() {
+  const sheet = getSheet(SHEET.CLASSES);
+  const headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
+  const results = [];
+  ['ImageUrl','Description'].forEach(col => {
+    if (!headers.includes(col)) {
+      const c = sheet.getLastColumn() + 1;
+      // ย้าย CreatedAt ไปท้ายสุดโดย insert before
+      sheet.insertColumnBefore(headers.indexOf('CreatedAt') >= 0 ? headers.indexOf('CreatedAt') + 1 : c);
+      const insertCol = headers.indexOf('CreatedAt') >= 0 ? headers.indexOf('CreatedAt') + 1 : c;
+      sheet.getRange(1, insertCol).setValue(col).setBackground('#1400FF').setFontColor('#FFF').setFontWeight('bold');
+      results.push('เพิ่ม ' + col);
+    } else { results.push(col + ' มีอยู่แล้ว'); }
+  });
+  return ok({ message: results.join(', ') });
 }
 
 function initHeaders(sheet, name) {

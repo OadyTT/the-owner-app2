@@ -93,6 +93,7 @@ h1,h2,h3,h4,h5,.fw-brand{font-family:var(--fhd);}
 
 /* ── MAIN ────────────────────────────────────── */
 .main-wrap{margin-top:var(--nav-h);transition:margin-left .3s;}
+.main-inner{max-width:1400px;width:100%;}
 .panel{display:none;animation:fadeUp .2s ease;}
 .panel.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
@@ -103,9 +104,18 @@ h1,h2,h3,h4,h5,.fw-brand{font-family:var(--fhd);}
 .btn-brand:active{transform:translateY(3px);box-shadow:0 1px 0 var(--bdk);}
 
 /* ── STAT CARDS ──────────────────────────────── */
-.stat-card{border:1.5px solid #e2e5f5;border-radius:14px;padding:18px;transition:transform .2s;}
-.stat-card:hover{transform:translateY(-3px);}
-.stat-val{font-family:var(--fhd);font-size:28px;font-weight:800;}
+.stat-card{border:1.5px solid #e2e5f5;border-radius:12px;padding:14px;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-val{font-family:var(--fhd);font-size:24px;font-weight:800;}
+/* Laptop: compact stat cards */
+@media(min-width:992px) and (max-width:1399px){
+  .stat-val{font-size:20px;}
+  .stat-card{padding:12px;}
+  .main-wrap .card-body{padding:14px;}
+}
+/* Chart wrapper: limit height */
+.chart-wrap{position:relative;height:180px;}
+@media(min-width:1400px){.chart-wrap{height:220px;}}
 
 /* ── APPROVE ─────────────────────────────────── */
 .slip-viewer{background:#f0f2ff;border-radius:10px;min-height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1.5px solid #e2e5f5;}
@@ -126,7 +136,7 @@ h1,h2,h3,h4,h5,.fw-brand{font-family:var(--fhd);}
 /* ── DATATABLE OVERRIDE ──────────────────────── */
 .dataTables_wrapper .dataTables_filter input{border:1.5px solid #e2e5f5;border-radius:8px;padding:5px 12px;font-size:13px;}
 .dataTables_wrapper .dataTables_length select{border:1.5px solid #e2e5f5;border-radius:8px;padding:4px 8px;}
-table.dataTable thead th{background:var(--brand)!important;color:#fff!important;font-size:12px!important;letter-spacing:.3px;white-space:nowrap;cursor:pointer;}
+table.dataTable thead th{background:var(--brand)!important;color:#fff!important;font-size:12px!important;white-space:nowrap;letter-spacing:.3px;white-space:nowrap;cursor:pointer;}
 table.dataTable thead th.sorting::after,
 table.dataTable thead th.sorting_asc::after,
 table.dataTable thead th.sorting_desc::after{color:rgba(255,255,255,.7)!important;}
@@ -144,6 +154,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
 @media(min-width:992px){
   .sidebar{left:0!important;}
   .main-wrap{margin-left:var(--sidebar-w);}
+  .main-inner{padding:0 8px;}
   #hamburger{display:none!important;}
 }
 </style>
@@ -237,7 +248,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
   </aside>
 
   <!-- MAIN -->
-  <div class="main-wrap p-3 p-md-4">
+  <div class="main-wrap p-2 p-md-3"><div class="main-inner mx-auto">
 
     <!-- OVERVIEW -->
     <div id="panel-overview" class="panel active">
@@ -251,43 +262,39 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
           <button class="btn btn-brand btn-sm" onclick="goPanel('reports')"><i class="bi bi-graph-up"></i> รายงาน</button>
         </div>
       </div>
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-4 col-lg">
+      <div class="row g-2 mb-3">
+        <div class="col-6 col-md-4 col-xl">
           <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">สมาชิก</div><div class="stat-val text-primary" id="s-total">—</div></div></div>
         </div>
-        <div class="col-6 col-md-4 col-lg">
+        <div class="col-6 col-md-4 col-xl">
           <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รอ Approve</div><div class="stat-val text-warning" id="s-pend">—</div></div></div>
         </div>
-        <div class="col-6 col-md-4 col-lg">
+        <div class="col-6 col-md-4 col-xl">
           <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">Check-in วันนี้</div><div class="stat-val text-success" id="s-today">—</div></div></div>
         </div>
-        <div class="col-6 col-md-4 col-lg">
+        <div class="col-6 col-md-4 col-xl">
           <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">Quarter</div><div class="stat-val text-info" id="s-quarter">—</div></div></div>
         </div>
-        <div class="col-6 col-md-4 col-lg">
+        <div class="col-6 col-md-4 col-xl">
           <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">ค่าปรับค้าง</div><div class="stat-val text-danger" id="s-fines">—</div></div></div>
         </div>
       </div>
       <div class="row g-3 mb-4">
-        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><canvas id="chart-members" height="220"></canvas></div></div></div>
-        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><canvas id="chart-revenue" height="220"></canvas></div></div></div>
+        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><div class="chart-wrap"><canvas id="chart-members"></canvas></div></div></div></div>
+        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><div class="chart-wrap"><canvas id="chart-revenue"></canvas></div></div></div></div>
       </div>
       <div class="row g-3">
         <div class="col-md-6">
-          <div class="card">
+          <div class="col-md-6"><div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <strong class="small">⏳ รอ Approve</strong>
               <button class="btn btn-warning btn-sm" onclick="goPanel('approve')">ดูทั้งหมด</button>
             </div>
-            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead><tbody id="ov-pend"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div>
-          </div>
-        </div>
+            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead><tbody id="ov-pend"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div></div></div>
         <div class="col-md-6">
           <div class="card">
             <div class="card-header"><strong class="small">✅ Check-in วันนี้</strong></div>
-            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead><tbody id="ov-ci"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div>
-          </div>
-        </div>
+            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead><tbody id="ov-ci"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div></div></div>
       </div>
     </div>
 
@@ -510,16 +517,16 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
           <button class="btn btn-brand btn-sm" onclick="exportReportCSV()"><i class="bi bi-download"></i> CSV</button>
         </div>
       </div>
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-4 col-lg"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รายได้สมาชิก</div><div class="stat-val text-primary" id="r-m">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-lg"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">จากค่าปรับ</div><div class="stat-val text-danger" id="r-fine">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-lg"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รวมทั้งหมด</div><div class="stat-val text-success" id="r-total">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-lg"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">สมาชิกใหม่</div><div class="stat-val text-info" id="r-n">—</div><div class="small text-muted">คน</div></div></div></div>
-        <div class="col-6 col-md-4 col-lg"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">ครั้งที่เรียน</div><div class="stat-val text-warning" id="r-s">—</div></div></div></div>
+      <div class="row g-2 mb-3">
+        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รายได้สมาชิก</div><div class="stat-val text-primary" id="r-m">—</div></div></div></div>
+        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">จากค่าปรับ</div><div class="stat-val text-danger" id="r-fine">—</div></div></div></div>
+        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รวมทั้งหมด</div><div class="stat-val text-success" id="r-total">—</div></div></div></div>
+        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">สมาชิกใหม่</div><div class="stat-val text-info" id="r-n">—</div><div class="small text-muted">คน</div></div></div></div>
+        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">ครั้งที่เรียน</div><div class="stat-val text-warning" id="r-s">—</div></div></div></div>
       </div>
       <div class="row g-3">
-        <div class="col-md-5"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 สัดส่วนรายได้</div><canvas id="chart-pie" height="250"></canvas></div></div></div>
-        <div class="col-md-7"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📊 Check-in 6 เดือน</div><canvas id="chart-ci" height="250"></canvas></div></div></div>
+        <div class="col-md-5"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 สัดส่วนรายได้</div><div class="chart-wrap"><canvas id="chart-pie"></canvas></div></div></div></div>
+        <div class="col-md-7"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📊 Check-in 6 เดือน</div><div class="chart-wrap"><canvas id="chart-ci"></canvas></div></div></div></div>
       </div>
     </div>
 
@@ -599,7 +606,8 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
       </div>
       <div class="card mt-3"><div class="card-header fw-bold"><i class="bi bi-tools"></i> ระบบ</div>
         <div class="card-body d-flex gap-2 flex-wrap">
-          <button class="btn btn-outline-secondary btn-sm" onclick="runSetup()"><i class="bi bi-wrench"></i> Setup Sheets (รัน 1 ครั้ง)</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="runSetup()"><i class="bi bi-wrench"></i> Setup Sheets</button>
+          <button class="btn btn-warning btn-sm" onclick="migrateClasses()"><i class="bi bi-arrow-clockwise"></i> Migrate Classes Columns</button>
           <button class="btn btn-outline-secondary btn-sm" onclick="openGS()"><i class="bi bi-table"></i> Google Sheet</button>
         </div>
       </div>
@@ -614,7 +622,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
       </div>
     </div>
 
-  </div><!-- end main-wrap -->
+  </div><!-- end main-inner --></div><!-- end main-wrap -->
 </div><!-- end admin-app -->
 
 <!-- ── MODALS ──────────────────────────────────────── -->
@@ -853,7 +861,11 @@ function mkChart(id,type,labels,datasets,opts={}) {
   if(charts[id]){charts[id].destroy();delete charts[id];}
   const ctx=document.getElementById(id)?.getContext('2d');
   if(!ctx) return;
-  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,...opts}});
+  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{
+    responsive:true,
+    maintainAspectRatio:true,
+    ...opts
+  }});
 }
 
 /* ── OVERVIEW ────────────────────────────────── */
@@ -1280,6 +1292,12 @@ async function saveSetting(group){
 }
 async function testReminder(){loading('ส่ง Reminder...');const res=await api('sendClassReminders');closeLoading();alertSuccess('ส่ง Reminder แล้ว!',res?.message||'');}
 async function runSetup(){loading('กำลัง Setup...');const res=await api('setupSheets');closeLoading();alertSuccess('Setup เสร็จ!',res?.message||'');}
+async function migrateClasses(){
+  loading('กำลัง Migrate Classes Columns...');
+  const res=await api('migrateClasses');
+  closeLoading();
+  Swal.fire({icon:'success',title:'Migrate สำเร็จ!',text:res?.message||'',confirmButtonColor:'var(--brand)'});
+}
 function openGS(){if(SHEET_ID)window.open('https://docs.google.com/spreadsheets/d/'+SHEET_ID,'_blank');}
 function applyTheme(c,dk){document.documentElement.style.setProperty('--brand',c);if(dk)document.documentElement.style.setProperty('--bdk',dk);document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));event?.target?.classList?.add('active');toast('เปลี่ยนธีมแล้ว','success');}
 
