@@ -612,10 +612,11 @@ table tbody tr:hover td { background:#f8f9ff; }
    ✅ Login ผ่าน GAS server เท่านั้น
 ─────────────────────────────────────────── */
 const GAS      = 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec';
-const SHEET_ID = '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0';
+// SHEET_ID ลบออกจาก frontend — ใช้ GAS action 'openSheet' แทน
 
 /* ── STATE ───────────────────────────────── */
 let A = null;
+let SESSION_TOKEN = null; // ✅ Admin session token จาก server
 let allMembers = [], pendingList = [], ciLog = [], selAp = null;
 let classCache = {}, memberCache = {};
 let charts = {};
@@ -631,12 +632,24 @@ const PANEL_LABELS = {
 /* ── API ────────────────────────────────── */
 async function api(action, data = {}) {
   try {
+    // ✅ แนบ SESSION_TOKEN ทุก request เพื่อ verify ฝั่ง server
+    const payload = { action, ...data };
+    if (SESSION_TOKEN) payload._token = SESSION_TOKEN;
     const r = await fetch(GAS, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action, ...data })
+      body: JSON.stringify(payload)
     });
-    return await r.json();
+    const res = await r.json();
+    // ถ้า session หมดอายุ → logout อัตโนมัติ
+    if (res?.sessionExpired) {
+      SESSION_TOKEN = null;
+      A = null;
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-wrap').style.display = 'flex';
+      return null;
+    }
+    return res;
   } catch(e) {
     console.error('API Error:', action, e.message);
     return null;
@@ -671,6 +684,7 @@ async function doLogin() {
     const res = await api('adminLogin', { username: u, password: p });
     if (res?.success) {
       A = res.admin;
+      SESSION_TOKEN = res.admin.token || null; // ✅ เก็บ token ใน memory
       startApp();
     } else {
       errEl.textContent = res?.message || 'Username หรือ Password ไม่ถูกต้อง';
@@ -698,9 +712,14 @@ function startApp() {
   loadSettings();
 }
 
-function logout() {
+async function logout() {
   if (!confirm('ออกจากระบบ?')) return;
+  // ✅ แจ้ง server ให้ลบ session
+  if (SESSION_TOKEN) {
+    await api('adminLogout', { token: SESSION_TOKEN });
+  }
   A = null;
+  SESSION_TOKEN = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-wrap').style.display = 'flex';
   document.getElementById('a-pass').value = '';
@@ -1199,7 +1218,14 @@ async function loadSettings(){
   const res=await api('getSettingsAll');if(!res?.settings)return;
   const s=res.settings;
   const sv=(id,key)=>{const el=document.getElementById(id);if(el&&s[key]!==undefined)el.value=s[key];};
-  sv('zm-id','zoom_id');sv('zm-pw','zoom_pw');sv('bk-nm','bank_name');sv('bk-ac','bank_acc');sv('bk-ow','bank_owner');
+  sv('zm-id','zoom_id');
+  // ✅ zoom_pw: แสดงเฉพาะ *** ถ้า set แล้ว (server ส่ง ***SET*** มา)
+  const zwEl = document.getElementById('zm-pw');
+  if (zwEl && s['zoom_pw']) zwEl.placeholder = s['zoom_pw'] === '***SET***' ? '••• (ตั้งค่าแล้ว — ใส่ใหม่เพื่อเปลี่ยน)' : s['zoom_pw'];
+  sv('bk-nm','bank_name');sv('bk-ac','bank_acc');sv('bk-ow','bank_owner');
+  // LINE token
+  const ltEl = document.getElementById('line-tok');
+  if (ltEl && s['line_token']) ltEl.placeholder = s['line_token'] === '***SET***' ? '••• (ตั้งค่าแล้ว — ใส่ใหม่เพื่อเปลี่ยน)' : 'ใส่ Token';
   sv('fn-on','fine_online');sv('fn-os','fine_onsite');sv('fn-hy','fine_hybrid');sv('fn-ch','cancel_hours');
 }
 async function saveSetting(group){
@@ -1214,7 +1240,12 @@ async function saveSetting(group){
 async function testReminder(){const res=await api('sendClassReminders');toast(res?.message||'ส่ง Reminder แล้ว');}
 async function runSetup(){const res=await api('setupSheets');toast(res?.message||'Setup เสร็จ');}
 async function migrateClasses(){const res=await api('migrateClasses');toast(res?.message||'Migrate เสร็จ');}
-function openGS(){window.open('https://docs.google.com/spreadsheets/d/'+SHEET_ID,'_blank');}
+async function openGS(){
+  const res = await api('getSheetUrl');
+  const url = res?.url || 'https://docs.google.com/spreadsheets/d/'+res?.sheetId;
+  if (res?.sheetId||res?.url) window.open(url,'_blank');
+  else toast('ไม่สามารถเปิด Sheet ได้','er');
+}
 
 /* ── TUTORIAL ────────────────────────────── */
 const TUT=[

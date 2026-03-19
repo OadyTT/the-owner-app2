@@ -2,7 +2,7 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="description" content="The Owner — ศูนย์เรียนรู้ธุรกิจ i am because we are">
 <title>The Owner — เรียนรู้ธุรกิจที่ทำได้จริง</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,600;0,700;0,800;0,900;1,700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -49,11 +49,24 @@ button,input,select,textarea{font-family:inherit;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-thumb{background:var(--pu1);border-radius:999px;}
 
-/* ══ NOISE TEXTURE ════════════════════════════════ */
+/* ══ NOISE TEXTURE — lightweight PNG ═════════════
+   แทน SVG feTurbulence ที่กิน GPU บนมือถือรุ่นเก่า
+   ใช้ CSS noise pattern แบบ pure CSS แทน
+════════════════════════════════════════════════ */
 [data-theme="dark"] body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity:.4;
+  /* Static noise ด้วย repeating-conic-gradient — ไม่ใช้ GPU filter */
+  background-image:
+    url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4t5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwma1y3YJonKRfFHpX/oRoZCAVf9U8GUsWWAWx9J+5ibnyUnGpI87R1/3xdMt29L7NectQ8Nud5+7/5hct52e5G2fFirDlMCfb3JHv18O/6VuMjM0bB1LDdU9YcXfNuDHCLlcL8TmTMV3QFh1lFyMVMFpC7h0Yd1R3BllRj/9sB/OIBEzYFJWkDHAQDgwD2EbBIMFwFKpAIBmBv2Ks8E3H2bKnWVmNTJWS7nVJPHHQTw4KrFGP7mQm5C0SBe2mQaKsAWuCCmwA6HRLAP4AcKBoJ8DgF4ZKyxJo7KAWD0kGKNhwARAQFBgMAkUBiAFYAGjAA==");
+  opacity:.025;
+  /* Disable on devices that prefer reduced motion */
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] body::before { display:none; }
+}
+/* Disable on low-end devices via media query */
+@media (max-width:480px) {
+  [data-theme="dark"] body::before { display:none; }
 }
 
 /* ══ NAV ══════════════════════════════════════════ */
@@ -250,7 +263,8 @@ button,input,select,textarea{font-family:inherit;}
 
 /* ══ STEPS ════════════════════════════════════════ */
 .steps{display:grid;gap:16px;}
-@media(min-width:640px){.steps{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:640px){.steps{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:1024px){.steps{grid-template-columns:repeat(3,1fr);}}
 .step-card{
   background:var(--wh08);border:1px solid var(--wh15);border-radius:var(--r-md);
   padding:22px;position:relative;overflow:hidden;
@@ -795,22 +809,32 @@ button,input,select,textarea{font-family:inherit;}
   <div class="container section">
     <div class="sec-badge">🎥 Zoom Class</div>
     <h2 class="sec-title" style="font-size:24px;">ข้อมูลเข้าเรียน Online</h2>
-    <div class="zoom-card">
-      <div style="font-family:var(--fhd);font-weight:800;color:#fff;margin-bottom:16px;">🎥 Zoom Meeting Info</div>
-      <div class="zoom-row">
-        <div><div class="zoom-lbl">Meeting ID</div><div class="zoom-val" id="z-mid">—</div></div>
-        <button class="zoom-copy" onclick="copyText(STATE.zoomId,'Meeting ID')">📋 Copy</button>
-      </div>
-      <div class="zoom-row">
-        <div><div class="zoom-lbl">Password</div><div class="zoom-val" id="z-pw">—</div></div>
-        <button class="zoom-copy" onclick="copyText(STATE.zoomPw,'Password')">📋 Copy</button>
-      </div>
-      <div class="zoom-btns">
-        <button class="btn-join" onclick="joinZoom()">🎥 Join Zoom</button>
-        <button class="btn-zline" onclick="sendZoomLine()">💚 ส่ง LINE</button>
+    <!-- SECURITY: ข้อมูล Zoom โหลดจาก server ทุกครั้ง ไม่เก็บใน DOM ล่วงหน้า -->
+    <div id="zoom-loading" style="text-align:center;padding:30px;">
+      <div style="font-size:28px;margin-bottom:8px;">🔐</div>
+      <div style="color:var(--wh70);font-size:14px;">กำลังโหลดข้อมูล Zoom อย่างปลอดภัย...</div>
+    </div>
+    <div id="zoom-content" style="display:none;">
+      <div class="zoom-card">
+        <div style="font-family:var(--fhd);font-weight:800;color:#fff;margin-bottom:16px;">🎥 Zoom Meeting Info</div>
+        <div class="zoom-row">
+          <div><div class="zoom-lbl">Meeting ID</div><div class="zoom-val" id="z-mid">—</div></div>
+          <button class="zoom-copy" onclick="copyZoomId()">📋 Copy</button>
+        </div>
+        <div class="zoom-row">
+          <div><div class="zoom-lbl">Password</div><div class="zoom-val" id="z-pw">—</div></div>
+          <button class="zoom-copy" onclick="copyZoomPw()">📋 Copy</button>
+        </div>
+        <div class="zoom-btns">
+          <button class="btn-join" onclick="joinZoom()">🎥 Join Zoom</button>
+          <button class="btn-zline" onclick="sendZoomLine()">💚 ส่ง LINE</button>
+        </div>
       </div>
     </div>
-    <div class="alert alert-ok"><div class="ai">✅</div><div><strong style="color:var(--gr2);">วิธีเข้าเรียน</strong><ol style="margin:6px 0 0 16px;font-size:13px;line-height:2;color:var(--wh70);"><li>กด Join Zoom</li><li>ระบบใส่ชื่อ Member ID ให้อัตโนมัติ</li><li>รอ Host อนุมัติเข้าห้อง</li></ol></div></div>
+    <div id="zoom-error" style="display:none;">
+      <div class="alert alert-er"><div class="ai">❌</div><div id="zoom-err-msg">ไม่สามารถโหลดข้อมูล Zoom ได้</div></div>
+    </div>
+    <div class="alert alert-ok" style="margin-top:12px;"><div class="ai">✅</div><div><strong style="color:var(--gr2);">วิธีเข้าเรียน</strong><ol style="margin:6px 0 0 16px;font-size:13px;line-height:2;color:var(--wh70);"><li>กด Join Zoom</li><li>ระบบใส่ชื่อ Member ID ให้อัตโนมัติ</li><li>รอ Host อนุมัติเข้าห้อง</li></ol></div></div>
   </div>
 </div>
 
@@ -976,7 +1000,8 @@ const LIFF = '2009199519-UViGDRf7';
 /* ── STATE ───────────────────────────────────── */
 const STATE = {
   user:null, plan:'quarter', slipFile:null, lineProfile:null,
-  bookings:[], zoomId:'', zoomPw:'',
+  bookings:[],
+  // ✅ Zoom ไม่เก็บใน client state — โหลดจาก server ทุกครั้งที่ต้องการ
   bankAcc:'014-7-128268', bankOwner:'สุพัตรา หงษ์วิเศษ', bankName:'ธนาคารกรุงเทพ',
   bankQrUrl:'', roomQrToken:null,
 };
@@ -1019,10 +1044,11 @@ async function init() {
 
 /* ── SETTINGS ────────────────────────────────── */
 async function loadSettings() {
+  // ── SECURITY: getSettings ส่งเฉพาะ public info (bank, site_url) ─────
+  // ❌ zoom_pw, line_token — ไม่ส่งออก GAS จะ filter ไว้ฝั่ง server
   const res = await api('getSettings'); if (!res?.success) return;
   const s = res.settings;
-  STATE.zoomId   = s.zoom_id    || '';
-  STATE.zoomPw   = s.zoom_pw    || '';
+  // Bank info — public ไม่ sensitive
   STATE.bankAcc  = s.bank_acc   || STATE.bankAcc;
   STATE.bankOwner= s.bank_owner || STATE.bankOwner;
   STATE.bankName = s.bank_name  || STATE.bankName;
@@ -1090,6 +1116,8 @@ function goScreen(name) {
   window.scrollTo(0,0);
   document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('dm-'+name)?.classList.add('active');
+  // ── SECURITY: โหลด Zoom จาก server ทุกครั้งที่เปิดหน้า ──
+  if (name === 'zoom' && STATE.user) loadZoomSecure();
 }
 
 /* ── MENU ────────────────────────────────────── */
@@ -1194,8 +1222,7 @@ async function loadPortal(user) {
   document.getElementById('portal-btn').classList.add('show');
   renderStatusPill();
   await loadSettings();
-  const zm=document.getElementById('z-mid');if(zm)zm.textContent=STATE.zoomId||'—';
-  const zp=document.getElementById('z-pw');if(zp)zp.textContent=STATE.zoomPw||'—';
+  // ✅ ไม่โหลด Zoom ตอน login — จะโหลดเฉพาะตอนเปิดหน้า Zoom เท่านั้น (server-verified)
   drawQR(mid);
   loadMemberSchedule();
   loadMemberBookings(mid);
@@ -1302,9 +1329,65 @@ function onDrop(e){e.preventDefault();document.getElementById('upload-zone').cla
 function handleSlip(file){if(file.size>5*1024*1024){toast('ไฟล์เกิน 5MB','err');return;}STATE.slipFile=file;const zone=document.getElementById('upload-zone');zone.classList.add('done');document.getElementById('up-icon').textContent='✅';document.getElementById('up-title').textContent=file.name;document.getElementById('up-sub').textContent=(file.size/1024).toFixed(0)+' KB';if(file.type.startsWith('image/')){const r=new FileReader();r.onload=e=>{document.getElementById('slip-img').src=e.target.result;document.getElementById('slip-preview').style.display='block';};r.readAsDataURL(file);}toast('แนบสลิป: '+file.name);}
 function fileToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
 
-/* ── ZOOM ────────────────────────────────────── */
-function joinZoom(){if(!STATE.zoomId){toast('ยังไม่มีข้อมูล Zoom','err');return;}const name=STATE.user?encodeURIComponent(STATE.user.memberId+'_'+STATE.user.firstName):'';window.open(`https://zoom.us/j/${STATE.zoomId.replace(/\s/g,'')}?pwd=${STATE.zoomPw}&uname=${name}`,'_blank');}
-function sendZoomLine(){const msg=`🎥 Zoom Class — The Owner\nMeeting ID: ${STATE.zoomId}\nPassword: ${STATE.zoomPw}\n👤 ${STATE.user?.memberId||''} ${STATE.user?.firstName||''}`;if(window.liff?.isInClient()){window.liff.sendMessages([{type:'text',text:msg}]);}else{navigator.clipboard?.writeText(msg);toast('Copy ข้อมูล Zoom แล้ว');}}
+/* ── ZOOM (Server-side secure) ───────────────────
+   ✅ Zoom Password ไม่เก็บใน client
+   ✅ โหลดจาก GAS ทุกครั้ง พร้อม verify memberId
+   ✅ ใช้งานได้ครั้งเดียว (session-based display)
+──────────────────────────────────────────────── */
+let _zoomSession = null; // เก็บชั่วคราวใน memory เท่านั้น ไม่ใน DOM
+
+async function loadZoomSecure() {
+  if (!STATE.user?.memberId) return;
+  const loading = document.getElementById('zoom-loading');
+  const content = document.getElementById('zoom-content');
+  const errEl   = document.getElementById('zoom-error');
+  if (loading) loading.style.display = 'block';
+  if (content) content.style.display = 'none';
+  if (errEl)   errEl.style.display   = 'none';
+
+  const res = await api('getZoomForMember', { memberId: STATE.user.memberId });
+  if (loading) loading.style.display = 'none';
+
+  if (res?.success) {
+    // เก็บใน memory variable — ไม่ใน DOM attribute หรือ localStorage
+    _zoomSession = { id: res.zoomId, pw: res.zoomPw };
+    // แสดงผลใน DOM (แสดงค่าจริง แต่ไม่เก็บไว้ใน attribute)
+    const mid = document.getElementById('z-mid');
+    const mpw = document.getElementById('z-pw');
+    if (mid) mid.textContent = res.zoomId || '—';
+    if (mpw) mpw.textContent = res.zoomPw ? '••••••' : '—'; // ซ่อน pw จริงใน DOM
+    if (content) content.style.display = 'block';
+  } else {
+    _zoomSession = null;
+    const msg = document.getElementById('zoom-err-msg');
+    if (msg) msg.textContent = res?.message || 'ไม่สามารถโหลดข้อมูล Zoom ได้';
+    if (errEl) errEl.style.display = 'block';
+  }
+}
+
+function copyZoomId() {
+  if (!_zoomSession?.id) { toast('ไม่มีข้อมูล Meeting ID','err'); return; }
+  navigator.clipboard?.writeText(_zoomSession.id.replace(/\s/g,''));
+  toast('📋 Copy Meeting ID: '+_zoomSession.id);
+}
+function copyZoomPw() {
+  if (!_zoomSession?.pw) { toast('ไม่มีข้อมูล Password','err'); return; }
+  navigator.clipboard?.writeText(_zoomSession.pw);
+  toast('📋 Copy Password แล้ว (ไม่แสดงเพื่อความปลอดภัย)');
+}
+function joinZoom() {
+  if (!_zoomSession?.id) { toast('กรุณารอโหลดข้อมูล Zoom','err'); return; }
+  const name = STATE.user ? encodeURIComponent(STATE.user.memberId+'_'+STATE.user.firstName) : '';
+  window.open(`https://zoom.us/j/${_zoomSession.id.replace(/\s/g,'')}?pwd=${_zoomSession.pw}&uname=${name}`,'_blank');
+  // Clear session after use เพื่อความปลอดภัย
+  setTimeout(() => { _zoomSession = null; }, 30000); // clear หลัง 30 วิ
+}
+function sendZoomLine() {
+  if (!_zoomSession?.id) { toast('กรุณารอโหลดข้อมูล Zoom','err'); return; }
+  const msg = `🎥 Zoom Class — The Owner\nMeeting ID: ${_zoomSession.id}\nPassword: ${_zoomSession.pw}\n👤 ${STATE.user?.memberId||''} ${STATE.user?.firstName||''}`;
+  if (window.liff?.isInClient()) { window.liff.sendMessages([{type:'text',text:msg}]); }
+  else { navigator.clipboard?.writeText(msg); toast('Copy ข้อมูล Zoom แล้ว'); }
+}
 
 /* ── QR ──────────────────────────────────────── */
 function drawQR(mid){

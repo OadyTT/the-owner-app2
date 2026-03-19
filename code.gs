@@ -45,6 +45,7 @@ function route(p) {
     getClasses:       ()=>getClasses(),
     checkinByRoomQR:  ()=>checkinByRoomQR(p),
     getSettings:      ()=>getSettingsPublic(),
+    getZoomForMember: ()=>getZoomForMember(p),
     // Member
     booking:          ()=>createBooking(p),
     cancelBooking:    ()=>cancelBooking(p),
@@ -53,6 +54,7 @@ function route(p) {
     getMemberHistory: ()=>getMemberHistory(p),
     // Admin
     adminLogin:           ()=>adminLogin(p),
+    adminLogout:          ()=>adminLogout(p),
     getStats:             ()=>getStats(),
     getPendingApprovals:  ()=>getPendingApprovals(),
     approveRegistration:  ()=>approveRegistration(p),
@@ -83,6 +85,7 @@ function route(p) {
     getSettingsAll:       ()=>getSettingsAll(),
     setupSheets:          ()=>setupAllSheets(),
     migrateClasses:       ()=>migrateClassesSheet(),
+    getSheetUrl:          ()=>ok({sheetId:SHEET_ID}),
     sendClassReminders:   ()=>sendClassReminders(),
   };
   return map[a] ? map[a]() : err('Unknown action: '+a);
@@ -132,6 +135,30 @@ function err(m) { return {success:false, message:m}; }
 function setupAllSheets() {
   Object.values(SHEET).forEach(n=>getSheet(n));
   return ok({message:'All sheets ready!'});
+}
+
+// ── RESET ADMIN ── รันใน Apps Script เพื่อรีเซ็ต admin/admin1234
+function resetAdmin() {
+  const sheet = getSheet(SHEET.ADMINS);
+  const rows_data = sheet.getDataRange().getValues();
+  // หา row ของ admin
+  let found = false;
+  for (let i = 1; i < rows_data.length; i++) {
+    if (String(rows_data[i][0]).trim() === 'admin') {
+      sheet.getRange(i+1, 2).setValue(hashPw('admin1234'));
+      sheet.getRange(i+1, 3).setValue('Super Admin');
+      sheet.getRange(i+1, 4).setValue('super');
+      found = true;
+      Logger.log('✅ Reset admin password สำเร็จ');
+      break;
+    }
+  }
+  if (!found) {
+    sheet.appendRow(['admin', hashPw('admin1234'), 'Super Admin', 'super', nowISO()]);
+    Logger.log('✅ สร้าง admin ใหม่สำเร็จ');
+  }
+  Logger.log('Username: admin | Password: admin1234');
+  return 'Done';
 }
 
 // Migrate: เพิ่มคอลัม ImageUrl + Description ให้ Classes sheet ที่มีอยู่แล้ว
@@ -226,7 +253,43 @@ function adminLogin(p) {
   if(!p.username||!p.password) return err('กรอก Username และ Password');
   const a = rows(getSheet(SHEET.ADMINS)).find(x=>x.Username===p.username&&x.Password===hashPw(p.password));
   if(!a) return err('Username หรือ Password ไม่ถูกต้อง');
-  return ok({admin:{username:a.Username, name:a.Name, role:a.Role}});
+  // ── สร้าง Session Token ──────────────────────────────────────────
+  // เก็บ token ใน PropertiesService (server-side, ไม่ใช่ Sheet)
+  // หมดอายุใน 8 ชั่วโมง
+  const token = Utilities.base64Encode(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
+      p.username + ':' + new Date().getTime() + ':' + Math.random()
+    )
+  );
+  const expiry = new Date().getTime() + (8 * 60 * 60 * 1000); // 8h
+  PropertiesService.getScriptProperties().setProperty(
+    'session_' + token,
+    JSON.stringify({username:a.Username, role:a.Role, expiry})
+  );
+  return ok({admin:{username:a.Username, name:a.Name, role:a.Role, token}});
+}
+
+// ── VERIFY ADMIN SESSION ──────────────────────────────────────────
+function verifyAdminSession(token) {
+  if(!token) return null;
+  try {
+    const raw = PropertiesService.getScriptProperties().getProperty('session_' + token);
+    if(!raw) return null;
+    const sess = JSON.parse(raw);
+    if(new Date().getTime() > sess.expiry) {
+      PropertiesService.getScriptProperties().deleteProperty('session_' + token);
+      return null;
+    }
+    return sess;
+  } catch(e) { return null; }
+}
+
+// ── LOGOUT: ลบ session ───────────────────────────────────────────
+function adminLogout(p) {
+  if(p.token) {
+    PropertiesService.getScriptProperties().deleteProperty('session_' + p.token);
+  }
+  return ok({message:'Logged out'});
 }
 function addAdmin(p) {
   if(!p.username||!p.password) return err('ข้อมูลไม่ครบ');
@@ -745,16 +808,27 @@ function getReports(p) {
 
 // ── SETTINGS ──────────────────────────────────────
 function getSettingsPublic() {
+  // ── SECURITY: ส่งเฉพาะ public settings ──────────────────────────────
+  // ❌ zoom_pw, line_token, bank_qr_url (ถ้ามี private) — ไม่ส่งออก
+  // ✅ ส่งเฉพาะข้อมูลที่จำเป็นสำหรับ member UI
+  const ALLOWED_KEYS = ['bank_acc','bank_owner','bank_name','bank_qr_url','site_url'];
   const s={};
   rows(getSheet(SHEET.SETTINGS)).forEach(r=>{
-    // ไม่ส่ง sensitive keys ออกไป
-    if(!['line_token'].includes(r.Key)) s[r.Key]=r.Value;
+    if(ALLOWED_KEYS.includes(r.Key)) s[r.Key]=r.Value;
   });
   return ok({settings:s});
 }
 function getSettingsAll() {
+  // ── SECURITY: Admin ดูได้ทั้งหมด ยกเว้น line_token (แสดงแค่ว่ามีหรือไม่) ──
+  const HIDDEN_KEYS = ['line_token'];
   const s={};
-  rows(getSheet(SHEET.SETTINGS)).forEach(r=>{s[r.Key]=r.Value;});
+  rows(getSheet(SHEET.SETTINGS)).forEach(r=>{
+    if(HIDDEN_KEYS.includes(r.Key)){
+      s[r.Key] = r.Value ? '***SET***' : ''; // บอกว่า set แล้ว แต่ไม่แสดงค่า
+    } else {
+      s[r.Key] = r.Value;
+    }
+  });
   return ok({settings:s});
 }
 function saveSettings(p) {
@@ -771,6 +845,31 @@ function saveSettings(p) {
     if(!found) sheet.appendRow([key,value,'']);
   });
   return ok({message:'บันทึกสำเร็จ'});
+}
+
+// ── MEMBER ZOOM (server-side, verified member only) ──────────────────
+// ✅ Zoom Password ไม่ออกไปใน getSettingsPublic
+// ✅ ต้องส่ง memberId ที่ถูกต้องจึงได้รับข้อมูล Zoom
+function getZoomForMember(p) {
+  if(!p.memberId) return err('ไม่มี Member ID');
+  const member = rows(getSheet(SHEET.MEMBERS)).find(x =>
+    String(x.ID||'').toUpperCase() === String(p.memberId).toUpperCase()
+  );
+  if(!member) return err('ไม่พบสมาชิก');
+  const status = String(member.Status||'').toLowerCase();
+  if(!['active',''].includes(status)) return err('สมาชิกไม่ Active');
+  // Check expiry
+  if(member.ExpiryDate) {
+    const exp = new Date(member.ExpiryDate);
+    if(exp < new Date()) return err('แพ็กเกจหมดอายุแล้ว');
+  }
+  // ส่ง Zoom info เฉพาะสมาชิกที่ผ่านการตรวจสอบ
+  return ok({
+    zoomId: getSetting('zoom_id') || '',
+    zoomPw: getSetting('zoom_pw') || '',
+    memberName: (member.FirstName||'') + ' ' + (member.LastName||''),
+    memberId: member.ID,
+  });
 }
 
 // ── LINE MESSAGING ────────────────────────────────
