@@ -436,7 +436,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
             <thead class="table-primary">
               <tr><th>Member ID</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แพ็กเกจ</th><th>สถานะ</th><th>หมดอายุ</th><th>ครั้ง</th><th>Actions</th></tr>
             </thead>
-            <tbody id="m-body"></tbody>
+            <tbody id="m-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -501,7 +501,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
             <thead class="table-primary">
               <tr><th>สมาชิก</th><th>คอร์ส</th><th>วันที่</th><th>ประเภท</th><th>เหตุผล</th><th>฿</th><th>สถานะ</th><th>Actions</th></tr>
             </thead>
-            <tbody id="f-body"></tbody>
+            <tbody id="f-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -541,7 +541,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
         <div class="card-body">
           <table class="table table-hover" id="dt-admins" style="width:100%">
             <thead class="table-primary"><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>สร้างเมื่อ</th><th>Actions</th></tr></thead>
-            <tbody id="ad-body"><tr><td><strong>admin</strong></td><td>Super Admin</td><td><span class="badge bg-danger">Super Admin</span></td><td class="text-muted small">Default</td><td></td></tr></tbody>
+            <tbody id="ad-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody><tr><td><strong>admin</strong></td><td>Super Admin</td><td><span class="badge bg-danger">Super Admin</span></td><td class="text-muted small">Default</td><td></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -787,33 +787,41 @@ function loading(text='กำลังโหลด...') { Swal.fire({title:text,
 function closeLoading() { Swal.close(); }
 
 /* ── DATATABLE HELPER ────────────────────────── */
-/* ── THAI LANGUAGE FOR DATATABLES ───────────────── */
+/* ── DATATABLE DEFERRED INIT ─────────────────────
+   DataTable ต้องการ element ที่ visible จึงจะทำงานได้
+   ใช้ setTimeout เพื่อรอให้ panel แสดงผลก่อน
+────────────────────────────────────────────────── */
 const DT_LANG_TH = {
-  sEmptyTable:'ไม่มีข้อมูลในตาราง', sInfo:'แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ',
-  sInfoEmpty:'แสดง 0 ถึง 0 จาก 0 รายการ', sInfoFiltered:'(กรองจาก _MAX_ รายการทั้งหมด)',
-  sSearch:'ค้นหา:', sLengthMenu:'แสดง _MENU_ รายการ', sLoadingRecords:'กำลังโหลด...',
-  sProcessing:'กำลังประมวลผล...', sZeroRecords:'ไม่พบรายการที่ค้นหา',
-  oPaginate:{sFirst:'แรก', sLast:'สุดท้าย', sNext:'ถัดไป', sPrevious:'ก่อนหน้า'},
+  sEmptyTable:'ไม่มีข้อมูล', sInfo:'_START_-_END_ จาก _TOTAL_',
+  sInfoEmpty:'0 รายการ', sInfoFiltered:'(กรองจาก _MAX_)',
+  sSearch:'ค้นหา:', sLengthMenu:'แสดง _MENU_',
+  sLoadingRecords:'กำลังโหลด...', sProcessing:'กำลังประมวลผล...',
+  sZeroRecords:'ไม่พบรายการ',
+  oPaginate:{sFirst:'«', sLast:'»', sNext:'›', sPrevious:'‹'},
 };
 
 function mkDT(id, opts={}) {
+  // ถ้า panel ยังซ่อนอยู่ ให้ skip - DataTable init บน hidden element จะพัง
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const panel = el.closest('.panel');
+  if (panel && !panel.classList.contains('active')) return null;
   try {
     if (dtInstances[id]) {
       try { dtInstances[id].destroy(); } catch(e) {}
       delete dtInstances[id];
     }
-    const el = document.getElementById(id);
-    if (!el) return null;
     dtInstances[id] = new DataTable('#'+id, {
       language: DT_LANG_TH,
-      pageLength: 25,
-      responsive: true,
-      dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      pageLength: 20,
+      responsive: false,
+      scrollX: false,
+      dom: "<'d-flex justify-content-between align-items-center mb-2'lf><'table-responsive'tr><'d-flex justify-content-between align-items-center mt-2'ip>",
       ...opts
     });
     return dtInstances[id];
   } catch(e) {
-    console.error('DataTable error:', id, e.message);
+    console.error('DataTable error on', id, ':', e.message);
     return null;
   }
 }
@@ -848,13 +856,21 @@ function logout() {
 
 /* ── PANEL NAV ───────────────────────────────── */
 function goPanel(name) {
-  curPanel=name;
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sb-nav .nav-link').forEach(i=>i.classList.remove('active'));
-  document.getElementById('panel-'+name)?.classList.add('active');
-  document.getElementById('nav-'+name)?.classList.add('active');
-  document.getElementById('nav-title').textContent=TITLES[name]||name;
-  loadPanel(name); closeSB(); setLup();
+  curPanel = name;
+  // 1. Remove active from all panels + nav items
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-nav .nav-link').forEach(i => i.classList.remove('active'));
+  // 2. Set active FIRST so DataTable can see visible elements
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+  document.getElementById('nav-title').textContent = TITLES[name] || name;
+  // 3. Load data AFTER panel is visible (requestAnimationFrame ensures paint)
+  requestAnimationFrame(() => {
+    loadPanel(name);
+  });
+  closeSB();
+  setLup();
 }
 function loadPanel(n) {
   try {
@@ -875,9 +891,11 @@ function loadPanel(n) {
   }
 }
 function refresh() {
-  const ico=document.getElementById('rfi');
-  ico.classList.add('spin'); setTimeout(()=>ico.classList.remove('spin'),800);
-  loadPanel(curPanel); setLup();
+  const ico = document.getElementById('rfi');
+  ico.classList.add('spin');
+  setTimeout(() => ico.classList.remove('spin'), 800);
+  requestAnimationFrame(() => loadPanel(curPanel));
+  setLup();
 }
 function setLup(){document.getElementById('lup').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 
@@ -1102,7 +1120,7 @@ async function loadMembers() {
       </td>
     </tr>`;
   }).join('');
-  mkDT('dt-members');
+  setTimeout(() => mkDT('dt-members'), 50);
 }
 function openEditMemberById(id){ const m=_memberData[id]; if(!m){toast('ไม่พบสมาชิก','error');return;} openEditMember(m); }
 function openEditMember(m){
@@ -1175,7 +1193,7 @@ async function loadClasses(){
       </td>
     </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted py-3">ยังไม่มีคลาส</td></tr>';
 
-  mkDT('dt-classes', {columnDefs:[{orderable:false, targets:[0,6]}]});
+  setTimeout(() => mkDT('dt-classes', {columnDefs:[{orderable:false, targets:[0,6]}]}), 50);
 }
 function openAddClass(){
   ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -1245,7 +1263,7 @@ async function loadBookings(status=''){
         ${b.Status==='confirmed'?`<button class="btn btn-danger btn-sm" onclick="cancelBk('${b.ID}')"><i class="bi bi-x-lg"></i></button>`:''}
       </td>
     </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ยังไม่มีการจอง</td></tr>';
-  mkDT('dt-bookings');
+  setTimeout(() => mkDT('dt-bookings'), 50);
 }
 async function checkInBk(id,mid,cls){loading();const res=await api('checkin',{memberId:mid,className:cls,adminId:A?.username});closeLoading();if(res?.success){await loadBookings();alertSuccess('Check-in สำเร็จ!',res.memberName);}else alertError(res?.message||'เกิดข้อผิดพลาด');}
 async function cancelBk(id){if(!await confirm('ยกเลิกการจอง?')) return;loading();await api('cancelBooking',{bookingId:id});closeLoading();await loadBookings();toast('ยกเลิกแล้ว','success');}
@@ -1272,7 +1290,7 @@ async function loadFines(){
         ${f.Status!=='paid'?`<button class="btn btn-success btn-sm" onclick="payFine('${f.ID}',this)"><i class="bi bi-check-lg"></i></button>`:''}
       </td>
     </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ไม่มีค่าปรับ</td></tr>';
-  mkDT('dt-fines');
+  setTimeout(() => mkDT('dt-fines'), 50);
 }
 function openEditFine(id,amount,reason){
   document.getElementById('ef-id').value=id;document.getElementById('af-amt').value=amount;document.getElementById('af-reason').value=reason;
@@ -1326,7 +1344,7 @@ async function loadAdmins() {
         `<button class="btn btn-outline-danger btn-sm" onclick="delAdmin('${a.username}',this)"><i class="bi bi-trash"></i></button>`
       }</td>
     </tr>`).join('');
-  mkDT('dt-admins', {columnDefs:[{orderable:false, targets:[4]}]});
+  setTimeout(() => mkDT('dt-admins', {columnDefs:[{orderable:false, targets:[4]}]}), 50);
 }
 
 async function addAdmin(){
