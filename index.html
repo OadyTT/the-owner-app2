@@ -138,13 +138,22 @@ button,input,select,textarea{font-family:inherit;}
 /* ══ HERO ══════════════════════════════════════════ */
 .hero{
   min-height:calc(100vh - var(--nav-h));
+  height:calc(100vh - var(--nav-h));
+  max-height:900px;
   display:grid;grid-template-columns:1fr;
   align-items:center;
-  padding:40px 20px 60px;
+  padding:32px 24px 48px;
   position:relative;overflow:hidden;
 }
 @media(min-width:900px){
-  .hero{grid-template-columns:1fr 1fr;gap:60px;padding:60px 60px;}
+  .hero{
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    padding:40px 60px;
+    max-height:none;
+    height:calc(100vh - var(--nav-h));
+    min-height:560px;
+  }
 }
 /* glow blobs */
 .hero::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.25) 0%,transparent 70%);top:-200px;left:-100px;pointer-events:none;animation:blob1 8s ease-in-out infinite;}
@@ -160,11 +169,11 @@ button,input,select,textarea{font-family:inherit;}
 }
 .open-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--gr1);animation:pulse-dot 2s ease-in-out infinite;}
 @keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5);}50%{box-shadow:0 0 0 5px rgba(16,185,129,0);}}
-.hero-title{font-family:var(--fhd);font-size:clamp(34px,8vw,60px);font-weight:900;line-height:1.1;margin-bottom:16px;color:#fff;}
+.hero-title{font-family:var(--fhd);font-size:clamp(30px,4.5vw,58px);font-weight:900;line-height:1.1;margin-bottom:14px;color:#fff;}
 .hero-title .hl{color:var(--ac1);}
 [data-theme="light"] .hero-title{color:var(--pu4);}
-.hero-sub{font-size:15px;color:var(--wh70);line-height:1.8;margin-bottom:32px;max-width:480px;}
-.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px;}
+.hero-sub{font-size:14px;color:var(--wh70);line-height:1.7;margin-bottom:24px;max-width:480px;}
+.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
 .btn-main{
   background:linear-gradient(135deg,var(--pu1),var(--pu2));color:#fff;
   padding:14px 28px;border-radius:14px;font-size:15px;font-weight:700;
@@ -186,13 +195,22 @@ button,input,select,textarea{font-family:inherit;}
 
 /* ══ MOCK BROWSER ═════════════════════════════════ */
 .hero-right{position:relative;z-index:2;display:none;}
-@media(min-width:900px){.hero-right{display:block;}}
+@media(min-width:900px){
+  .hero-right{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+  }
+}
 .browser-mock{
   background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.12);
   border-radius:var(--r-xl);
   backdrop-filter:var(--blur);
   overflow:hidden;
+  width:100%;
+  max-width:560px;
   box-shadow:0 40px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
   animation:float 6s ease-in-out infinite;
 }
@@ -1017,34 +1035,13 @@ function updateBankDisplay() {
   });
 }
 function showBankQR() {
-  const sec = document.getElementById('bank-qr-section');
-  const img = document.getElementById('bank-qr-img');
-  if (!sec || !img) return;
-  const acc = STATE.bankAcc.replace(/[-\s]/g, '');
-  if (STATE.bankQrUrl) {
-    // แปลง Google Drive view URL → thumbnail URL
-    const url = driveToImgUrl(STATE.bankQrUrl);
-    img.src = url;
-    sec.style.display = 'block';
-  } else if (acc.length >= 10) {
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(buildEMV(acc))}`;
-    sec.style.display = 'block';
-  }
+  const sec=document.getElementById('bank-qr-section');
+  const img=document.getElementById('bank-qr-img');
+  if(!sec||!img) return;
+  const acc=STATE.bankAcc.replace(/[-\s]/g,'');
+  if(STATE.bankQrUrl){img.src=STATE.bankQrUrl;sec.style.display='block';}
+  else if(acc.length>=10){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(buildEMV(acc))}`;sec.style.display='block';}
 }
-
-// แปลง Google Drive URL ทุกรูปแบบ → direct image URL
-function driveToImgUrl(url) {
-  if (!url) return url;
-  // รูปแบบ: /file/d/FILE_ID/view หรือ /open?id=FILE_ID
-  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  const fileId = m1?.[1] || m2?.[1];
-  if (fileId) {
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
-  }
-  return url; // ถ้าไม่ใช่ Drive URL ใช้ตรงๆ
-}
-
 function buildEMV(id){const g='0016A000000677010111'+lv(id);const b='000201'+lv('01')+'010212'+'29'+lv(g)+'5303764'+'5802TH'+'6304';return b+crc16(b);}
 function lv(v){return String(v).length.toString().padStart(2,'0')+v;}
 function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021):(c<<1);}return(c&0xFFFF).toString(16).toUpperCase().padStart(4,'0');}
@@ -1076,7 +1073,7 @@ async function lineFlow() {
   if (window.liff) {
     try {
       if (!window.liff._initialized) await window.liff.init({liffId:LIFF});
-      if (window.liff.isInClient()) {sh
+      if (window.liff.isInClient()) {
         if (window.liff.isLoggedIn()) { await initLiff(); return; }
         window.liff.login(); return;
       }
