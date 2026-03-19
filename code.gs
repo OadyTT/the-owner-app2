@@ -224,14 +224,38 @@ function initHeaders(sheet, name) {
 function loginMember(p) {
   if(!p.email) return err('กรุณาใส่อีเมล');
   const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.Email===p.email && ['active','Active',''].includes(String(x.Status).trim().toLowerCase()));
-  if(!m) return err('ไม่พบสมาชิก');
+  if(!m) {
+    // ตรวจสอบว่ามีในระบบ Registrations หรือไม่
+    const reg = rows(getSheet(SHEET.REGISTRATIONS)).find(r => r.Email===p.email);
+    if (reg) {
+      if (reg.Status === 'waiting') return {success:false, needApproval:true, plan:reg.Plan, createdAt:reg.CreatedAt};
+      if (reg.Status === 'rejected') return {success:false, rejected:true, adminNote:reg.AdminNote};
+    }
+    return err('ไม่พบสมาชิกที่ Active ในระบบ');
+  }
   return ok({user:sanitizeMember(m)});
 }
 function lineLogin(p) {
   if(!p.lineUserId) return err('ไม่มี LINE User ID');
+  // 1. ตรวจ Members ก่อน
   const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.LineId===p.lineUserId && ['active','Active',''].includes(String(x.Status).trim().toLowerCase()));
-  if(!m) return {success:false, needRegister:true, displayName:p.displayName};
-  return ok({user:sanitizeMember(m)});
+  if(m) return ok({user:sanitizeMember(m)});
+  // 2. ตรวจ Registrations — รอ approve หรือ rejected
+  const reg = rows(getSheet(SHEET.REGISTRATIONS)).find(r =>
+    r.LineId === p.lineUserId
+  );
+  if (reg) {
+    if (reg.Status === 'waiting') {
+      return {success:false, needApproval:true,
+        plan: reg.Plan, createdAt: reg.CreatedAt,
+        firstName: reg.FirstName, displayName: p.displayName};
+    }
+    if (reg.Status === 'rejected') {
+      return {success:false, rejected:true, adminNote: reg.AdminNote, displayName: p.displayName};
+    }
+  }
+  // 3. ไม่เคยสมัคร
+  return {success:false, needRegister:true, displayName:p.displayName};
 }
 function sanitizeMember(m) {
   // normalize plan to lowercase
