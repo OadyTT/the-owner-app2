@@ -1017,13 +1017,34 @@ function updateBankDisplay() {
   });
 }
 function showBankQR() {
-  const sec=document.getElementById('bank-qr-section');
-  const img=document.getElementById('bank-qr-img');
-  if(!sec||!img) return;
-  const acc=STATE.bankAcc.replace(/[-\s]/g,'');
-  if(STATE.bankQrUrl){img.src=STATE.bankQrUrl;sec.style.display='block';}
-  else if(acc.length>=10){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(buildEMV(acc))}`;sec.style.display='block';}
+  const sec = document.getElementById('bank-qr-section');
+  const img = document.getElementById('bank-qr-img');
+  if (!sec || !img) return;
+  const acc = STATE.bankAcc.replace(/[-\s]/g, '');
+  if (STATE.bankQrUrl) {
+    // แปลง Google Drive view URL → thumbnail URL
+    const url = driveToImgUrl(STATE.bankQrUrl);
+    img.src = url;
+    sec.style.display = 'block';
+  } else if (acc.length >= 10) {
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(buildEMV(acc))}`;
+    sec.style.display = 'block';
+  }
 }
+
+// แปลง Google Drive URL ทุกรูปแบบ → direct image URL
+function driveToImgUrl(url) {
+  if (!url) return url;
+  // รูปแบบ: /file/d/FILE_ID/view หรือ /open?id=FILE_ID
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const fileId = m1?.[1] || m2?.[1];
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+  }
+  return url; // ถ้าไม่ใช่ Drive URL ใช้ตรงๆ
+}
+
 function buildEMV(id){const g='0016A000000677010111'+lv(id);const b='000201'+lv('01')+'010212'+'29'+lv(g)+'5303764'+'5802TH'+'6304';return b+crc16(b);}
 function lv(v){return String(v).length.toString().padStart(2,'0')+v;}
 function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021):(c<<1);}return(c&0xFFFF).toString(16).toUpperCase().padStart(4,'0');}
@@ -1055,7 +1076,7 @@ async function lineFlow() {
   if (window.liff) {
     try {
       if (!window.liff._initialized) await window.liff.init({liffId:LIFF});
-      if (window.liff.isInClient()) {
+      if (window.liff.isInClient()) {sh
         if (window.liff.isLoggedIn()) { await initLiff(); return; }
         window.liff.login(); return;
       }
