@@ -10,8 +10,39 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root { --brand:#1400FF; --bdk:#0D00CC; --blt:#EEF0FF; --sw:220px; --nh:58px; }
-body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; }
+body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; transition:background .3s,color .3s; }
 .fw-brand { font-family:'Prompt',sans-serif; }
+/* ── DARK MODE ──────────────────────────────── */
+[data-bs-theme="dark"] body { background:#0e0e1f; color:#e8e8ff; }
+[data-bs-theme="dark"] .topbar { background:#13132b !important; border-color:#2a2a55 !important; }
+[data-bs-theme="dark"] .sidebar { background:#13132b !important; border-color:#2a2a55 !important; }
+[data-bs-theme="dark"] .main { background:#0e0e1f; }
+[data-bs-theme="dark"] .stat-c,
+[data-bs-theme="dark"] .chart-box,
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .bg-white.border { background:#1a1a38 !important; border-color:#2a2a55 !important; color:#e8e8ff; }
+[data-bs-theme="dark"] table thead th { background:#1400FF !important; }
+[data-bs-theme="dark"] table tbody td { border-color:#2a2a55; color:#e8e8ff; }
+[data-bs-theme="dark"] table tbody tr:hover td { background:#1e1e3f !important; }
+[data-bs-theme="dark"] .modal-content { background:#1a1a38 !important; border:1px solid #2a2a55; color:#e8e8ff; }
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select { background:#0e0e1f; border-color:#2a2a55; color:#e8e8ff; }
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus { background:#1a1a38; border-color:#1400FF; }
+[data-bs-theme="dark"] .form-label { color:#c4b5fd; }
+[data-bs-theme="dark"] .sb-item { color:#9090cc !important; }
+[data-bs-theme="dark"] .sb-item:hover { background:rgba(20,0,255,.15) !important; color:#c4b5fd !important; }
+[data-bs-theme="dark"] .sb-item.active { background:#1400FF !important; color:#fff !important; }
+[data-bs-theme="dark"] .alert-success { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.3); color:#6ee7b7; }
+[data-bs-theme="dark"] .alert-warning { background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.3); color:#fcd34d; }
+[data-bs-theme="dark"] .alert-info    { background:rgba(59,130,246,.1); border-color:rgba(59,130,246,.3); color:#93c5fd; }
+[data-bs-theme="dark"] .btn-outline-secondary { border-color:#2a2a55; color:#9090cc; }
+[data-bs-theme="dark"] .accordion-item { background:#1a1a38; border-color:#2a2a55; }
+[data-bs-theme="dark"] .accordion-button { background:#1a1a38; color:#c4b5fd; }
+[data-bs-theme="dark"] .accordion-button:not(.collapsed) { background:#1400FF !important; color:#fff !important; }
+[data-bs-theme="dark"] .text-muted { color:#7070aa !important; }
+[data-bs-theme="dark"] .slip-box { background:#1a1a38; border-color:#2a2a55; }
+[data-bs-theme="dark"] .upload-zone { background:rgba(20,0,255,.08); border-color:rgba(20,0,255,.3); color:#c4b5fd; }
 
 /* LOGIN */
 #login-wrap { position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef0ff,#fff); }
@@ -39,8 +70,8 @@ body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; }
 .panel.active { display:block; }
 
 /* STAT CARD */
-.stat-c { background:#fff;border:1.5px solid #e2e5f5;border-radius:14px;padding:16px;box-shadow:0 3px 0 #e2e5f5; }
-.stat-val { font-family:'Prompt',sans-serif;font-size:26px;font-weight:800; }
+.stat-c { background:#fff;border:1.5px solid #e2e5f5;border-radius:12px;padding:12px 16px;box-shadow:0 2px 0 #e2e5f5; }
+.stat-val { font-family:'Prompt',sans-serif;font-size:22px;font-weight:800; }
 
 /* TABLE */
 .tbl-wrap { overflow-x:auto; }
@@ -179,7 +210,7 @@ table tbody tr:hover td { background:#f8f9ff; }
       <button class="sb-item" id="sb-tutorial" onclick="go('tutorial')"><i class="bi bi-book-fill"></i> คู่มือการใช้งาน</button>
     </div>
     <div class="sb-foot">
-      <small class="text-muted">The Owner Admin v5 | <a href="/index.html" class="text-primary">หน้าหลัก</a></small>
+      <small class="text-muted">The Owner Admin v5.1 | <a href="/index.html" class="text-primary">หน้าหลัก</a></small>
     </div>
   </aside>
 
@@ -195,7 +226,7 @@ table tbody tr:hover td { background:#f8f9ff; }
       <button class="btn btn-brand btn-sm2" onclick="go('reports')"><i class="bi bi-graph-up"></i> รายงาน</button>
     </div>
   </div>
-  <div class="row g-3 mb-4">
+  <div class="row g-2 mb-3">
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">สมาชิก</div><div class="stat-val text-primary" id="st-members">—</div></div></div>
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รอ Approve</div><div class="stat-val text-warning" id="st-pend">—</div></div></div>
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">Check-in วันนี้</div><div class="stat-val text-success" id="st-today">—</div></div></div>
@@ -203,8 +234,8 @@ table tbody tr:hover td { background:#f8f9ff; }
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">ค่าปรับค้าง</div><div class="stat-val text-danger" id="st-fines">—</div></div></div>
   </div>
   <div class="row g-3 mb-4">
-    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><canvas id="ch-members" height="180"></canvas></div></div>
-    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><canvas id="ch-revenue" height="180"></canvas></div></div>
+    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><canvas id="ch-members" height="160"></canvas></div></div>
+    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><canvas id="ch-revenue" height="160"></canvas></div></div>
   </div>
   <div class="row g-3">
     <div class="col-md-6">
@@ -415,7 +446,7 @@ table tbody tr:hover td { background:#f8f9ff; }
       <button class="btn btn-brand btn-sm2" onclick="exportReportCSV()"><i class="bi bi-download"></i> CSV</button>
     </div>
   </div>
-  <div class="row g-3 mb-4">
+  <div class="row g-2 mb-3">
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รายได้สมาชิก</div><div class="stat-val text-primary" id="r-m">—</div></div></div>
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">จากค่าปรับ</div><div class="stat-val text-danger" id="r-fine">—</div></div></div>
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รวมทั้งหมด</div><div class="stat-val text-success" id="r-total">—</div></div></div>
@@ -1029,6 +1060,24 @@ function exportMembersCSV(){
 
 /* ── CLASSES ─────────────────────────────── */
 let _clsImgFile = null;
+// แปลง day format → "ศุกร์ที่ 20 มีนาคม 2569 ⏰ 10:00-12:00"
+function formatClassDay(dayStr, timeStr) {
+  if (!dayStr) return '—';
+  const parts = dayStr.split('+');
+  const dayName = parts[0] || '';
+  const dateStr = parts[1] || '';
+  let formatted = dayName;
+  if (dateStr) {
+    const d = dateStr.split('/');
+    if (d.length === 3) {
+      const months = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+      formatted = `${dayName}ที่ ${parseInt(d[0])} ${months[parseInt(d[1])]||''} ${d[2]}`;
+    }
+  }
+  if (timeStr) formatted += `<div class="text-muted small mt-1">⏰ ${timeStr}</div>`;
+  return formatted;
+}
+
 async function loadClasses() {
   document.getElementById('cl-body').innerHTML = '<tr class="empty-row"><td colspan="7"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
   const res = await api('getClasses');
@@ -1039,12 +1088,17 @@ async function loadClasses() {
   const bMap={online:'bk-gray',onsite:'bk-green',hybrid:'bk-blue'};
   document.getElementById('cl-body').innerHTML = classes.map(c => `
     <tr>
-      <td>${c.imageUrl?`<img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">`:
-        `<div style="width:44px;height:44px;border-radius:8px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:18px;">📚</div>`}</td>
-      <td><strong>${c.name||'—'}</strong>${c.description?`<div class="text-muted small">${c.description}</div>`:''}</td>
-      <td class="small">${c.day||'—'} ${c.time||''}</td>
+      <td>${c.imageUrl
+        ? `<img src="${c.imageUrl}" style="width:70px;height:70px;border-radius:12px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.12);" onerror="this.parentNode.innerHTML='<div style=width:70px;height:70px;border-radius:12px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:28px;>📚</div>'">`
+        : `<div style="width:70px;height:70px;border-radius:12px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:28px;">📚</div>`
+      }</td>
+      <td>
+        <strong style="font-size:14px;">${c.name||'—'}</strong>
+        ${c.description?`<div class="text-muted small mt-1">${c.description}</div>`:''}
+      </td>
+      <td style="min-width:170px;">${formatClassDay(c.day,c.time)}</td>
       <td><span class="bk ${bMap[c.type]||'bk-blue'}">${tMap[c.type]||c.type}</span></td>
-      <td class="small text-center">${c.bookedSeats}/${c.maxSeats}</td>
+      <td class="text-center fw-bold">${c.bookedSeats}/${c.maxSeats}</td>
       <td class="text-center">${c.zoomLink?`<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-xs"><i class="bi bi-camera-video-fill"></i></a>`:'—'}</td>
       <td style="white-space:nowrap;">
         <button class="btn btn-outline-secondary btn-xs me-1" onclick="openEditClass('${c.id}')">✏️</button>
@@ -1278,10 +1332,22 @@ function closeModal(name){ bootstrap.Modal.getInstance(document.getElementById('
 
 /* ── THEME ───────────────────────────────── */
 function toggleTheme(){
-  const b=document.body;const dark=b.getAttribute('data-bs-theme')==='dark';
-  b.setAttribute('data-bs-theme',dark?'light':'dark');
-  document.getElementById('thi').className='bi '+(dark?'bi-moon-stars':'bi-sun-fill');
+  const isDark = document.body.getAttribute('data-bs-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.body.setAttribute('data-bs-theme', next);
+  localStorage.setItem('admin-theme', next);
+  document.getElementById('thi').className = 'bi ' + (isDark ? 'bi-moon-stars' : 'bi-sun-fill');
+  document.getElementById('thi').style.color = isDark ? '' : '#f59e0b';
 }
+// โหลด theme จาก localStorage
+(function(){
+  const saved = localStorage.getItem('admin-theme') || 'light';
+  document.body.setAttribute('data-bs-theme', saved);
+  window.addEventListener('DOMContentLoaded', () => {
+    const ico = document.getElementById('thi');
+    if (ico) { ico.className = 'bi ' + (saved === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars'); if(saved==='dark') ico.style.color='#f59e0b'; }
+  });
+})();
 
 /* ── INIT ────────────────────────────────── */
 document.getElementById('a-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
