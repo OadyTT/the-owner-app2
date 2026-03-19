@@ -9,8 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<!-- DataTables + Bootstrap5 theme -->
-<link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<!-- DataTables removed - using built-in search -->
 
 <!-- SweetAlert2 -->
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
@@ -425,14 +424,15 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
     <div id="panel-members" class="panel">
       <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
         <h4 class="fw-brand fw-bold mb-0">👥 สมาชิก</h4>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <input type="text" class="form-control form-control-sm" style="width:180px;" placeholder="🔍 ค้นหาสมาชิก..." oninput="tblSearch(this,'tbl-members')">
           <button class="btn btn-outline-secondary btn-sm" onclick="exportMembersCSV()"><i class="bi bi-download"></i> CSV</button>
           <button class="btn btn-brand btn-sm" onclick="openModal('add-member')"><i class="bi bi-plus-lg"></i> เพิ่มสมาชิก</button>
         </div>
       </div>
       <div class="card">
         <div class="card-body">
-          <table class="table table-hover" id="dt-members" style="width:100%">
+          <table class="table table-hover table-sm" id="tbl-members" style="width:100%">
             <thead class="table-primary">
               <tr><th>Member ID</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แพ็กเกจ</th><th>สถานะ</th><th>หมดอายุ</th><th>ครั้ง</th><th>Actions</th></tr>
             </thead>
@@ -446,14 +446,15 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
     <div id="panel-classes" class="panel">
       <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
         <div><h4 class="fw-brand fw-bold mb-0">📚 คอร์ส & ตาราง</h4><small class="text-muted">ดึงข้อมูลจาก Google Sheet</small></div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" class="form-control form-control-sm" style="width:160px;" placeholder="🔍 ค้นหา..." oninput="tblSearch(this,'dt-classes')">
           <button class="btn btn-outline-secondary btn-sm" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
           <button class="btn btn-brand btn-sm" onclick="openAddClass()"><i class="bi bi-plus-lg"></i> เพิ่มคลาส</button>
         </div>
       </div>
       <div class="card">
         <div class="card-body">
-          <table class="table table-hover" id="dt-classes" style="width:100%">
+          <table class="table table-hover table-sm" id="dt-classes" style="width:100%">
             <thead class="table-primary">
               <tr><th>รูป</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>ที่นั่ง</th><th>Zoom</th><th>Actions</th></tr>
             </thead>
@@ -473,7 +474,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
       </div>
       <div class="card">
         <div class="card-body">
-          <table class="table table-hover" id="dt-bookings" style="width:100%">
+          <table class="table table-hover table-sm" id="tbl-bookings" style="width:100%">
             <thead class="table-primary">
               <tr><th>Member ID</th><th>ชื่อ</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>Check-in</th><th>สถานะ</th><th>Actions</th></tr>
             </thead>
@@ -487,7 +488,10 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
     <div id="panel-fines" class="panel">
       <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
         <h4 class="fw-brand fw-bold mb-0">⚠️ ค่าปรับ</h4>
-        <button class="btn btn-danger btn-sm" onclick="openModal('add-fine')"><i class="bi bi-plus-lg"></i> เพิ่มค่าปรับ</button>
+        <div class="d-flex gap-2 align-items-center">
+          <input type="text" class="form-control form-control-sm" style="width:180px;" placeholder="🔍 ค้นหา..." oninput="tblSearch(this,'tbl-fines')">
+          <button class="btn btn-danger btn-sm" onclick="openModal('add-fine')"><i class="bi bi-plus-lg"></i> เพิ่มค่าปรับ</button>
+        </div>
       </div>
       <div class="row g-3 mb-3">
         <div class="col-4"><div class="card stat-card text-center"><div class="card-body"><div class="small text-muted fw-bold">ค้างชำระ</div><div class="stat-val text-danger" id="f-total">฿0</div></div></div></div>
@@ -497,7 +501,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
       <div class="alert alert-info d-flex gap-2"><i class="bi bi-info-circle-fill"></i><div><strong>อัตราค่าปรับ:</strong> Online ฿20 | Onsite ฿50 | Hybrid ฿100</div></div>
       <div class="card">
         <div class="card-body">
-          <table class="table table-hover" id="dt-fines" style="width:100%">
+          <table class="table table-hover table-sm" id="tbl-fines" style="width:100%">
             <thead class="table-primary">
               <tr><th>สมาชิก</th><th>คอร์ส</th><th>วันที่</th><th>ประเภท</th><th>เหตุผล</th><th>฿</th><th>สถานะ</th><th>Actions</th></tr>
             </thead>
@@ -539,7 +543,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
       <div class="alert alert-info d-flex gap-2 mb-3"><i class="bi bi-info-circle-fill"></i><div><strong>Super Admin</strong> — ทุกสิทธิ์ &nbsp;|&nbsp; <strong>Manager</strong> — Approve + สมาชิก + รายงาน &nbsp;|&nbsp; <strong>Staff</strong> — Check-in เท่านั้น</div></div>
       <div class="card">
         <div class="card-body">
-          <table class="table table-hover" id="dt-admins" style="width:100%">
+          <table class="table table-hover table-sm" id="tbl-admins" style="width:100%">
             <thead class="table-primary"><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>สร้างเมื่อ</th><th>Actions</th></tr></thead>
             <tbody id="ad-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody><tr><td><strong>admin</strong></td><td>Super Admin</td><td><span class="badge bg-danger">Super Admin</span></td><td class="text-muted small">Default</td><td></td></tr></tbody>
           </table>
@@ -746,8 +750,7 @@ table.dataTable tbody tr:hover td{background:var(--blt)!important;}
 <!-- JS LIBRARIES -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<!-- DataTables JS removed -->
 
 <script>
 'use strict';
@@ -761,7 +764,7 @@ const SHEET_ID = '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0';
 /* ── STATE ──────────────────────────────────── */
 let A = null;
 let allMembers = [], pendingList = [], ciLog = [], selAp = null;
-let charts = {}, dtInstances = {};
+let charts = {};
 let curPanel = 'overview';
 const TITLES = {overview:'📊 ภาพรวม',approve:'✅ Approve Slip',checkin:'📷 Check-in',roomqr:'🔲 Room QR',members:'👥 สมาชิก',classes:'📚 คอร์ส',bookings:'📋 การจอง',fines:'⚠️ ค่าปรับ',reports:'📈 รายได้',admins:'🔐 Admin Users',settings:'⚙️ ตั้งค่า',tutorial:'📖 คู่มือ'};
 
@@ -787,43 +790,24 @@ function loading(text='กำลังโหลด...') { Swal.fire({title:text,
 function closeLoading() { Swal.close(); }
 
 /* ── DATATABLE HELPER ────────────────────────── */
-/* ── DATATABLE DEFERRED INIT ─────────────────────
-   DataTable ต้องการ element ที่ visible จึงจะทำงานได้
-   ใช้ setTimeout เพื่อรอให้ panel แสดงผลก่อน
+/* ── SIMPLE TABLE SEARCH (replaces DataTables) ────
+   ไม่มี external dependency → ไม่พัง
 ────────────────────────────────────────────────── */
-const DT_LANG_TH = {
-  sEmptyTable:'ไม่มีข้อมูล', sInfo:'_START_-_END_ จาก _TOTAL_',
-  sInfoEmpty:'0 รายการ', sInfoFiltered:'(กรองจาก _MAX_)',
-  sSearch:'ค้นหา:', sLengthMenu:'แสดง _MENU_',
-  sLoadingRecords:'กำลังโหลด...', sProcessing:'กำลังประมวลผล...',
-  sZeroRecords:'ไม่พบรายการ',
-  oPaginate:{sFirst:'«', sLast:'»', sNext:'›', sPrevious:'‹'},
-};
+const dtInstances = {}; // keep for compatibility
 
 function mkDT(id, opts={}) {
-  // ถ้า panel ยังซ่อนอยู่ ให้ skip - DataTable init บน hidden element จะพัง
-  const el = document.getElementById(id);
-  if (!el) return null;
-  const panel = el.closest('.panel');
-  if (panel && !panel.classList.contains('active')) return null;
-  try {
-    if (dtInstances[id]) {
-      try { dtInstances[id].destroy(); } catch(e) {}
-      delete dtInstances[id];
-    }
-    dtInstances[id] = new DataTable('#'+id, {
-      language: DT_LANG_TH,
-      pageLength: 20,
-      responsive: false,
-      scrollX: false,
-      dom: "<'d-flex justify-content-between align-items-center mb-2'lf><'table-responsive'tr><'d-flex justify-content-between align-items-center mt-2'ip>",
-      ...opts
-    });
-    return dtInstances[id];
-  } catch(e) {
-    console.error('DataTable error on', id, ':', e.message);
-    return null;
-  }
+  // No-op - DataTables removed, using tblSearch instead
+  return null;
+}
+
+// Simple inline search for any table
+function tblSearch(inputEl, tableId) {
+  const q = inputEl.value.toLowerCase();
+  const tbody = document.querySelector('#' + tableId + ' tbody');
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
 }
 
 /* ── LOGIN ───────────────────────────────────── */
@@ -1098,10 +1082,12 @@ async function genQR(){
 
 /* ── MEMBERS ─────────────────────────────────── */
 async function loadMembers() {
-  loading();
-  const res=await api('getMembers');
-  closeLoading();
-  allMembers=res?.members||[];
+  const tbody = document.getElementById('m-body');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  const res = await api('getMembers');
+  allMembers = res?.members || [];
+  _memberData = {};
+  allMembers.forEach(m => { _memberData[m.memberId] = m; });
   document.getElementById('m-body').innerHTML=allMembers.map(m=>{
     const isQ=String(m.memberId||'').startsWith('OwnP')||String(m.plan||'').toLowerCase()==='quarter';
     const isActive=['active',''].includes(String(m.status||'').toLowerCase());
@@ -1120,7 +1106,6 @@ async function loadMembers() {
       </td>
     </tr>`;
   }).join('');
-  setTimeout(() => mkDT('dt-members'), 50);
 }
 function openEditMemberById(id){ const m=_memberData[id]; if(!m){toast('ไม่พบสมาชิก','error');return;} openEditMember(m); }
 function openEditMember(m){
@@ -1162,7 +1147,9 @@ function exportMembersCSV(){
 let _classData = {}; // cache class data
 
 async function loadClasses(){
-  const res = await api('getClasses');
+  const res =   const _tbloadClasses = document.getElementById('cl-body');
+  if (_tbloadClasses) _tbloadClasses.innerHTML = '<tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  await api('getClasses');
   const classes = res?.classes || [];
   _classData = {};
   classes.forEach(c => { _classData[c.id] = c; });
@@ -1193,7 +1180,6 @@ async function loadClasses(){
       </td>
     </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted py-3">ยังไม่มีคลาส</td></tr>';
 
-  setTimeout(() => mkDT('dt-classes', {columnDefs:[{orderable:false, targets:[0,6]}]}), 50);
 }
 function openAddClass(){
   ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -1263,14 +1249,15 @@ async function loadBookings(status=''){
         ${b.Status==='confirmed'?`<button class="btn btn-danger btn-sm" onclick="cancelBk('${b.ID}')"><i class="bi bi-x-lg"></i></button>`:''}
       </td>
     </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ยังไม่มีการจอง</td></tr>';
-  setTimeout(() => mkDT('dt-bookings'), 50);
 }
 async function checkInBk(id,mid,cls){loading();const res=await api('checkin',{memberId:mid,className:cls,adminId:A?.username});closeLoading();if(res?.success){await loadBookings();alertSuccess('Check-in สำเร็จ!',res.memberName);}else alertError(res?.message||'เกิดข้อผิดพลาด');}
 async function cancelBk(id){if(!await confirm('ยกเลิกการจอง?')) return;loading();await api('cancelBooking',{bookingId:id});closeLoading();await loadBookings();toast('ยกเลิกแล้ว','success');}
 
 /* ── FINES ───────────────────────────────────── */
 async function loadFines(){
-  const res=await api('getFines');const fines=res?.fines||[];
+  const res=  const _tbloadFines = document.getElementById('f-body');
+  if (_tbloadFines) _tbloadFines.innerHTML = '<tr><td colspan="8" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  await api('getFines');const fines=res?.fines||[];
   const pend=fines.filter(f=>f.Status==='pending');const paid=fines.filter(f=>f.Status==='paid');
   document.getElementById('f-total').textContent='฿'+pend.reduce((s,f)=>s+Number(f.Amount||0),0);
   document.getElementById('f-cnt').textContent=pend.length;
@@ -1290,7 +1277,6 @@ async function loadFines(){
         ${f.Status!=='paid'?`<button class="btn btn-success btn-sm" onclick="payFine('${f.ID}',this)"><i class="bi bi-check-lg"></i></button>`:''}
       </td>
     </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ไม่มีค่าปรับ</td></tr>';
-  setTimeout(() => mkDT('dt-fines'), 50);
 }
 function openEditFine(id,amount,reason){
   document.getElementById('ef-id').value=id;document.getElementById('af-amt').value=amount;document.getElementById('af-reason').value=reason;
@@ -1330,7 +1316,9 @@ function exportReportCSV(){
 
 /* ── ADMINS ──────────────────────────────────── */
 async function loadAdmins() {
-  const res = await api('getAdmins');
+  const res =   const _tbloadAdmins = document.getElementById('ad-body');
+  if (_tbloadAdmins) _tbloadAdmins.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  await api('getAdmins');
   if (!res?.admins?.length) return;
   const rMap={staff:'Staff',manager:'Manager',super:'Super Admin'};
   const rCls={staff:'bg-info',manager:'bg-warning text-dark',super:'bg-danger'};
@@ -1344,7 +1332,6 @@ async function loadAdmins() {
         `<button class="btn btn-outline-danger btn-sm" onclick="delAdmin('${a.username}',this)"><i class="bi bi-trash"></i></button>`
       }</td>
     </tr>`).join('');
-  setTimeout(() => mkDT('dt-admins', {columnDefs:[{orderable:false, targets:[4]}]}), 50);
 }
 
 async function addAdmin(){
