@@ -132,30 +132,31 @@ button,input,select,textarea{font-family:inherit;}
 
 /* ══ PAGE WRAP ════════════════════════════════════ */
 .page-wrap{padding-top:var(--nav-h);}
-.screen{display:none;min-height:calc(100vh - var(--nav-h));}
+.screen{display:none;}
 .screen.active{display:block;}
 
 /* ══ HERO ══════════════════════════════════════════ */
 .hero{
-  min-height:calc(100svh - var(--nav-h));
-  display:grid;grid-template-columns:1fr;
-  align-items:center;justify-content:center;
-  padding:28px 24px 36px;
-  position:relative;overflow:hidden;
-  box-sizing:border-box;
+  height:calc(100vh - var(--nav-h));
+  min-height:520px;
+  display:grid;
+  grid-template-columns:1fr;
+  align-items:center;
+  padding:24px 24px 32px;
+  position:relative;
+  overflow:hidden;
 }
-@media(min-width:900px) and (min-height:600px){
+@media(min-width:900px){
   .hero{
     grid-template-columns:1fr 1fr;
     gap:40px;
-    padding:32px 60px;
-    min-height:calc(100svh - var(--nav-h));
-    max-height:calc(100svh - var(--nav-h));
+    padding:0 60px;
   }
 }
 @media(min-width:1400px){
-  .hero{ padding:40px 100px; gap:60px; }
+  .hero{ padding:0 100px; gap:60px; }
 }
+
 /* glow blobs */
 .hero::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 70%);top:-150px;left:-80px;pointer-events:none;animation:blob1 8s ease-in-out infinite;}
 .hero::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.15) 0%,transparent 70%);bottom:-100px;right:0;pointer-events:none;animation:blob2 10s ease-in-out infinite;}
