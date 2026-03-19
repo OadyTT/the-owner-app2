@@ -41,6 +41,7 @@ function route(p) {
     // Public
     registerWithSlip: ()=>registerWithSlip(p),
     lineLogin:        ()=>lineLogin(p),
+    linkLineToMember: ()=>linkLineToMember(p),
     login:            ()=>loginMember(p),
     getClasses:       ()=>getClasses(),
     checkinByRoomQR:  ()=>checkinByRoomQR(p),
@@ -237,13 +238,22 @@ function loginMember(p) {
 }
 function lineLogin(p) {
   if(!p.lineUserId) return err('ไม่มี LINE User ID');
-  // 1. ตรวจ Members ก่อน
-  const m = rows(getSheet(SHEET.MEMBERS)).find(x=>x.LineId===p.lineUserId && ['active','Active',''].includes(String(x.Status).trim().toLowerCase()));
-  if(m) return ok({user:sanitizeMember(m)});
-  // 2. ตรวจ Registrations — รอ approve หรือ rejected
-  const reg = rows(getSheet(SHEET.REGISTRATIONS)).find(r =>
-    r.LineId === p.lineUserId
+
+  const membersSheet = getSheet(SHEET.MEMBERS);
+  const regsSheet    = getSheet(SHEET.REGISTRATIONS);
+
+  // ── 1. ค้นหาใน Members ด้วย LineId ──────────────────────────────
+  const allMembers = rows(membersSheet);
+  let m = allMembers.find(x =>
+    x.LineId === p.lineUserId &&
+    ['active','Active',''].includes(String(x.Status||'').trim().toLowerCase())
   );
+  if (m) return ok({user: sanitizeMember(m)});
+
+  // ── 2. ค้นหาใน Registrations ด้วย LineId ──────────────────────
+  const allRegs = rows(regsSheet);
+  const reg = allRegs.find(r => r.LineId === p.lineUserId);
+
   if (reg) {
     if (reg.Status === 'waiting') {
       return {success:false, needApproval:true,
@@ -253,9 +263,48 @@ function lineLogin(p) {
     if (reg.Status === 'rejected') {
       return {success:false, rejected:true, adminNote: reg.AdminNote, displayName: p.displayName};
     }
+    // status='approved' แต่ยังไม่เจอใน Members → หาด้วย MemberId หรือ Email
+    if (reg.Status === 'approved') {
+      // ลองหาด้วย MemberId ที่ approved ไว้
+      let mByMid = allMembers.find(x =>
+        x.ID === reg.MemberId &&
+        ['active','Active',''].includes(String(x.Status||'').trim().toLowerCase())
+      );
+      // ถ้าไม่เจอด้วย MemberId ลองหาด้วย Email
+      if (!mByMid) {
+        mByMid = allMembers.find(x =>
+          x.Email === reg.Email &&
+          ['active','Active',''].includes(String(x.Status||'').trim().toLowerCase())
+        );
+      }
+      if (mByMid) {
+        // อัปเดต LineId ใน Members sheet ด้วย (ถ้าว่างอยู่)
+        if (!mByMid.LineId) {
+          setCell(membersSheet, findRow(membersSheet, 0, mByMid.ID), 'LineId', p.lineUserId);
+          mByMid.LineId = p.lineUserId;
+        }
+        return ok({user: sanitizeMember(mByMid)});
+      }
+    }
   }
-  // 3. ไม่เคยสมัคร
+
+  // ── 3. ค้นหา Registrations ด้วย LineDisplayName / ไม่มี LineId ──
+  // กรณีสมัครผ่าน form โดยไม่ได้ login LINE
+  // ลองหาด้วย Members email ที่อาจ match กับ LINE profile
+  // (ไม่สามารถ match ได้อัตโนมัติ — ต้องให้ user เชื่อม)
+
+  // ── 4. ไม่พบในระบบ → สมัครใหม่ ─────────────────────────────────
   return {success:false, needRegister:true, displayName:p.displayName};
+}
+
+// ── ฟังก์ชัน link LINE กับ account เดิม (สมาชิกที่ email login อยู่แล้ว) ──
+function linkLineToMember(p) {
+  if(!p.memberId || !p.lineUserId) return err('ข้อมูลไม่ครบ');
+  const sheet = getSheet(SHEET.MEMBERS);
+  const rowNum = findRow(sheet, 0, p.memberId);
+  if (rowNum < 0) return err('ไม่พบสมาชิก');
+  setCell(sheet, rowNum, 'LineId', p.lineUserId);
+  return ok({message: 'เชื่อม LINE สำเร็จ'});
 }
 function sanitizeMember(m) {
   // normalize plan to lowercase

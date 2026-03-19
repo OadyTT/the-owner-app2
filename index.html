@@ -1127,7 +1127,10 @@ button,input,select,textarea{font-family:inherit;}
       <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('login')">ยกเลิก</button>
       <button class="btn btn-primary" style="flex:2;" onclick="doLogin()" id="btn-login"><span class="bxt">เข้าสู่ระบบ</span></button>
     </div>
-    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--wh70);">ยังไม่มีบัญชี? <button onclick="closeModal('login');openModal('register')" style="color:var(--ac1);font-weight:700;background:none;border:none;cursor:pointer;font-size:13px;">สมัครสมาชิก</button></p>
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;font-size:12px;color:#FCD34D;">
+      💡 ถ้าเคยสมัครแล้วแต่ LINE login ไม่ได้ → ใช้อีเมลที่สมัครไว้ ระบบจะเชื่อม LINE ให้อัตโนมัติ
+    </div>
+    <p style="text-align:center;margin-top:12px;font-size:13px;color:var(--wh70);">ยังไม่มีบัญชี? <button onclick="closeModal('login');openModal('register')" style="color:var(--ac1);font-weight:700;background:none;border:none;cursor:pointer;font-size:13px;">สมัครสมาชิก</button></p>
   </div>
 </div>
 
@@ -1410,8 +1413,25 @@ async function doLogin() {
   const btn=document.getElementById('btn-login');btn.classList.add('ldg');btn.disabled=true;
   const res=await api('login',{email:em});
   btn.classList.remove('ldg');btn.disabled=false;
-  if(res?.success&&res.user){closeModal('login');await loadPortal(res.user);toast('เข้าสู่ระบบสำเร็จ ✅');}
-  else toast(res?.message||'ไม่พบสมาชิก','err');
+  if (res?.success && res.user) {
+    closeModal('login');
+    await loadPortal(res.user);
+    toast('เข้าสู่ระบบสำเร็จ ✅');
+    // ถ้า login email สำเร็จ + มี LINE profile → เชื่อม LINE อัตโนมัติ
+    if (STATE.lineProfile?.userId && !res.user.lineId) {
+      const linkRes = await api('linkLineToMember',{
+        memberId: res.user.memberId, lineUserId: STATE.lineProfile.userId
+      });
+      if (linkRes?.success) toast('🔗 เชื่อม LINE สำเร็จ — ครั้งหน้า login ผ่าน LINE ได้เลย');
+    }
+  } else if (res?.needApproval) {
+    closeModal('login'); showPendingScreen(res);
+  } else if (res?.rejected) {
+    closeModal('login'); showRejectedScreen(res);
+  } else {
+    // อาจเป็นสมาชิกที่สมัครโดยไม่ได้ link LINE
+    toast(res?.message||'ไม่พบสมาชิก — ลองใช้อีเมลที่สมัครไว้','err');
+  }
 }
 
 /* ── FORMAT HELPERS ──────────────────────────── */
