@@ -1142,7 +1142,17 @@ function drawQRC(id, text) {
   ctx.fillStyle='#1400FF';ctx.fillRect(26,26,20,20);
   ctx.fillStyle='#fff';ctx.font='bold 5px sans-serif';ctx.textAlign='center';ctx.fillText('OWN',36,33);ctx.fillText(text.slice(-4),36,40);
 }
-function printQR(id,name){const c=document.getElementById(id);if(!c)return;const w=window.open('','_blank','width=400,height=500');w.document.write(`<html><body style="text-align:center;font-family:sans-serif;padding:20px;"><h2>THE OWNER</h2><h3>${name}</h3><img src="${c.toDataURL()}" style="width:200px;"><script>window.print();<\/script></body></html>`);}
+function printQR(id,name){
+  const c=document.getElementById(id);if(!c)return;
+  const w=window.open('','_blank','width=400,height=500');
+  const scTag='scr'+'ipt';
+  const html='<html><body style="text-align:center;font-family:sans-serif;padding:20px;">'
+    +'<h2>THE OWNER</h2><h3>'+name+'</h3>'
+    +'<img src="'+c.toDataURL()+'" style="width:200px;">'
+    +'<'+scTag+'>window.print();<\/'+scTag+'>'
+    +'</body></html>';
+  w.document.write(html);
+}
 async function openGenQR() {
   const sel = document.getElementById('gq-cl');
   sel.innerHTML = '<option>กำลังโหลด...</option>';
@@ -1221,51 +1231,78 @@ function exportMembersCSV(){
 
 /* ── CLASSES ─────────────────────────────── */
 let _clsImgFile = null;
-// แปลง day format → "ศุกร์ที่ 20 มีนาคม 2569 ⏰ 10:00-12:00"
-function formatClassDay(dayStr, timeStr) {
+let _allClasses  = [];
+
+function formatClassDay(dayStr) {
   if (!dayStr) return '—';
   const parts = dayStr.split('+');
   const dayName = parts[0] || '';
   const dateStr = parts[1] || '';
-  let formatted = dayName;
-  if (dateStr) {
-    const d = dateStr.split('/');
-    if (d.length === 3) {
-      const months = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-      formatted = `${dayName}ที่ ${parseInt(d[0])} ${months[parseInt(d[1])]||''} ${d[2]}`;
-    }
+  if (!dateStr) return dayName;
+  const d = dateStr.split('/');
+  if (d.length !== 3) return dayStr;
+  const months = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return dayName + 'ที่ ' + parseInt(d[0]) + ' ' + (months[parseInt(d[1])]||'') + ' ' + d[2];
+}
+
+function renderClassCards(classes) {
+  const wrap = document.getElementById('cls-grid-wrap');
+  if (!wrap) return;
+  if (!classes.length) {
+    wrap.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#8888aa;">ยังไม่มีคลาส — กด "+ เพิ่มคลาส"</div>';
+    return;
   }
-  if (timeStr) formatted += `<div class="text-muted small mt-1">⏰ ${timeStr}</div>`;
-  return formatted;
+  const tMap = {online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid'};
+  const tCol = {online:'bk-gray',   onsite:'bk-green',  hybrid:'bk-blue'};
+  wrap.innerHTML = classes.map(function(c) {
+    var pct = c.maxSeats ? Math.round(c.bookedSeats/c.maxSeats*100) : 0;
+    var left = c.maxSeats - c.bookedSeats;
+    var seatColor = left <= 0 ? '#ef4444' : left <= 5 ? '#f59e0b' : '#10b981';
+    var seatTxt   = left <= 0 ? '❌ เต็ม' : left <= 5 ? '⚡ เหลือ '+left : c.bookedSeats+'/'+c.maxSeats;
+    var thumb = c.imageUrl
+      ? '<img src="'+c.imageUrl+'" class="cls-thumb" alt="'+c.name+'" onerror="this.outerHTML=\'<div class=cls-thumb-placeholder>📚</div>\'">'
+      : '<div class="cls-thumb-placeholder">📚</div>';
+    var zoomBtn = c.zoomLink
+      ? '<a href="'+c.zoomLink+'" target="_blank" class="btn btn-outline-primary btn-xs mt-1 d-inline-flex align-items-center gap-1"><i class="bi bi-camera-video-fill"></i> Zoom</a>'
+      : '';
+    var desc = c.description ? '<div style="font-size:12px;color:#8888aa;margin-top:6px;">'+c.description+'</div>' : '';
+    return '<div class="cls-card">'
+      + thumb
+      + '<div class="cls-body">'
+      + '<div style="font-family:\'Prompt\',sans-serif;font-size:15px;font-weight:800;">'+( c.name||'—')+'</div>'
+      + '<div class="cls-day">📅 '+formatClassDay(c.day)+'<br>⏰ '+(c.time||'—')+'</div>'
+      + '<div class="cls-badges"><span class="bk '+(tCol[c.type]||'bk-blue')+'">'+(tMap[c.type]||c.type)+'</span>'
+      + '<span style="font-size:12px;font-weight:700;color:'+seatColor+';">'+seatTxt+'</span></div>'
+      + '<div style="height:5px;background:#e2e5f5;border-radius:999px;overflow:hidden;">'
+      + '<div style="height:100%;width:'+pct+'%;background:'+seatColor+';border-radius:999px;transition:width .5s;"></div></div>'
+      + desc + zoomBtn
+      + '</div>'
+      + '<div class="cls-actions">'
+      + '<button class="btn btn-outline-secondary btn-sm flex-fill" onclick="openEditClass(\''+c.id+'\')">'
+      + '<i class="bi bi-pencil"></i> แก้ไข</button>'
+      + '<button class="btn btn-outline-danger btn-sm flex-fill" onclick="delClass(\''+c.id+'\',\''+c.name.replace(/'/g,'')+'\')">'
+      + '<i class="bi bi-trash"></i> ลบ</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function filterClassCards(q) {
+  var lq = q.toLowerCase();
+  renderClassCards(lq ? _allClasses.filter(function(c) {
+    return (c.name||'').toLowerCase().includes(lq)
+        || (c.day||'').toLowerCase().includes(lq)
+        || (c.type||'').toLowerCase().includes(lq);
+  }) : _allClasses);
 }
 
 async function loadClasses() {
-  document.getElementById('cl-body').innerHTML = '<tr class="empty-row"><td colspan="7"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  var wrap = document.getElementById('cls-grid-wrap');
+  if (wrap) wrap.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#8888aa;"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</div>';
   const res = await api('getClasses');
   classCache = {};
-  const classes = res?.classes || [];
-  classes.forEach(c => { classCache[c.id] = c; });
-  const tMap={online:'🖥️ Online',onsite:'🏢 Onsite',hybrid:'⚡ Hybrid'};
-  const bMap={online:'bk-gray',onsite:'bk-green',hybrid:'bk-blue'};
-  document.getElementById('cl-body').innerHTML = classes.map(c => `
-    <tr>
-      <td>${c.imageUrl
-        ? `<img src="${c.imageUrl}" style="width:70px;height:70px;border-radius:12px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.12);" onerror="this.parentNode.innerHTML='<div style=width:70px;height:70px;border-radius:12px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:28px;>📚</div>'">`
-        : `<div style="width:70px;height:70px;border-radius:12px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:28px;">📚</div>`
-      }</td>
-      <td>
-        <strong style="font-size:14px;">${c.name||'—'}</strong>
-        ${c.description?`<div class="text-muted small mt-1">${c.description}</div>`:''}
-      </td>
-      <td style="min-width:170px;">${formatClassDay(c.day,c.time)}</td>
-      <td><span class="bk ${bMap[c.type]||'bk-blue'}">${tMap[c.type]||c.type}</span></td>
-      <td class="text-center fw-bold">${c.bookedSeats}/${c.maxSeats}</td>
-      <td class="text-center">${c.zoomLink?`<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-xs"><i class="bi bi-camera-video-fill"></i></a>`:'—'}</td>
-      <td style="white-space:nowrap;">
-        <button class="btn btn-outline-secondary btn-xs me-1" onclick="openEditClass('${c.id}')">✏️</button>
-        <button class="btn btn-danger btn-xs" onclick="delClass('${c.id}','${(c.name||'').replace(/'/g,'')}')">🗑️</button>
-      </td>
-    </tr>`).join('') || '<tr class="empty-row"><td colspan="7">ยังไม่มีคลาส</td></tr>';
+  _allClasses = res?.classes || [];
+  _allClasses.forEach(function(c) { classCache[c.id] = c; });
+  renderClassCards(_allClasses);
 }
 function openAddClass(){
   ['ac-id','ac-date','ac-tm','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
