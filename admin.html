@@ -1,1263 +1,1124 @@
 <!DOCTYPE html>
-<html lang="th" data-bs-theme="light">
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>The Owner — Admin</title>
-
-<!-- Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-<!-- DataTables removed - using built-in search -->
-
-<!-- SweetAlert2 -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── BRAND TOKENS ───────────────────────────── */
-:root{
-  --brand:#1400FF;--bdk:#0D00CC;--blt:#EEF0FF;
-  --fth:'Sarabun',sans-serif;--fhd:'Prompt',sans-serif;
-  --sidebar-w:250px;--nav-h:58px;
+:root { --brand:#1400FF; --bdk:#0D00CC; --blt:#EEF0FF; --sw:220px; --nh:58px; }
+body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; }
+.fw-brand { font-family:'Prompt',sans-serif; }
+
+/* LOGIN */
+#login-wrap { position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef0ff,#fff); }
+.login-box { width:100%;max-width:380px;background:#fff;border-radius:18px;padding:36px 32px;box-shadow:0 8px 40px rgba(20,0,255,.1); }
+.brand-mark { width:44px;height:44px;border-radius:50%;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;font-family:'Prompt',sans-serif;font-size:9px;font-weight:800;color:#fff;line-height:1.2;text-align:center;box-shadow:0 4px 0 var(--bdk); }
+
+/* LAYOUT */
+#app { display:none; }
+.topbar { position:fixed;top:0;left:0;right:0;height:var(--nh);z-index:500;background:#fff;border-bottom:1.5px solid #e2e5f5;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.topbar-title { font-family:'Prompt',sans-serif;font-size:14px;font-weight:800; }
+.sidebar { position:fixed;top:0;left:0;bottom:0;width:var(--sw);z-index:400;background:#fff;border-right:1.5px solid #e2e5f5;display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s; }
+.sb-head { padding:16px 14px 14px;background:linear-gradient(135deg,var(--brand),#4433ff); }
+.sb-user { background:rgba(255,255,255,.15);border-radius:9px;padding:9px 12px;margin-top:8px; }
+.sb-sec { font-size:10px;font-weight:700;color:#8888aa;letter-spacing:1.5px;text-transform:uppercase;padding:12px 14px 4px; }
+.sb-item { display:flex;align-items:center;gap:9px;padding:10px 14px;color:#4a4a6a;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .2s;border-left:3px solid transparent; }
+.sb-item:hover { background:#eef0ff;color:var(--brand); }
+.sb-item.active { background:#eef0ff;color:var(--brand);font-weight:700;border-left-color:var(--brand); }
+.sb-badge { background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:auto;display:none; }
+.sb-badge.on { display:inline; }
+.sb-foot { padding:12px 14px;border-top:1px solid #e2e5f5;margin-top:auto; }
+.main { margin-top:var(--nh);margin-left:var(--sw);padding:20px;min-height:calc(100vh - var(--nh)); }
+
+/* PANEL */
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* STAT CARD */
+.stat-c { background:#fff;border:1.5px solid #e2e5f5;border-radius:14px;padding:16px;box-shadow:0 3px 0 #e2e5f5; }
+.stat-val { font-family:'Prompt',sans-serif;font-size:26px;font-weight:800; }
+
+/* TABLE */
+.tbl-wrap { overflow-x:auto; }
+.tbl-search { width:200px;padding:6px 12px;border:1.5px solid #e2e5f5;border-radius:8px;font-size:13px;outline:none;font-family:inherit; }
+.tbl-search:focus { border-color:var(--brand); }
+table { width:100%;border-collapse:collapse;font-size:13px; }
+table thead th { background:var(--brand);color:#fff;padding:10px 13px;font-weight:700;font-size:12px;white-space:nowrap;text-align:left; }
+table tbody td { padding:10px 13px;border-bottom:1px solid #e2e5f5;vertical-align:middle; }
+table tbody tr:last-child td { border-bottom:none; }
+table tbody tr:hover td { background:#f8f9ff; }
+.empty-row td { text-align:center;padding:30px;color:#8888aa;font-size:13px; }
+
+/* BADGE */
+.bk { display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700; }
+.bk-green { background:rgba(16,185,129,.1);color:#10b981; }
+.bk-red   { background:rgba(239,68,68,.1);color:#ef4444; }
+.bk-blue  { background:#eef0ff;color:var(--brand); }
+.bk-yellow{ background:rgba(245,158,11,.1);color:#f59e0b; }
+.bk-gray  { background:rgba(100,100,120,.08);color:#6b7280; }
+
+/* BUTTON */
+.btn-brand { background:var(--brand);color:#fff;border:none;box-shadow:0 4px 0 var(--bdk); }
+.btn-brand:hover { background:var(--bdk);color:#fff; }
+.btn-brand:active { transform:translateY(3px);box-shadow:0 1px 0 var(--bdk); }
+.btn-xs { padding:4px 10px;font-size:12px;border-radius:6px; }
+.btn-sm2 { padding:6px 14px;font-size:12px;border-radius:8px; }
+
+/* APPROVE DETAIL */
+.slip-box { background:#f0f2ff;border-radius:10px;min-height:180px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1.5px solid #e2e5f5; }
+.slip-box img { max-width:100%;max-height:260px;object-fit:contain;cursor:zoom-in; }
+
+/* CHECKIN */
+.scan-input { font-family:'Prompt',sans-serif;font-size:24px;font-weight:800;letter-spacing:4px;text-align:center;border:2px solid var(--brand);border-radius:12px;padding:12px;width:100%;outline:none; }
+.scan-input:focus { box-shadow:0 0 0 3px rgba(20,0,255,.15); }
+
+/* CHART */
+.chart-box { background:#fff;border:1.5px solid #e2e5f5;border-radius:14px;padding:18px;box-shadow:0 3px 0 #e2e5f5; }
+
+/* MODAL */
+.modal-content { border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15); }
+.form-control, .form-select { border:1.5px solid #e2e5f5;font-family:'Sarabun',sans-serif; }
+.form-control:focus, .form-select:focus { border-color:var(--brand);box-shadow:0 0 0 3px rgba(20,0,255,.1); }
+
+/* UPLOAD */
+.upload-zone { border:2px dashed rgba(20,0,255,.25);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:#eef0ff;position:relative;transition:all .2s; }
+.upload-zone:hover { border-color:var(--brand); }
+.upload-zone input { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+.upload-zone.has-file { border-color:#10b981;background:rgba(16,185,129,.05); }
+
+/* RESPONSIVE */
+@media(max-width:991px){
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .sb-overlay { position:fixed;inset:0;z-index:390;background:rgba(0,0,0,.4);display:none; }
+  .sb-overlay.open { display:block; }
 }
-[data-bs-theme="dark"]{--blt:#1A1A3A;}
 
-/* ── BASE ────────────────────────────────────── */
-body{font-family:var(--fth);font-size:14px;}
-h1,h2,h3,h4,h5,.fw-brand{font-family:var(--fhd);}
-
-/* ── LOGIN ───────────────────────────────────── */
-#login-screen{
-  position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#EEF0FF 0%,#fff 60%,#EEF0FF 100%);
-}
-.login-card{width:100%;max-width:380px;}
-.brand-mark{
-  width:52px;height:52px;border-radius:50%;background:var(--brand);
-  display:inline-flex;align-items:center;justify-content:center;
-  font-family:var(--fhd);font-size:9px;font-weight:800;color:#fff;
-  line-height:1.2;text-align:center;
-  box-shadow:0 4px 0 var(--bdk);
-}
-
-/* ── NAVBAR ──────────────────────────────────── */
-.top-nav{
-  position:fixed;top:0;left:0;right:0;z-index:500;height:var(--nav-h);
-  background:#fff;border-bottom:1.5px solid #e2e5f5;
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,.05);
-}
-[data-bs-theme="dark"] .top-nav{background:#0e0e28;border-color:#2a2a55;}
-.top-nav .brand-text{font-family:var(--fhd);font-size:15px;font-weight:800;}
-.screen-title{font-size:13px;color:#8888aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
-.nav-tools{margin-left:auto;display:flex;align-items:center;gap:6px;}
-.lup{font-size:10px;color:#8888aa;}
-
-/* ── SIDEBAR ─────────────────────────────────── */
-.sidebar{
-  position:fixed;top:0;left:calc(-1 * var(--sidebar-w));bottom:0;z-index:450;
-  width:var(--sidebar-w);background:#fff;
-  box-shadow:4px 0 20px rgba(0,0,0,.1);
-  transition:left .3s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;overflow-y:auto;
-}
-[data-bs-theme="dark"] .sidebar{background:#0e0e28;}
-.sidebar.open{left:0;}
-.sb-header{
-  padding:16px 14px 14px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--brand) 0%,#4433FF 100%);
-}
-.sb-nav .nav-link{
-  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;
-  color:#4a4a6a;font-size:13px;font-weight:500;transition:all .2s;
-  margin-bottom:2px;position:relative;
-}
-[data-bs-theme="dark"] .sb-nav .nav-link{color:#9090cc;}
-.sb-nav .nav-link:hover{background:var(--blt);color:var(--brand);}
-.sb-nav .nav-link.active{background:var(--brand);color:#fff;font-weight:700;}
-.sb-nav .nav-link .bi{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
-.sb-section{font-size:10px;font-weight:700;color:#8888aa;letter-spacing:1.5px;text-transform:uppercase;padding:12px 12px 4px;}
-.notify-badge{
-  position:absolute;right:10px;background:#ef4444;color:#fff;
-  font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;display:none;
-}
-.notify-badge.on{display:inline;}
-
-/* ── MAIN ────────────────────────────────────── */
-.main-wrap{margin-top:var(--nav-h);transition:margin-left .3s;}
-.main-inner{max-width:1400px;width:100%;}
-.panel{display:none;animation:fadeUp .2s ease;}
-.panel.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
-/* ── BRAND BUTTONS ───────────────────────────── */
-.btn-brand{background:var(--brand);color:#fff;border:none;box-shadow:0 4px 0 var(--bdk);}
-.btn-brand:hover{background:var(--bdk);color:#fff;transform:translateY(-1px);}
-.btn-brand:active{transform:translateY(3px);box-shadow:0 1px 0 var(--bdk);}
-
-/* ── STAT CARDS ──────────────────────────────── */
-.stat-card{border:1.5px solid #e2e5f5;border-radius:12px;padding:14px;transition:transform .2s;}
-.stat-card:hover{transform:translateY(-2px);}
-.stat-val{font-family:var(--fhd);font-size:24px;font-weight:800;}
-/* Laptop: compact stat cards */
-@media(min-width:992px) and (max-width:1399px){
-  .stat-val{font-size:20px;}
-  .stat-card{padding:12px;}
-  .main-wrap .card-body{padding:14px;}
-}
-/* Chart wrapper: limit height */
-.chart-wrap{position:relative;height:180px;}
-@media(min-width:1400px){.chart-wrap{height:220px;}}
-
-/* ── APPROVE ─────────────────────────────────── */
-.slip-viewer{background:#f0f2ff;border-radius:10px;min-height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1.5px solid #e2e5f5;}
-.slip-viewer img{max-width:100%;max-height:280px;object-fit:contain;cursor:zoom-in;}
-
-/* ── CHECK-IN ────────────────────────────────── */
-.scan-input{
-  font-family:var(--fhd);font-size:24px;font-weight:800;
-  letter-spacing:4px;text-align:center;border:2px solid var(--brand);
-  border-radius:12px;padding:12px;width:100%;
-}
-.scan-input:focus{outline:none;box-shadow:0 0 0 3px rgba(20,0,255,.15);}
-.ci-log{max-height:280px;overflow-y:auto;}
-
-/* ── QR ──────────────────────────────────────── */
-.qr-canvas-wrap{background:#fff;padding:10px;border-radius:9px;display:inline-block;}
-
-/* ── DATATABLE OVERRIDE ──────────────────────── */
-.dataTables_wrapper .dataTables_filter input{border:1.5px solid #e2e5f5;border-radius:8px;padding:5px 12px;font-size:13px;}
-.dataTables_wrapper .dataTables_length select{border:1.5px solid #e2e5f5;border-radius:8px;padding:4px 8px;}
-table.dataTable thead th{background:var(--brand)!important;color:#fff!important;font-size:12px!important;white-space:nowrap;letter-spacing:.3px;white-space:nowrap;cursor:pointer;}
-table.dataTable thead th.sorting::after,
-table.dataTable thead th.sorting_asc::after,
-table.dataTable thead th.sorting_desc::after{color:rgba(255,255,255,.7)!important;}
-table.dataTable tbody tr:hover td{background:var(--blt)!important;}
-.dt-container .dt-paging .paginate_button.current{background:var(--brand)!important;color:#fff!important;border-color:var(--brand)!important;}
-
-/* ── TUTORIAL ACCORDION ──────────────────────── */
-.tut-num{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
-/* ── SWATCH ──────────────────────────────────── */
-.swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:all .2s;border:3px solid transparent;}
-.swatch:hover,.swatch.active{transform:scale(1.2);outline:3px solid currentColor;outline-offset:2px;}
-
-/* ── RESPONSIVE ──────────────────────────────── */
-@media(min-width:992px){
-  .sidebar{left:0!important;}
-  .main-wrap{margin-left:var(--sidebar-w);}
-  .main-inner{padding:0 8px;}
-  #hamburger{display:none!important;}
-}
+/* TOAST */
+.toast-wrap { position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px; }
+.my-toast { padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);animation:slideIn .3s ease; }
+.my-toast.ok { background:#10b981; }
+.my-toast.er { background:#ef4444; }
+.my-toast.in { background:var(--brand); }
+@keyframes slideIn { from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);} }
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN ─────────────────────────────────────── -->
-<div id="login-screen">
-  <div class="login-card p-4 shadow-lg rounded-4 bg-white">
+<!-- LOGIN -->
+<div id="login-wrap">
+  <div class="login-box">
     <div class="text-center mb-4">
       <div class="brand-mark mb-2">THE<br>OWN</div>
-      <h5 class="fw-brand fw-bold mb-0">THE OWNER</h5>
-      <small class="text-muted">Admin Dashboard v5</small>
-      <div class="mt-2"><span class="badge bg-danger-subtle text-danger">🔐 Admin Only</span></div>
+      <div class="fw-brand fw-bold" style="font-size:18px;">THE OWNER</div>
+      <small class="text-muted">Admin Dashboard</small>
+      <div class="mt-2"><span class="badge" style="background:rgba(239,68,68,.1);color:#ef4444;">🔐 Admin Only</span></div>
     </div>
-    <div class="mb-3">
-      <input type="text" class="form-control" id="a-user" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('a-pass').focus()">
-    </div>
-    <div class="mb-3">
-      <input type="password" class="form-control" id="a-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="btn btn-brand w-100 fw-bold" onclick="doLogin()" id="lbtn">🔑 เข้าสู่ระบบ</button>
+    <input type="text" class="form-control mb-2" id="a-user" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')getElementById('a-pass').focus()">
+    <input type="password" class="form-control mb-3" id="a-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-brand w-100 fw-bold" onclick="doLogin()" id="lbtn" style="padding:12px;border-radius:10px;">🔑 เข้าสู่ระบบ</button>
+    <div id="login-err" class="text-center text-danger small mt-2" style="display:none;"></div>
   </div>
 </div>
 
-<!-- ── APP ───────────────────────────────────────── -->
-<div id="admin-app" style="display:none;">
+<!-- APP -->
+<div id="app">
+  <div class="sb-overlay" id="sb-overlay" onclick="closeSB()"></div>
 
-  <!-- Overlay -->
-  <div id="sb-overlay" class="d-none d-lg-none" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.4);" onclick="closeSB()"></div>
-
-  <!-- NAVBAR -->
-  <nav class="top-nav">
-    <button id="hamburger" class="btn btn-light btn-sm me-1 d-lg-none" onclick="toggleSB()">
-      <i class="bi bi-list fs-5"></i>
-    </button>
-    <div class="brand-mark me-2" style="width:32px;height:32px;font-size:8px;flex-shrink:0;">THE<br>OWN</div>
-    <span class="brand-text d-none d-sm-inline">THE OWNER</span>
-    <span class="badge bg-danger ms-1 d-none d-sm-inline">ADMIN</span>
-    <span class="screen-title ms-2" id="nav-title">📊 ภาพรวม</span>
-    <div class="nav-tools">
-      <span class="lup d-none d-md-inline" id="lup"></span>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="btn btn-light btn-sm d-lg-none" onclick="toggleSB()"><i class="bi bi-list fs-5"></i></button>
+    <div class="brand-mark" style="width:32px;height:32px;font-size:8px;flex-shrink:0;">THE<br>OWN</div>
+    <div>
+      <span class="topbar-title">THE OWNER</span>
+      <span class="badge ms-1" style="background:#ef4444;font-size:10px;">ADMIN</span>
+    </div>
+    <span class="text-muted small ms-2 d-none d-md-inline" id="panel-label">📊 ภาพรวม</span>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="text-muted small d-none d-md-inline" id="lup-time"></span>
       <button class="btn btn-outline-primary btn-sm" onclick="refresh()"><i class="bi bi-arrow-clockwise" id="rfi"></i> Refresh</button>
-      <button class="btn btn-light btn-sm" onclick="toggleTheme()"><i class="bi bi-moon-stars" id="theme-icon"></i></button>
+      <button class="btn btn-light btn-sm" onclick="toggleTheme()"><i class="bi bi-moon-stars" id="thi"></i></button>
       <button class="btn btn-outline-danger btn-sm" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
     </div>
-  </nav>
+  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
-    <div class="sb-header">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <div class="brand-mark" style="width:38px;height:38px;font-size:8px;flex-shrink:0;background:rgba(255,255,255,.2);box-shadow:none;">THE<br>OWN</div>
-        <div><div class="fw-brand fw-bold text-white">THE OWNER</div><small class="text-white-50">i am because we are</small></div>
+    <div class="sb-head">
+      <div class="d-flex align-items-center gap-2">
+        <div class="brand-mark" style="width:36px;height:36px;font-size:8px;background:rgba(255,255,255,.2);box-shadow:none;flex-shrink:0;">THE<br>OWN</div>
+        <div><div class="fw-brand fw-bold text-white" style="font-size:14px;">THE OWNER</div><div class="text-white-50" style="font-size:10px;">i am because we are</div></div>
       </div>
-      <div class="rounded-3 p-2" style="background:rgba(255,255,255,.15);">
-        <div class="fw-bold text-white small" id="sb-name">Admin</div>
-        <div class="text-white-50" style="font-size:11px;" id="sb-role">Super Admin</div>
+      <div class="sb-user">
+        <div class="fw-bold text-white small" id="sb-uname">Admin</div>
+        <div class="text-white-50" style="font-size:11px;" id="sb-urole">Super Admin</div>
       </div>
     </div>
-    <div class="p-2 flex-grow-1">
-      <div class="sb-section">หลัก</div>
-      <nav class="sb-nav">
-        <a class="nav-link active" id="nav-overview" onclick="goPanel('overview')"><i class="bi bi-bar-chart-fill"></i>ภาพรวม</a>
-        <a class="nav-link" id="nav-approve" onclick="goPanel('approve')"><i class="bi bi-check2-circle"></i>Approve Slip<span class="notify-badge" id="pdot">0</span></a>
-        <a class="nav-link" id="nav-checkin" onclick="goPanel('checkin')"><i class="bi bi-camera-fill"></i>Check-in</a>
-        <a class="nav-link" id="nav-roomqr" onclick="goPanel('roomqr')"><i class="bi bi-qr-code"></i>Room QR Code</a>
-      </nav>
-      <div class="sb-section">จัดการ</div>
-      <nav class="sb-nav">
-        <a class="nav-link" id="nav-members" onclick="goPanel('members')"><i class="bi bi-people-fill"></i>สมาชิก</a>
-        <a class="nav-link" id="nav-classes" onclick="goPanel('classes')"><i class="bi bi-collection-fill"></i>คอร์ส & ตาราง</a>
-        <a class="nav-link" id="nav-bookings" onclick="goPanel('bookings')"><i class="bi bi-calendar2-check"></i>การจอง</a>
-        <a class="nav-link" id="nav-fines" onclick="goPanel('fines')"><i class="bi bi-exclamation-triangle-fill"></i>ค่าปรับ</a>
-      </nav>
-      <div class="sb-section">รายงาน</div>
-      <nav class="sb-nav">
-        <a class="nav-link" id="nav-reports" onclick="goPanel('reports')"><i class="bi bi-graph-up-arrow"></i>รายได้ & รายงาน</a>
-      </nav>
-      <hr class="mx-2 my-1">
-      <div class="sb-section">ตั้งค่า</div>
-      <nav class="sb-nav">
-        <a class="nav-link" id="nav-admins" onclick="goPanel('admins')"><i class="bi bi-shield-lock-fill"></i>Admin Users</a>
-        <a class="nav-link" id="nav-settings" onclick="goPanel('settings')"><i class="bi bi-gear-fill"></i>ตั้งค่าระบบ</a>
-        <a class="nav-link" id="nav-tutorial" onclick="goPanel('tutorial')"><i class="bi bi-book-fill"></i>คู่มือการใช้งาน</a>
-      </nav>
+    <div class="flex-grow-1 py-2">
+      <div class="sb-sec">หลัก</div>
+      <button class="sb-item active" id="sb-overview" onclick="go('overview')"><i class="bi bi-bar-chart-fill"></i> ภาพรวม</button>
+      <button class="sb-item" id="sb-approve" onclick="go('approve')"><i class="bi bi-check2-circle"></i> Approve Slip <span class="sb-badge" id="pdot"></span></button>
+      <button class="sb-item" id="sb-checkin" onclick="go('checkin')"><i class="bi bi-camera-fill"></i> Check-in</button>
+      <button class="sb-item" id="sb-roomqr" onclick="go('roomqr')"><i class="bi bi-qr-code"></i> Room QR Code</button>
+      <div class="sb-sec">จัดการ</div>
+      <button class="sb-item" id="sb-members" onclick="go('members')"><i class="bi bi-people-fill"></i> สมาชิก</button>
+      <button class="sb-item" id="sb-classes" onclick="go('classes')"><i class="bi bi-collection-fill"></i> คอร์ส & ตาราง</button>
+      <button class="sb-item" id="sb-bookings" onclick="go('bookings')"><i class="bi bi-calendar2-check"></i> การจอง</button>
+      <button class="sb-item" id="sb-fines" onclick="go('fines')"><i class="bi bi-exclamation-triangle-fill"></i> ค่าปรับ</button>
+      <div class="sb-sec">รายงาน</div>
+      <button class="sb-item" id="sb-reports" onclick="go('reports')"><i class="bi bi-graph-up-arrow"></i> รายได้ & รายงาน</button>
+      <div style="height:1px;background:#e2e5f5;margin:6px 12px;"></div>
+      <div class="sb-sec">ตั้งค่า</div>
+      <button class="sb-item" id="sb-admins" onclick="go('admins')"><i class="bi bi-shield-lock-fill"></i> Admin Users</button>
+      <button class="sb-item" id="sb-settings" onclick="go('settings')"><i class="bi bi-gear-fill"></i> ตั้งค่าระบบ</button>
+      <button class="sb-item" id="sb-tutorial" onclick="go('tutorial')"><i class="bi bi-book-fill"></i> คู่มือการใช้งาน</button>
     </div>
-    <div class="p-3 border-top text-center">
+    <div class="sb-foot">
       <small class="text-muted">The Owner Admin v5 | <a href="/index.html" class="text-primary">หน้าหลัก</a></small>
     </div>
   </aside>
 
   <!-- MAIN -->
-  <div class="main-wrap p-2 p-md-3"><div class="main-inner mx-auto">
+  <main class="main">
 
-    <!-- OVERVIEW -->
-    <div id="panel-overview" class="panel active">
-      <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
-        <div>
-          <h4 class="fw-brand fw-bold mb-0">📊 ภาพรวมระบบ</h4>
-          <small class="text-muted" id="today-date"></small>
+<!-- ── OVERVIEW ───────────────────────────────────── -->
+<div id="p-overview" class="panel active">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <div><h4 class="fw-brand fw-bold mb-0">📊 ภาพรวมระบบ</h4><small class="text-muted" id="today-date"></small></div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary btn-sm2" onclick="exportMembersCSV()"><i class="bi bi-download"></i> CSV</button>
+      <button class="btn btn-brand btn-sm2" onclick="go('reports')"><i class="bi bi-graph-up"></i> รายงาน</button>
+    </div>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">สมาชิก</div><div class="stat-val text-primary" id="st-members">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รอ Approve</div><div class="stat-val text-warning" id="st-pend">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">Check-in วันนี้</div><div class="stat-val text-success" id="st-today">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">Quarter</div><div class="stat-val text-info" id="st-quarter">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">ค่าปรับค้าง</div><div class="stat-val text-danger" id="st-fines">—</div></div></div>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><canvas id="ch-members" height="180"></canvas></div></div>
+    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><canvas id="ch-revenue" height="180"></canvas></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom"><strong class="small">⏳ รอ Approve</strong><button class="btn btn-warning btn-xs" onclick="go('approve')">ดูทั้งหมด</button></div>
+        <table><thead><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead><tbody id="ov-pend"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+        <div class="p-3 border-bottom"><strong class="small">✅ Check-in วันนี้</strong></div>
+        <table><thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead><tbody id="ov-ci"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APPROVE ─────────────────────────────────────── -->
+<div id="p-approve" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <div><h4 class="fw-brand fw-bold mb-0">✅ Approve Slip</h4><small class="text-muted">ระบบสร้าง Member ID และส่ง LINE อัตโนมัติ</small></div>
+    <div class="d-flex gap-2">
+      <select class="form-select form-select-sm" style="width:130px;" onchange="filterAp(this.value)"><option value="">ทั้งหมด</option><option value="waiting">รอ</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="searchAp(this.value)">
+    </div>
+  </div>
+  <div class="bg-white border rounded-3 overflow-hidden mb-3" style="border-color:#e2e5f5!important;">
+    <div class="p-3 border-bottom"><strong class="small">รายการ (<span id="ap-cnt">0</span>)</strong></div>
+    <div class="tbl-wrap">
+      <table id="tbl-approve">
+        <thead><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>ยอด</th><th>LINE ID</th><th>เวลา</th><th>สถานะ</th><th>Actions</th></tr></thead>
+        <tbody id="ap-body"><tr class="empty-row"><td colspan="7">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Approve Detail -->
+  <div id="ap-detail" style="display:none;">
+    <h6 class="fw-bold mb-3">🔍 รายละเอียด</h6>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="bg-white border rounded-3 p-4" style="border-color:#e2e5f5!important;">
+          <div class="small text-primary fw-bold text-uppercase mb-3">ข้อมูลสมาชิก</div>
+          <table class="w-100" style="font-size:13px;">
+            <tr><td class="text-muted pb-2">ชื่อ</td><td class="fw-bold pb-2" id="ap-name">—</td></tr>
+            <tr><td class="text-muted pb-2">อีเมล</td><td class="pb-2" id="ap-email">—</td></tr>
+            <tr><td class="text-muted pb-2">โทร</td><td class="pb-2" id="ap-phone">—</td></tr>
+            <tr><td class="text-muted pb-2">LINE ID</td><td class="pb-2 small" id="ap-line">—</td></tr>
+            <tr><td class="text-muted pb-2">แพ็กเกจ</td><td class="pb-2" id="ap-plan">—</td></tr>
+            <tr><td class="text-muted pb-2">ยอดโอน</td><td class="fw-brand fw-bold text-primary" style="font-size:18px;" id="ap-amt">—</td></tr>
+          </table>
+          <div class="mb-3 mt-2"><label class="form-label small fw-bold">หมายเหตุ</label><textarea class="form-control form-control-sm" id="ap-note" rows="2" placeholder="บันทึก..."></textarea></div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success flex-fill" onclick="doApprove('approved')">✅ Approve</button>
+            <button class="btn btn-danger flex-fill" onclick="doApprove('rejected')">❌ Reject</button>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="closeApDetail()">← กลับ</button>
         </div>
+      </div>
+      <div class="col-md-6">
+        <div class="bg-white border rounded-3 p-4 h-100 d-flex flex-column" style="border-color:#e2e5f5!important;">
+          <div class="small text-primary fw-bold text-uppercase mb-3">Slip การโอนเงิน</div>
+          <div class="slip-box flex-grow-1 mb-2" id="slip-box"><div class="text-muted text-center small"><i class="bi bi-paperclip fs-2 d-block mb-1"></i>ไม่มีสลิป</div></div>
+          <button class="btn btn-outline-primary btn-sm" onclick="openSlip()"><i class="bi bi-zoom-in"></i> ขยาย</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CHECK-IN ─────────────────────────────────────── -->
+<div id="p-checkin" class="panel">
+  <h4 class="fw-brand fw-bold mb-1">📷 Check-in</h4>
+  <p class="text-muted small mb-3">พิมพ์ Member ID แล้วกด Enter</p>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 p-4 text-center" style="border-color:#e2e5f5!important;">
+        <i class="bi bi-camera-video text-muted" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+        <input type="text" class="scan-input mb-3" id="sc-id" placeholder="OwnP0001" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doCI()">
+        <div class="d-flex gap-2 justify-content-center mb-3">
+          <button class="btn btn-success" onclick="doCI()"><i class="bi bi-check-lg"></i> Check-in</button>
+          <button class="btn btn-outline-secondary" onclick="clearCI()"><i class="bi bi-trash"></i></button>
+        </div>
+        <div id="ci-res"></div>
+      </div>
+      <div class="bg-white border rounded-3 p-3 mt-3" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold small mb-2"><i class="bi bi-search"></i> ค้นหาด้วยชื่อ</div>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control" id="ns-in" placeholder="ชื่อสมาชิก..." onkeydown="if(event.key==='Enter')searchName()">
+          <button class="btn btn-brand" onclick="searchName()">ค้นหา</button>
+        </div>
+        <div id="ns-res" class="mt-2"></div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+          <strong class="small">📋 Log วันนี้</strong>
+          <span class="badge bg-primary" id="ci-cnt">0 คน</span>
+        </div>
+        <div id="ci-log" style="max-height:320px;overflow-y:auto;">
+          <div class="text-center text-muted p-4 small">ยังไม่มี Check-in</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROOM QR ─────────────────────────────────────── -->
+<div id="p-roomqr" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3">
+    <div><h4 class="fw-brand fw-bold mb-0">🔲 Room QR Code</h4><small class="text-muted">QR สำหรับติดหน้าห้อง</small></div>
+    <button class="btn btn-brand btn-sm2" onclick="openGenQR()"><i class="bi bi-plus-lg"></i> สร้าง QR</button>
+  </div>
+  <div id="qr-list" class="row g-3"><div class="col-12 text-center text-muted py-4">กำลังโหลด...</div></div>
+  <div class="alert alert-warning d-flex gap-2 mt-3"><i class="bi bi-exclamation-triangle-fill"></i><div><strong>Walk-in มีค่าปรับ</strong> — สมาชิกที่ Check-in โดยไม่จองล่วงหน้าจะถูกค่าปรับอัตโนมัติ</div></div>
+</div>
+
+<!-- ── MEMBERS ─────────────────────────────────────── -->
+<div id="p-members" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="fw-brand fw-bold mb-0">👥 สมาชิก</h4>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="tblFilter('tbl-members',this.value)">
+      <button class="btn btn-outline-secondary btn-sm2" onclick="exportMembersCSV()"><i class="bi bi-download"></i> CSV</button>
+      <button class="btn btn-brand btn-sm2" onclick="openModal('add-member')"><i class="bi bi-plus-lg"></i> เพิ่มสมาชิก</button>
+    </div>
+  </div>
+  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+    <div class="tbl-wrap">
+      <table id="tbl-members">
+        <thead><tr><th>Member ID</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แพ็กเกจ</th><th>สถานะ</th><th>หมดอายุ</th><th>ครั้ง</th><th>Actions</th></tr></thead>
+        <tbody id="m-body"><tr class="empty-row"><td colspan="9">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── CLASSES ─────────────────────────────────────── -->
+<div id="p-classes" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <div><h4 class="fw-brand fw-bold mb-0">📚 คอร์ส & ตาราง</h4><small class="text-muted">ดึงข้อมูลจาก Google Sheet</small></div>
+    <div class="d-flex gap-2">
+      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="tblFilter('tbl-classes',this.value)">
+      <button class="btn btn-outline-secondary btn-sm2" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
+      <button class="btn btn-brand btn-sm2" onclick="openAddClass()"><i class="bi bi-plus-lg"></i> เพิ่มคลาส</button>
+    </div>
+  </div>
+  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+    <div class="tbl-wrap">
+      <table id="tbl-classes">
+        <thead><tr><th>รูป</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>ที่นั่ง</th><th>Zoom</th><th>Actions</th></tr></thead>
+        <tbody id="cl-body"><tr class="empty-row"><td colspan="7">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOOKINGS ─────────────────────────────────────── -->
+<div id="p-bookings" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="fw-brand fw-bold mb-0">📋 การจอง</h4>
+    <div class="d-flex gap-2">
+      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="tblFilter('tbl-bookings',this.value)">
+      <select class="form-select form-select-sm" style="width:150px;" onchange="loadBookings(this.value)"><option value="">ทั้งหมด</option><option value="confirmed">ยืนยัน</option><option value="cancelled">ยกเลิก</option><option value="no-show">No-show</option></select>
+    </div>
+  </div>
+  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+    <div class="tbl-wrap">
+      <table id="tbl-bookings">
+        <thead><tr><th>Member ID</th><th>ชื่อ</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>Check-in</th><th>สถานะ</th><th>Actions</th></tr></thead>
+        <tbody id="bk-body"><tr class="empty-row"><td colspan="8">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── FINES ─────────────────────────────────────────── -->
+<div id="p-fines" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="fw-brand fw-bold mb-0">⚠️ ค่าปรับ</h4>
+    <div class="d-flex gap-2">
+      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="tblFilter('tbl-fines',this.value)">
+      <button class="btn btn-danger btn-sm2" onclick="openModal('add-fine')"><i class="bi bi-plus-lg"></i> เพิ่ม</button>
+    </div>
+  </div>
+  <div class="row g-3 mb-3">
+    <div class="col-4"><div class="stat-c text-center"><div class="text-muted small fw-bold">ค้างชำระ</div><div class="stat-val text-danger" id="f-total">฿0</div></div></div>
+    <div class="col-4"><div class="stat-c text-center"><div class="text-muted small fw-bold">รายการค้าง</div><div class="stat-val text-warning" id="f-cnt">0</div></div></div>
+    <div class="col-4"><div class="stat-c text-center"><div class="text-muted small fw-bold">ชำระแล้ว</div><div class="stat-val text-success" id="f-paid">฿0</div></div></div>
+  </div>
+  <div class="alert alert-info d-flex gap-2"><i class="bi bi-info-circle-fill"></i><div>อัตราค่าปรับ: Online ฿20 | Onsite ฿50 | Hybrid ฿100</div></div>
+  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+    <div class="tbl-wrap">
+      <table id="tbl-fines">
+        <thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>วันที่</th><th>ประเภท</th><th>เหตุผล</th><th>฿</th><th>สถานะ</th><th>Actions</th></tr></thead>
+        <tbody id="f-body"><tr class="empty-row"><td colspan="8">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── REPORTS ─────────────────────────────────────── -->
+<div id="p-reports" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="fw-brand fw-bold mb-0">📈 รายได้ & รายงาน</h4>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <input type="month" class="form-control form-control-sm" id="rep-month" style="width:160px;" onchange="loadReports()">
+      <button class="btn btn-brand btn-sm2" onclick="exportReportCSV()"><i class="bi bi-download"></i> CSV</button>
+    </div>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รายได้สมาชิก</div><div class="stat-val text-primary" id="r-m">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">จากค่าปรับ</div><div class="stat-val text-danger" id="r-fine">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รวมทั้งหมด</div><div class="stat-val text-success" id="r-total">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">สมาชิกใหม่</div><div class="stat-val text-info" id="r-n">—</div></div></div>
+    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">ครั้งที่เรียน</div><div class="stat-val text-warning" id="r-s">—</div></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-5"><div class="chart-box"><div class="fw-bold small mb-3">💰 สัดส่วนรายได้</div><canvas id="ch-pie" height="220"></canvas></div></div>
+    <div class="col-md-7"><div class="chart-box"><div class="fw-bold small mb-3">📊 Check-in 6 เดือน</div><canvas id="ch-ci" height="220"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ── ADMINS ─────────────────────────────────────── -->
+<div id="p-admins" class="panel">
+  <div class="d-flex align-items-start justify-content-between mb-3">
+    <h4 class="fw-brand fw-bold mb-0">🔐 Admin Users</h4>
+    <button class="btn btn-brand btn-sm2" onclick="openModal('add-admin')"><i class="bi bi-plus-lg"></i> เพิ่ม Admin</button>
+  </div>
+  <div class="alert alert-info d-flex gap-2 mb-3"><i class="bi bi-info-circle-fill"></i><div><strong>Super Admin</strong> ทุกสิทธิ์ | <strong>Manager</strong> Approve+สมาชิก | <strong>Staff</strong> Check-in</div></div>
+  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
+    <div class="tbl-wrap">
+      <table id="tbl-admins">
+        <thead><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>สร้างเมื่อ</th><th>Actions</th></tr></thead>
+        <tbody id="ad-body"><tr class="empty-row"><td colspan="5">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS ─────────────────────────────────────── -->
+<div id="p-settings" class="panel">
+  <h4 class="fw-brand fw-bold mb-1">⚙️ ตั้งค่าระบบ</h4>
+  <p class="text-muted small mb-3">ค่าทั้งหมดบันทึกลง Google Sheet — ไม่เก็บรหัสใน HTML</p>
+  <div class="alert alert-success d-flex gap-2 mb-3"><i class="bi bi-shield-check-fill"></i><div>Zoom Password, LINE Token เก็บใน Google Sheet เท่านั้น</div></div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 p-4 mb-3" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold mb-3"><i class="bi bi-camera-video-fill"></i> Zoom</div>
+        <div class="mb-2"><label class="form-label small fw-bold">Meeting ID</label><input class="form-control form-control-sm" id="zm-id" placeholder="964 333 6086"></div>
+        <div class="mb-3"><label class="form-label small fw-bold">Password</label><input class="form-control form-control-sm" id="zm-pw" placeholder="12345"></div>
+        <button class="btn btn-brand btn-sm2" onclick="saveSetting('zoom')">💾 บันทึก Zoom</button>
+      </div>
+      <div class="bg-white border rounded-3 p-4 mb-3" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold mb-3"><i class="bi bi-bank"></i> ธนาคาร</div>
+        <div class="mb-2"><label class="form-label small fw-bold">ชื่อธนาคาร</label><input class="form-control form-control-sm" id="bk-nm"></div>
+        <div class="mb-2"><label class="form-label small fw-bold">เลขบัญชี</label><input class="form-control form-control-sm" id="bk-ac"></div>
+        <div class="mb-3"><label class="form-label small fw-bold">ชื่อเจ้าของบัญชี</label><input class="form-control form-control-sm" id="bk-ow"></div>
+        <button class="btn btn-brand btn-sm2" onclick="saveSetting('bank')">💾 บันทึกธนาคาร</button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="bg-white border rounded-3 p-4 mb-3" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill text-warning"></i> ค่าปรับ</div>
+        <div class="row g-2 mb-3">
+          <div class="col-6"><label class="form-label small fw-bold">Online (฿)</label><input type="number" class="form-control form-control-sm" id="fn-on"></div>
+          <div class="col-6"><label class="form-label small fw-bold">Onsite (฿)</label><input type="number" class="form-control form-control-sm" id="fn-os"></div>
+          <div class="col-6"><label class="form-label small fw-bold">Hybrid (฿)</label><input type="number" class="form-control form-control-sm" id="fn-hy"></div>
+          <div class="col-6"><label class="form-label small fw-bold">ยกเลิกล่วงหน้า (ชม.)</label><input type="number" class="form-control form-control-sm" id="fn-ch"></div>
+        </div>
+        <button class="btn btn-brand btn-sm2" onclick="saveSetting('fines')">💾 บันทึกนโยบาย</button>
+      </div>
+      <div class="bg-white border rounded-3 p-4 mb-3" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold mb-3"><i class="bi bi-bell-fill text-success"></i> LINE Token</div>
+        <div class="mb-3"><label class="form-label small fw-bold">Channel Access Token</label><input type="password" class="form-control form-control-sm" id="line-tok"></div>
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-secondary btn-sm" onclick="exportMembersCSV()"><i class="bi bi-download"></i> Export CSV</button>
-          <button class="btn btn-brand btn-sm" onclick="goPanel('reports')"><i class="bi bi-graph-up"></i> รายงาน</button>
+          <button class="btn btn-brand btn-sm2" onclick="saveSetting('line')">💾 บันทึก</button>
+          <button class="btn btn-outline-secondary btn-sm2" onclick="testReminder()">🔔 ทดสอบ</button>
         </div>
       </div>
-      <div class="row g-2 mb-3">
-        <div class="col-6 col-md-4 col-xl">
-          <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">สมาชิก</div><div class="stat-val text-primary" id="s-total">—</div></div></div>
-        </div>
-        <div class="col-6 col-md-4 col-xl">
-          <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รอ Approve</div><div class="stat-val text-warning" id="s-pend">—</div></div></div>
-        </div>
-        <div class="col-6 col-md-4 col-xl">
-          <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">Check-in วันนี้</div><div class="stat-val text-success" id="s-today">—</div></div></div>
-        </div>
-        <div class="col-6 col-md-4 col-xl">
-          <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">Quarter</div><div class="stat-val text-info" id="s-quarter">—</div></div></div>
-        </div>
-        <div class="col-6 col-md-4 col-xl">
-          <div class="card stat-card h-100"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">ค่าปรับค้าง</div><div class="stat-val text-danger" id="s-fines">—</div></div></div>
-        </div>
-      </div>
-      <div class="row g-3 mb-4">
-        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><div class="chart-wrap"><canvas id="chart-members"></canvas></div></div></div></div>
-        <div class="col-md-6"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><div class="chart-wrap"><canvas id="chart-revenue"></canvas></div></div></div></div>
-      </div>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="col-md-6"><div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <strong class="small">⏳ รอ Approve</strong>
-              <button class="btn btn-warning btn-sm" onclick="goPanel('approve')">ดูทั้งหมด</button>
-            </div>
-            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead><tbody id="ov-pend"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div></div></div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header"><strong class="small">✅ Check-in วันนี้</strong></div>
-            <div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-primary"><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead><tbody id="ov-ci"><tr><td colspan="3" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody></table></div></div></div>
-      </div>
-    </div>
-
-    <!-- APPROVE -->
-    <div id="panel-approve" class="panel">
-      <h4 class="fw-brand fw-bold mb-1">✅ Approve Slip</h4>
-      <p class="text-muted small mb-3">ระบบสร้าง Member ID และส่ง LINE อัตโนมัติหลัง Approve</p>
-      <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <strong>รายการ (<span id="ap-cnt">0</span>)</strong>
-          <div class="d-flex gap-2 flex-wrap">
-            <select class="form-select form-select-sm" style="width:130px;" onchange="filterAp(this.value)">
-              <option value="">ทั้งหมด</option><option value="waiting">รอ</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
-            </select>
-            <input type="text" class="form-control form-control-sm" placeholder="🔍 ค้นหา..." style="width:160px;" oninput="searchAp(this.value)">
-          </div>
-        </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0" id="tbl-approve">
-              <thead class="table-primary">
-                <tr><th>ชื่อ-นามสกุล</th><th>แพ็กเกจ</th><th>ยอด</th><th>LINE ID</th><th>เวลาสมัคร</th><th>สถานะ</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="ap-body"><tr><td colspan="7" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Detail -->
-      <div id="ap-detail" style="display:none;">
-        <h6 class="fw-bold mb-3">🔍 รายละเอียด</h6>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="text-primary text-uppercase small fw-bold mb-3">ข้อมูลสมาชิก</h6>
-                <table class="table table-sm table-borderless">
-                  <tr><td class="text-muted">ชื่อ</td><td class="fw-bold" id="ap-name">—</td></tr>
-                  <tr><td class="text-muted">อีเมล</td><td id="ap-email">—</td></tr>
-                  <tr><td class="text-muted">โทร</td><td id="ap-phone">—</td></tr>
-                  <tr><td class="text-muted">LINE ID</td><td id="ap-line" style="font-size:11px;">—</td></tr>
-                  <tr><td class="text-muted">แพ็กเกจ</td><td id="ap-plan">—</td></tr>
-                  <tr><td class="text-muted">ยอดโอน</td><td class="fw-bold text-primary fs-5 fw-brand" id="ap-amt">—</td></tr>
-                  <tr><td class="text-muted">เวลาสมัคร</td><td id="ap-time">—</td></tr>
-                </table>
-                <div class="mb-3">
-                  <label class="form-label small fw-bold">หมายเหตุ Admin</label>
-                  <textarea class="form-control form-control-sm" id="ap-note" rows="2" placeholder="บันทึกเหตุผล..."></textarea>
-                </div>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-success flex-fill" onclick="doApprove('approved')">✅ Approve</button>
-                  <button class="btn btn-danger flex-fill" onclick="doApprove('rejected')">❌ Reject</button>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="closeApDetail()">← กลับ</button>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card h-100">
-              <div class="card-body d-flex flex-column">
-                <h6 class="text-primary text-uppercase small fw-bold mb-3">Slip การโอนเงิน</h6>
-                <div class="slip-viewer flex-grow-1 mb-2" id="slip-viewer">
-                  <div class="text-center text-muted"><i class="bi bi-paperclip fs-2"></i><div class="small mt-1">ไม่มีสลิป</div></div>
-                </div>
-                <button class="btn btn-outline-primary btn-sm" onclick="openSlip()"><i class="bi bi-zoom-in"></i> ขยายสลิป</button>
-              </div>
-            </div>
-          </div>
+      <div class="bg-white border rounded-3 p-4" style="border-color:#e2e5f5!important;">
+        <div class="fw-bold mb-3"><i class="bi bi-tools"></i> ระบบ</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-secondary btn-sm2" onclick="runSetup()"><i class="bi bi-wrench"></i> Setup Sheets</button>
+          <button class="btn btn-warning btn-sm2" onclick="migrateClasses()"><i class="bi bi-arrow-clockwise"></i> Migrate Classes</button>
+          <button class="btn btn-outline-secondary btn-sm2" onclick="openGS()"><i class="bi bi-table"></i> Google Sheet</button>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- CHECK-IN -->
-    <div id="panel-checkin" class="panel">
-      <h4 class="fw-brand fw-bold mb-1">📷 Check-in</h4>
-      <p class="text-muted small mb-3">พิมพ์ Member ID แล้วกด Enter</p>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body text-center">
-              <i class="bi bi-camera-video fs-1 text-muted mb-2 d-block"></i>
-              <input type="text" class="scan-input mb-3" id="sc-id" placeholder="OwnP0001" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doCI()">
-              <div class="d-flex gap-2 justify-content-center">
-                <button class="btn btn-success" onclick="doCI()"><i class="bi bi-check-lg"></i> Check-in</button>
-                <button class="btn btn-outline-secondary" onclick="clearCI()"><i class="bi bi-trash"></i></button>
-              </div>
-              <div id="ci-res" class="mt-3" style="display:none;"></div>
-            </div>
-          </div>
-          <div class="card mt-3">
-            <div class="card-body">
-              <h6 class="fw-bold mb-2"><i class="bi bi-search"></i> ค้นหาด้วยชื่อ</h6>
-              <div class="input-group">
-                <input type="text" class="form-control" id="ns-in" placeholder="พิมพ์ชื่อสมาชิก..." onkeydown="if(event.key==='Enter')searchName()">
-                <button class="btn btn-brand" onclick="searchName()">ค้นหา</button>
-              </div>
-              <div id="ns-res" class="mt-2"></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between">
-              <strong class="small">📋 Log วันนี้</strong>
-              <span class="badge bg-primary" id="ci-cnt">0 คน</span>
-            </div>
-            <div class="ci-log" id="ci-log">
-              <div class="text-center text-muted p-4"><small>ยังไม่มี Check-in</small></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- ── TUTORIAL ─────────────────────────────────────── -->
+<div id="p-tutorial" class="panel">
+  <h4 class="fw-brand fw-bold mb-1">📖 คู่มือการใช้งาน Admin</h4>
+  <p class="text-muted small mb-3">กดหัวข้อเพื่อดูรายละเอียด</p>
+  <div class="accordion" id="tut-acc" style="--bs-accordion-active-bg:#eef0ff;--bs-accordion-active-color:var(--brand);">
+    <div id="tut-list"></div>
+  </div>
+</div>
 
-    <!-- ROOM QR -->
-    <div id="panel-roomqr" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <div><h4 class="fw-brand fw-bold mb-0">🔲 Room QR Code</h4><small class="text-muted">QR สำหรับติดหน้าห้อง — Walk-in สแกน Check-in (มีค่าปรับ)</small></div>
-        <button class="btn btn-brand btn-sm" onclick="openGenQR()"><i class="bi bi-plus-lg"></i> สร้าง QR</button>
-      </div>
-      <div id="qr-list" class="row g-3">
-        <div class="col-12 text-center text-muted py-4"><i class="bi bi-qr-code fs-2"></i><div class="small mt-1">กำลังโหลด...</div></div>
-      </div>
-      <div class="alert alert-warning d-flex gap-2 mt-3"><i class="bi bi-exclamation-triangle-fill"></i><div><strong>Walk-in มีค่าปรับ</strong> — สมาชิกที่ Check-in โดยไม่จองล่วงหน้าจะถูกค่าปรับอัตโนมัติ</div></div>
-    </div>
+  </main>
+</div><!-- end app -->
 
-    <!-- MEMBERS -->
-    <div id="panel-members" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <h4 class="fw-brand fw-bold mb-0">👥 สมาชิก</h4>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <input type="text" class="form-control form-control-sm" style="width:180px;" placeholder="🔍 ค้นหาสมาชิก..." oninput="tblSearch(this,'tbl-members')">
-          <button class="btn btn-outline-secondary btn-sm" onclick="exportMembersCSV()"><i class="bi bi-download"></i> CSV</button>
-          <button class="btn btn-brand btn-sm" onclick="openModal('add-member')"><i class="bi bi-plus-lg"></i> เพิ่มสมาชิก</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-hover table-sm" id="tbl-members" style="width:100%">
-            <thead class="table-primary">
-              <tr><th>Member ID</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แพ็กเกจ</th><th>สถานะ</th><th>หมดอายุ</th><th>ครั้ง</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="m-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toast-wrap"></div>
 
-    <!-- CLASSES -->
-    <div id="panel-classes" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <div><h4 class="fw-brand fw-bold mb-0">📚 คอร์ส & ตาราง</h4><small class="text-muted">ดึงข้อมูลจาก Google Sheet</small></div>
-        <div class="d-flex gap-2 align-items-center">
-          <input type="text" class="form-control form-control-sm" style="width:160px;" placeholder="🔍 ค้นหา..." oninput="tblSearch(this,'dt-classes')">
-          <button class="btn btn-outline-secondary btn-sm" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
-          <button class="btn btn-brand btn-sm" onclick="openAddClass()"><i class="bi bi-plus-lg"></i> เพิ่มคลาส</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-hover table-sm" id="dt-classes" style="width:100%">
-            <thead class="table-primary">
-              <tr><th>รูป</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>ที่นั่ง</th><th>Zoom</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="cl-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- BOOKINGS -->
-    <div id="panel-bookings" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <h4 class="fw-brand fw-bold mb-0">📋 การจอง</h4>
-        <select class="form-select form-select-sm" style="width:160px;" onchange="loadBookings(this.value)">
-          <option value="">ทั้งหมด</option><option value="confirmed">ยืนยัน</option><option value="cancelled">ยกเลิก</option><option value="no-show">No-show</option>
-        </select>
-      </div>
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-hover table-sm" id="tbl-bookings" style="width:100%">
-            <thead class="table-primary">
-              <tr><th>Member ID</th><th>ชื่อ</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>Check-in</th><th>สถานะ</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="bk-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- FINES -->
-    <div id="panel-fines" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <h4 class="fw-brand fw-bold mb-0">⚠️ ค่าปรับ</h4>
-        <div class="d-flex gap-2 align-items-center">
-          <input type="text" class="form-control form-control-sm" style="width:180px;" placeholder="🔍 ค้นหา..." oninput="tblSearch(this,'tbl-fines')">
-          <button class="btn btn-danger btn-sm" onclick="openModal('add-fine')"><i class="bi bi-plus-lg"></i> เพิ่มค่าปรับ</button>
-        </div>
-      </div>
-      <div class="row g-3 mb-3">
-        <div class="col-4"><div class="card stat-card text-center"><div class="card-body"><div class="small text-muted fw-bold">ค้างชำระ</div><div class="stat-val text-danger" id="f-total">฿0</div></div></div></div>
-        <div class="col-4"><div class="card stat-card text-center"><div class="card-body"><div class="small text-muted fw-bold">รายการค้าง</div><div class="stat-val text-warning" id="f-cnt">0</div></div></div></div>
-        <div class="col-4"><div class="card stat-card text-center"><div class="card-body"><div class="small text-muted fw-bold">ชำระแล้ว</div><div class="stat-val text-success" id="f-paid">฿0</div></div></div></div>
-      </div>
-      <div class="alert alert-info d-flex gap-2"><i class="bi bi-info-circle-fill"></i><div><strong>อัตราค่าปรับ:</strong> Online ฿20 | Onsite ฿50 | Hybrid ฿100</div></div>
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-hover table-sm" id="tbl-fines" style="width:100%">
-            <thead class="table-primary">
-              <tr><th>สมาชิก</th><th>คอร์ส</th><th>วันที่</th><th>ประเภท</th><th>เหตุผล</th><th>฿</th><th>สถานะ</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="f-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- REPORTS -->
-    <div id="panel-reports" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <h4 class="fw-brand fw-bold mb-0">📈 รายได้ & รายงาน</h4>
-        <div class="d-flex gap-2 align-items-center flex-wrap">
-          <input type="month" class="form-control form-control-sm" id="rep-month" style="width:160px;" onchange="loadReports()">
-          <button class="btn btn-outline-secondary btn-sm" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
-          <button class="btn btn-brand btn-sm" onclick="exportReportCSV()"><i class="bi bi-download"></i> CSV</button>
-        </div>
-      </div>
-      <div class="row g-2 mb-3">
-        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รายได้สมาชิก</div><div class="stat-val text-primary" id="r-m">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">จากค่าปรับ</div><div class="stat-val text-danger" id="r-fine">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">รวมทั้งหมด</div><div class="stat-val text-success" id="r-total">—</div></div></div></div>
-        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">สมาชิกใหม่</div><div class="stat-val text-info" id="r-n">—</div><div class="small text-muted">คน</div></div></div></div>
-        <div class="col-6 col-md-4 col-xl"><div class="card stat-card"><div class="card-body"><div class="small text-muted fw-bold text-uppercase mb-2">ครั้งที่เรียน</div><div class="stat-val text-warning" id="r-s">—</div></div></div></div>
-      </div>
-      <div class="row g-3">
-        <div class="col-md-5"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">💰 สัดส่วนรายได้</div><div class="chart-wrap"><canvas id="chart-pie"></canvas></div></div></div></div>
-        <div class="col-md-7"><div class="card"><div class="card-body"><div class="fw-bold small mb-3">📊 Check-in 6 เดือน</div><div class="chart-wrap"><canvas id="chart-ci"></canvas></div></div></div></div>
-      </div>
-    </div>
-
-    <!-- ADMINS -->
-    <div id="panel-admins" class="panel">
-      <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-        <h4 class="fw-brand fw-bold mb-0">🔐 Admin Users</h4>
-        <button class="btn btn-brand btn-sm" onclick="openModal('add-admin')"><i class="bi bi-plus-lg"></i> เพิ่ม Admin</button>
-      </div>
-      <div class="alert alert-info d-flex gap-2 mb-3"><i class="bi bi-info-circle-fill"></i><div><strong>Super Admin</strong> — ทุกสิทธิ์ &nbsp;|&nbsp; <strong>Manager</strong> — Approve + สมาชิก + รายงาน &nbsp;|&nbsp; <strong>Staff</strong> — Check-in เท่านั้น</div></div>
-      <div class="card">
-        <div class="card-body">
-          <table class="table table-hover table-sm" id="tbl-admins" style="width:100%">
-            <thead class="table-primary"><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>สร้างเมื่อ</th><th>Actions</th></tr></thead>
-            <tbody id="ad-body"><tr><td colspan="99" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>กำลังโหลด...</td></tr></tbody><tr><td><strong>admin</strong></td><td>Super Admin</td><td><span class="badge bg-danger">Super Admin</span></td><td class="text-muted small">Default</td><td></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="panel-settings" class="panel">
-      <h4 class="fw-brand fw-bold mb-1">⚙️ ตั้งค่าระบบ</h4>
-      <p class="text-muted small mb-3">ค่าทั้งหมดบันทึกลง Google Sheet — ไม่เก็บ password ในไฟล์ HTML</p>
-      <div class="alert alert-success d-flex gap-2"><i class="bi bi-shield-check-fill"></i><div><strong>Security:</strong> Zoom Password, LINE Token เก็บใน Google Sheet เท่านั้น</div></div>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="card mb-3"><div class="card-header fw-bold"><i class="bi bi-camera-video-fill"></i> Zoom</div>
-            <div class="card-body">
-              <div class="mb-2"><label class="form-label small fw-bold">Meeting ID</label><input type="text" class="form-control form-control-sm" id="zm-id" placeholder="964 333 6086"></div>
-              <div class="mb-3"><label class="form-label small fw-bold">Password</label><input type="text" class="form-control form-control-sm" id="zm-pw" placeholder="12345"></div>
-              <button class="btn btn-brand btn-sm" onclick="saveSetting('zoom')">💾 บันทึก Zoom</button>
-            </div>
-          </div>
-          <div class="card mb-3"><div class="card-header fw-bold"><i class="bi bi-bank"></i> ธนาคาร</div>
-            <div class="card-body">
-              <div class="mb-2"><label class="form-label small fw-bold">ชื่อธนาคาร</label><input type="text" class="form-control form-control-sm" id="bk-nm"></div>
-              <div class="mb-2"><label class="form-label small fw-bold">เลขบัญชี</label><input type="text" class="form-control form-control-sm" id="bk-ac"></div>
-              <div class="mb-3"><label class="form-label small fw-bold">ชื่อเจ้าของบัญชี</label><input type="text" class="form-control form-control-sm" id="bk-ow"></div>
-              <button class="btn btn-brand btn-sm" onclick="saveSetting('bank')">💾 บันทึกธนาคาร</button>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card mb-3"><div class="card-header fw-bold"><i class="bi bi-exclamation-triangle-fill text-warning"></i> ค่าปรับ</div>
-            <div class="card-body">
-              <div class="row g-2 mb-3">
-                <div class="col-6"><label class="form-label small fw-bold">Online (฿)</label><input type="number" class="form-control form-control-sm" id="fn-on"></div>
-                <div class="col-6"><label class="form-label small fw-bold">Onsite (฿)</label><input type="number" class="form-control form-control-sm" id="fn-os"></div>
-                <div class="col-6"><label class="form-label small fw-bold">Hybrid (฿)</label><input type="number" class="form-control form-control-sm" id="fn-hy"></div>
-                <div class="col-6"><label class="form-label small fw-bold">ยกเลิกล่วงหน้า (ชม.)</label><input type="number" class="form-control form-control-sm" id="fn-ch"></div>
-              </div>
-              <button class="btn btn-brand btn-sm" onclick="saveSetting('fines')">💾 บันทึกนโยบาย</button>
-            </div>
-          </div>
-          <div class="card mb-3"><div class="card-header fw-bold"><i class="bi bi-bell-fill text-success"></i> LINE Token</div>
-            <div class="card-body">
-              <div class="mb-3"><label class="form-label small fw-bold">Channel Access Token</label><input type="password" class="form-control form-control-sm" id="line-tok" placeholder="ใส่ Token จาก LINE Developers"></div>
-              <div class="d-flex gap-2">
-                <button class="btn btn-brand btn-sm" onclick="saveSetting('line')">💾 บันทึก</button>
-                <button class="btn btn-outline-secondary btn-sm" onclick="testReminder()">🔔 ทดสอบ</button>
-              </div>
-            </div>
-          </div>
-          <div class="card"><div class="card-header fw-bold"><i class="bi bi-palette-fill"></i> ธีมสี</div>
-            <div class="card-body">
-              <div class="d-flex gap-2 flex-wrap">
-                <div class="swatch active" style="background:#1400FF;color:#1400FF;" onclick="applyTheme('#1400FF','#0D00CC')"></div>
-                <div class="swatch" style="background:#10B981;color:#10B981;" onclick="applyTheme('#10B981','#059669')"></div>
-                <div class="swatch" style="background:#EF4444;color:#EF4444;" onclick="applyTheme('#EF4444','#DC2626')"></div>
-                <div class="swatch" style="background:#8B5CF6;color:#8B5CF6;" onclick="applyTheme('#8B5CF6','#7C3AED')"></div>
-                <div class="swatch" style="background:#F59E0B;color:#F59E0B;" onclick="applyTheme('#F59E0B','#D97706')"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="card mt-3"><div class="card-header fw-bold"><i class="bi bi-tools"></i> ระบบ</div>
-        <div class="card-body d-flex gap-2 flex-wrap">
-          <button class="btn btn-outline-secondary btn-sm" onclick="runSetup()"><i class="bi bi-wrench"></i> Setup Sheets</button>
-          <button class="btn btn-warning btn-sm" onclick="migrateClasses()"><i class="bi bi-arrow-clockwise"></i> Migrate Classes Columns</button>
-          <button class="btn btn-outline-secondary btn-sm" onclick="openGS()"><i class="bi bi-table"></i> Google Sheet</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TUTORIAL -->
-    <div id="panel-tutorial" class="panel">
-      <h4 class="fw-brand fw-bold mb-1">📖 คู่มือการใช้งาน Admin</h4>
-      <p class="text-muted small mb-3">กดที่หัวข้อเพื่อดูรายละเอียด</p>
-      <div class="accordion" id="tut-accordion" style="--bs-accordion-active-bg:var(--blt);--bs-accordion-active-color:var(--brand);--bs-accordion-btn-active-icon:url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231400FF'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e\");">
-        <div id="tut-list"></div>
-      </div>
-    </div>
-
-  </div><!-- end main-inner --></div><!-- end main-wrap -->
-</div><!-- end admin-app -->
-
-<!-- ── MODALS ──────────────────────────────────────── -->
+<!-- ── MODALS ─────────────────────────────────────── -->
 
 <!-- Add Member -->
 <div class="modal fade" id="modal-add-member" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold">👤 เพิ่มสมาชิก</h5><button class="btn-close" onclick="closeModal('add-member')"></button></div>
-    <div class="modal-body">
-      <div class="row g-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ *</label><input type="text" class="form-control" id="am-fn"></div><div class="col-6"><label class="form-label small fw-bold">นามสกุล</label><input type="text" class="form-control" id="am-ln"></div></div>
-      <div class="mt-2"><label class="form-label small fw-bold">อีเมล *</label><input type="email" class="form-control" id="am-em"></div>
-      <div class="row g-2 mt-0"><div class="col-6"><label class="form-label small fw-bold">โทร</label><input type="tel" class="form-control" id="am-ph"></div><div class="col-6"><label class="form-label small fw-bold">แพ็กเกจ</label><select class="form-select" id="am-pl"><option value="trial">Trial (OwnT)</option><option value="quarter" selected>Quarter (OwnP)</option></select></div></div>
-      <div class="mt-2"><label class="form-label small fw-bold">LINE ID</label><input type="text" class="form-control" id="am-li"></div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('add-member')">ยกเลิก</button><button class="btn btn-brand" onclick="addMember()">+ เพิ่มสมาชิก</button></div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-1">👤 เพิ่มสมาชิก</h5><p class="text-muted small mb-3">Admin เพิ่มโดยตรง</p>
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ *</label><input class="form-control" id="am-fn"></div><div class="col-6"><label class="form-label small fw-bold">นามสกุล</label><input class="form-control" id="am-ln"></div></div>
+    <div class="mb-2"><label class="form-label small fw-bold">อีเมล *</label><input type="email" class="form-control" id="am-em"></div>
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">โทร</label><input type="tel" class="form-control" id="am-ph"></div><div class="col-6"><label class="form-label small fw-bold">แพ็กเกจ</label><select class="form-select" id="am-pl"><option value="trial">Trial</option><option value="quarter" selected>Quarter</option></select></div></div>
+    <div class="mb-3"><label class="form-label small fw-bold">LINE ID</label><input class="form-control" id="am-li"></div>
+    <div class="d-flex gap-2"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-brand flex-fill" onclick="addMember()">+ เพิ่มสมาชิก</button></div>
   </div></div>
 </div>
 
 <!-- Edit Member -->
 <div class="modal fade" id="modal-edit-member" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold">✏️ แก้ไขสมาชิก</h5><button class="btn-close" onclick="closeModal('edit-member')"></button></div>
-    <div class="modal-body">
-      <div class="mb-2 text-muted small" id="em-mid-lbl"></div>
-      <input type="hidden" id="em-id">
-      <div class="row g-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ</label><input type="text" class="form-control" id="em-fn"></div><div class="col-6"><label class="form-label small fw-bold">นามสกุล</label><input type="text" class="form-control" id="em-ln"></div></div>
-      <div class="mt-2"><label class="form-label small fw-bold">อีเมล</label><input type="email" class="form-control" id="em-em"></div>
-      <div class="row g-2 mt-0"><div class="col-6"><label class="form-label small fw-bold">โทร</label><input type="tel" class="form-control" id="em-ph"></div><div class="col-6"><label class="form-label small fw-bold">แพ็กเกจ</label><select class="form-select" id="em-pl"><option value="trial">Trial</option><option value="quarter">Quarter</option></select></div></div>
-      <div class="row g-2 mt-0"><div class="col-6"><label class="form-label small fw-bold">สถานะ</label><select class="form-select" id="em-st"><option value="active">Active</option><option value="inactive">Inactive</option></select></div><div class="col-6"><label class="form-label small fw-bold">วันหมดอายุ</label><input type="date" class="form-control" id="em-exp"></div></div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('edit-member')">ยกเลิก</button><button class="btn btn-brand" onclick="saveMember()">💾 บันทึก</button></div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-1">✏️ แก้ไขสมาชิก</h5><p class="text-muted small mb-2" id="em-mid-lbl"></p>
+    <input type="hidden" id="em-id">
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ</label><input class="form-control" id="em-fn"></div><div class="col-6"><label class="form-label small fw-bold">นามสกุล</label><input class="form-control" id="em-ln"></div></div>
+    <div class="mb-2"><label class="form-label small fw-bold">อีเมล</label><input type="email" class="form-control" id="em-em"></div>
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">โทร</label><input type="tel" class="form-control" id="em-ph"></div><div class="col-6"><label class="form-label small fw-bold">แพ็กเกจ</label><select class="form-select" id="em-pl"><option value="trial">Trial</option><option value="quarter">Quarter</option></select></div></div>
+    <div class="row g-2 mb-3"><div class="col-6"><label class="form-label small fw-bold">สถานะ</label><select class="form-select" id="em-st"><option value="active">Active</option><option value="inactive">Inactive</option></select></div><div class="col-6"><label class="form-label small fw-bold">วันหมดอายุ</label><input type="date" class="form-control" id="em-exp"></div></div>
+    <div class="d-flex gap-2"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-brand flex-fill" onclick="saveMember()">💾 บันทึก</button></div>
   </div></div>
 </div>
 
-<!-- Add Class -->
+<!-- Add/Edit Class -->
 <div class="modal fade" id="modal-add-class" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold" id="ac-title">📚 เพิ่มคลาสใหม่</h5><button class="btn-close" onclick="closeModal('add-class')"></button></div>
-    <div class="modal-body">
-      <input type="hidden" id="ac-id">
-      <div class="mb-2"><label class="form-label small fw-bold">ชื่อคอร์ส *</label><select class="form-select" id="ac-nm"><option>Product Growth 101</option><option>Business Growth 101</option><option>Health Buddy Growth 101</option><option>Digital Growth 101</option></select></div>
-      <div class="row g-2">
-        <div class="col-6"><label class="form-label small fw-bold">วัน</label><select class="form-select" id="ac-dy"><option>จันทร์</option><option>อังคาร</option><option>พุธ</option><option>พฤหัสบดี</option><option>ศุกร์</option><option>เสาร์</option><option>อาทิตย์</option></select></div>
-        <div class="col-6"><label class="form-label small fw-bold">วันที่จัด (dd/mm/yyyy)</label><input type="text" class="form-control" id="ac-date" placeholder="18/03/2569"></div>
-        <div class="col-6"><label class="form-label small fw-bold">เวลา *</label><input type="text" class="form-control" id="ac-tm" placeholder="09:00-11:00"></div>
-        <div class="col-6"><label class="form-label small fw-bold">ประเภท</label><select class="form-select" id="ac-tp"><option value="online">🖥️ Online</option><option value="onsite">🏢 Onsite</option><option value="hybrid">⚡ Hybrid</option></select></div>
-        <div class="col-6"><label class="form-label small fw-bold">ที่นั่งสูงสุด</label><input type="number" class="form-control" id="ac-st" value="20"></div>
-        <div class="col-6"><label class="form-label small fw-bold">Zoom Meeting ID</label><input type="text" class="form-control" id="ac-zid"></div>
-        <div class="col-6"><label class="form-label small fw-bold">Zoom Password</label><input type="text" class="form-control" id="ac-zpw"></div>
-        <div class="col-6"><label class="form-label small fw-bold">Zoom Link</label><input type="url" class="form-control" id="ac-zl"></div>
-        <div class="col-6"><label class="form-label small fw-bold">URL รูป Thumbnail</label><input type="url" class="form-control" id="ac-img" placeholder="https://..."></div>
-        <div class="col-6"><label class="form-label small fw-bold">คำอธิบาย</label><input type="text" class="form-control" id="ac-desc"></div>
-      </div>
-      <!-- Image Upload Zone -->
-      <div class="mt-3">
-        <label class="form-label small fw-bold"><i class="bi bi-image me-1"></i>หรืออัปโหลดรูปจากเครื่อง → Google Drive/Projects The Owner/Pics</label>
-        <div id="class-upload-zone"
-          style="border:2px dashed #c7d2fe;border-radius:10px;padding:18px;text-align:center;cursor:pointer;background:#eef0ff;position:relative;transition:all .3s;"
-          ondragover="event.preventDefault();this.style.borderColor='#1400FF';"
-          ondragleave="this.style.borderColor='#c7d2fe';"
-          ondrop="onClassImgDrop(event)">
-          <input type="file" id="class-img-input" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="onClassImgSelect(event)">
-          <i class="bi bi-cloud-arrow-up fs-2 text-primary mb-2 d-block" id="class-up-icon"></i>
-          <div class="fw-bold small" id="class-up-title">คลิกหรือลากรูปมาวาง</div>
-          <div class="text-muted small" id="class-up-sub">JPG, PNG, WEBP — สูงสุด 5MB</div>
+  <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-3" id="ac-title">📚 เพิ่มคลาสใหม่</h5>
+    <input type="hidden" id="ac-id">
+    <div class="mb-2"><label class="form-label small fw-bold">ชื่อคอร์ส *</label><select class="form-select" id="ac-nm"><option>Product Growth 101</option><option>Business Growth 101</option><option>Health Buddy Growth 101</option><option>Digital Growth 101</option></select></div>
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label small fw-bold">วัน</label><select class="form-select" id="ac-dy"><option>จันทร์</option><option>อังคาร</option><option>พุธ</option><option>พฤหัสบดี</option><option>ศุกร์</option><option>เสาร์</option><option>อาทิตย์</option></select></div>
+      <div class="col-6"><label class="form-label small fw-bold">วันที่จัด (dd/mm/yyyy)</label><input class="form-control" id="ac-date" placeholder="18/03/2569"></div>
+      <div class="col-6"><label class="form-label small fw-bold">เวลา *</label><input class="form-control" id="ac-tm" placeholder="09:00-11:00"></div>
+      <div class="col-6"><label class="form-label small fw-bold">ประเภท</label><select class="form-select" id="ac-tp"><option value="online">🖥️ Online</option><option value="onsite">🏢 Onsite</option><option value="hybrid">⚡ Hybrid</option></select></div>
+      <div class="col-6"><label class="form-label small fw-bold">ที่นั่งสูงสุด</label><input type="number" class="form-control" id="ac-st" value="20"></div>
+      <div class="col-6"><label class="form-label small fw-bold">Zoom Link</label><input type="url" class="form-control" id="ac-zl"></div>
+      <div class="col-12"><label class="form-label small fw-bold">URL รูป Thumbnail</label><input type="url" class="form-control" id="ac-img" placeholder="https://..."></div>
+      <div class="col-12">
+        <label class="form-label small fw-bold">หรืออัปโหลดรูปจากเครื่อง → Google Drive/Projects The Owner/Pics</label>
+        <div class="upload-zone" id="cls-upzone" ondragover="event.preventDefault()" ondrop="onClsImgDrop(event)">
+          <input type="file" accept="image/*" onchange="onClsImgSelect(event)">
+          <i class="bi bi-cloud-arrow-up text-primary" style="font-size:24px;display:block;margin-bottom:4px;" id="cls-up-icon"></i>
+          <div class="small" id="cls-up-title">คลิกหรือลากรูปมาวาง</div>
+          <div class="text-muted" style="font-size:11px;" id="cls-up-sub">JPG, PNG — ≤5MB</div>
         </div>
-        <div id="class-img-preview" class="mt-2" style="display:none;">
-          <img id="class-preview-img" src="" alt="Preview" style="max-height:120px;border-radius:8px;border:2px solid #10b981;">
-        </div>
-        <div id="class-upload-status" class="mt-2"></div>
+        <div id="cls-up-status" class="mt-1"></div>
+        <div id="cls-img-preview" style="display:none;margin-top:8px;"><img id="cls-preview-img" style="max-height:100px;border-radius:8px;border:2px solid #10b981;"></div>
       </div>
+      <div class="col-12"><label class="form-label small fw-bold">คำอธิบาย</label><input class="form-control" id="ac-desc"></div>
     </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('add-class')">ยกเลิก</button><button class="btn btn-brand" onclick="saveClass()">💾 บันทึก</button></div>
+    <div class="d-flex gap-2 mt-3"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-brand flex-fill" onclick="saveClass()">💾 บันทึก</button></div>
   </div></div>
 </div>
 
 <!-- Add Admin -->
 <div class="modal fade" id="modal-add-admin" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold">🔐 เพิ่ม Admin User</h5><button class="btn-close" onclick="closeModal('add-admin')"></button></div>
-    <div class="modal-body">
-      <div class="row g-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ</label><input type="text" class="form-control" id="aa-nm"></div><div class="col-6"><label class="form-label small fw-bold">Username *</label><input type="text" class="form-control" id="aa-us"></div></div>
-      <div class="mt-2"><label class="form-label small fw-bold">Password *</label><input type="password" class="form-control" id="aa-pw"></div>
-      <div class="mt-2"><label class="form-label small fw-bold">Role</label><select class="form-select" id="aa-ro"><option value="staff">🔵 Staff — Check-in เท่านั้น</option><option value="manager">🟡 Manager — Approve + สมาชิก</option><option value="super">🔴 Super Admin — ทุกสิทธิ์</option></select></div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('add-admin')">ยกเลิก</button><button class="btn btn-brand" onclick="addAdmin()">+ เพิ่ม Admin</button></div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-3">🔐 เพิ่ม Admin User</h5>
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">ชื่อ</label><input class="form-control" id="aa-nm"></div><div class="col-6"><label class="form-label small fw-bold">Username *</label><input class="form-control" id="aa-us"></div></div>
+    <div class="mb-2"><label class="form-label small fw-bold">Password *</label><input type="password" class="form-control" id="aa-pw"></div>
+    <div class="mb-3"><label class="form-label small fw-bold">Role</label><select class="form-select" id="aa-ro"><option value="staff">🔵 Staff — Check-in</option><option value="manager">🟡 Manager — Approve+สมาชิก</option><option value="super">🔴 Super Admin — ทุกสิทธิ์</option></select></div>
+    <div class="d-flex gap-2"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-brand flex-fill" onclick="addAdmin()">+ เพิ่ม Admin</button></div>
   </div></div>
 </div>
 
 <!-- Gen QR -->
 <div class="modal fade" id="modal-gen-qr" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold">🔲 สร้าง Room QR Code</h5><button class="btn-close" onclick="closeModal('gen-qr')"></button></div>
-    <div class="modal-body">
-      <div class="mb-2"><label class="form-label small fw-bold">เลือกคลาส *</label><select class="form-select" id="gq-cl"><option>กำลังโหลด...</option></select></div>
-      <div class="mb-2"><label class="form-label small fw-bold">อายุ QR (ชั่วโมง)</label><input type="number" class="form-control" id="gq-hr" value="24" min="1"></div>
-      <div class="alert alert-warning small"><i class="bi bi-exclamation-triangle-fill"></i> QR ใหม่จะยกเลิก QR เก่าของคลาสนั้นอัตโนมัติ</div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('gen-qr')">ยกเลิก</button><button class="btn btn-brand" onclick="genQR()">🔲 สร้าง QR</button></div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-3">🔲 สร้าง Room QR Code</h5>
+    <div class="mb-2"><label class="form-label small fw-bold">เลือกคลาส *</label><select class="form-select" id="gq-cl"><option>กำลังโหลด...</option></select></div>
+    <div class="mb-3"><label class="form-label small fw-bold">อายุ QR (ชั่วโมง)</label><input type="number" class="form-control" id="gq-hr" value="24" min="1"></div>
+    <div class="d-flex gap-2"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-brand flex-fill" onclick="genQR()">🔲 สร้าง QR</button></div>
   </div></div>
 </div>
 
 <!-- Add Fine -->
 <div class="modal fade" id="modal-add-fine" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fw-brand fw-bold" id="fine-modal-title">⚠️ เพิ่มค่าปรับ</h5><button class="btn-close" onclick="closeModal('add-fine')"></button></div>
-    <div class="modal-body">
-      <input type="hidden" id="ef-id">
-      <div class="mb-2"><label class="form-label small fw-bold">Member ID *</label><input type="text" class="form-control" id="af-mid" oninput="this.value=this.value.toUpperCase()"></div>
-      <div class="mb-2"><label class="form-label small fw-bold">คอร์ส</label><input type="text" class="form-control" id="af-cls"></div>
-      <div class="row g-2">
-        <div class="col-6"><label class="form-label small fw-bold">ประเภท</label><select class="form-select" id="af-tp"><option value="online">Online ฿20</option><option value="onsite" selected>Onsite ฿50</option><option value="hybrid">Hybrid ฿100</option></select></div>
-        <div class="col-6"><label class="form-label small fw-bold">จำนวน (฿)</label><input type="number" class="form-control" id="af-amt" value="50"></div>
-      </div>
-      <div class="mt-2"><label class="form-label small fw-bold">เหตุผล</label><input type="text" class="form-control" id="af-reason" placeholder="จองแล้วไม่มา / Walk-in"></div>
-    </div>
-    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('add-fine')">ยกเลิก</button><button class="btn btn-danger" onclick="addFineManual()">+ เพิ่มค่าปรับ</button></div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
+    <h5 class="fw-brand fw-bold mb-3" id="fine-title">⚠️ เพิ่มค่าปรับ</h5>
+    <input type="hidden" id="ef-id">
+    <div class="mb-2"><label class="form-label small fw-bold">Member ID *</label><input class="form-control" id="af-mid" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="mb-2"><label class="form-label small fw-bold">คอร์ส</label><input class="form-control" id="af-cls"></div>
+    <div class="row g-2 mb-2"><div class="col-6"><label class="form-label small fw-bold">ประเภท</label><select class="form-select" id="af-tp"><option value="online">Online ฿20</option><option value="onsite" selected>Onsite ฿50</option><option value="hybrid">Hybrid ฿100</option></select></div><div class="col-6"><label class="form-label small fw-bold">จำนวน (฿)</label><input type="number" class="form-control" id="af-amt" value="50"></div></div>
+    <div class="mb-3"><label class="form-label small fw-bold">เหตุผล</label><input class="form-control" id="af-reason" placeholder="จองแล้วไม่มา"></div>
+    <div class="d-flex gap-2"><button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-danger flex-fill" onclick="addFineManual()">+ เพิ่มค่าปรับ</button></div>
   </div></div>
 </div>
 
-<!-- JS LIBRARIES -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- DataTables JS removed -->
-
 <script>
 'use strict';
-/* ── CONFIG ─────────────────────────────────────
+/* ── CONFIG ─────────────────────────────────
    ❌ ไม่เก็บ password ใน code
    ✅ Login ผ่าน GAS server เท่านั้น
-──────────────────────────────────────────────── */
+─────────────────────────────────────────── */
 const GAS      = 'https://script.google.com/macros/s/AKfycby3R9EW4mqzKUZ3U9Iu2FM-Wg3kaUcyhRKGXso1krMjIjS3nyxzmajvRsI2reieyA6r/exec';
 const SHEET_ID = '1wQtlbkr6LOlq71FpqZjXJ6D7WA_2aq4SsGOs4YTbbN0';
 
-/* ── STATE ──────────────────────────────────── */
+/* ── STATE ───────────────────────────────── */
 let A = null;
 let allMembers = [], pendingList = [], ciLog = [], selAp = null;
+let classCache = {}, memberCache = {};
 let charts = {};
 let curPanel = 'overview';
-const TITLES = {overview:'📊 ภาพรวม',approve:'✅ Approve Slip',checkin:'📷 Check-in',roomqr:'🔲 Room QR',members:'👥 สมาชิก',classes:'📚 คอร์ส',bookings:'📋 การจอง',fines:'⚠️ ค่าปรับ',reports:'📈 รายได้',admins:'🔐 Admin Users',settings:'⚙️ ตั้งค่า',tutorial:'📖 คู่มือ'};
 
-/* ── API ─────────────────────────────────────── */
-async function api(action, data={}) {
+const PANEL_LABELS = {
+  overview:'📊 ภาพรวม', approve:'✅ Approve Slip', checkin:'📷 Check-in',
+  roomqr:'🔲 Room QR', members:'👥 สมาชิก', classes:'📚 คอร์ส & ตาราง',
+  bookings:'📋 การจอง', fines:'⚠️ ค่าปรับ', reports:'📈 รายได้',
+  admins:'🔐 Admin Users', settings:'⚙️ ตั้งค่า', tutorial:'📖 คู่มือ',
+};
+
+/* ── API ────────────────────────────────── */
+async function api(action, data = {}) {
   try {
-    const r = await fetch(GAS, {method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...data})});
+    const r = await fetch(GAS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action, ...data })
+    });
     return await r.json();
-  } catch(e) { console.error('API:',action,e); return null; }
+  } catch(e) {
+    console.error('API Error:', action, e.message);
+    return null;
+  }
 }
 
-/* ── SWEETALERT2 HELPERS ─────────────────────── */
-function toast(msg, type='success') {
-  Swal.fire({toast:true, position:'bottom-end', icon:type, title:msg, showConfirmButton:false, timer:3000, timerProgressBar:true, width:'auto'});
-}
-async function confirm(msg, title='ยืนยัน?') {
-  const r = await Swal.fire({title, text:msg, icon:'warning', showCancelButton:true, confirmButtonColor:'#EF4444', cancelButtonColor:'#6c757d', confirmButtonText:'ยืนยัน', cancelButtonText:'ยกเลิก'});
-  return r.isConfirmed;
-}
-function alertSuccess(title, text='') { Swal.fire({icon:'success', title, text, timer:2000, showConfirmButton:false}); }
-function alertError(text) { Swal.fire({icon:'error', title:'เกิดข้อผิดพลาด', text, confirmButtonColor:'var(--brand)'}); }
-function loading(text='กำลังโหลด...') { Swal.fire({title:text, allowOutsideClick:false, didOpen:()=>Swal.showLoading()}); }
-function closeLoading() { Swal.close(); }
-
-/* ── DATATABLE HELPER ────────────────────────── */
-/* ── SIMPLE TABLE SEARCH (replaces DataTables) ────
-   ไม่มี external dependency → ไม่พัง
-────────────────────────────────────────────────── */
-const dtInstances = {}; // keep for compatibility
-
-function mkDT(id, opts={}) {
-  // No-op - DataTables removed, using tblSearch instead
-  return null;
+/* ── TOAST ───────────────────────────────── */
+function toast(msg, type = 'ok') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = `my-toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
 }
 
-// Simple inline search for any table
-function tblSearch(inputEl, tableId) {
-  const q = inputEl.value.toLowerCase();
-  const tbody = document.querySelector('#' + tableId + ' tbody');
-  if (!tbody) return;
-  tbody.querySelectorAll('tr').forEach(row => {
-    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
+/* ── CONFIRM ─────────────────────────────── */
+async function cfm(msg) {
+  return window.confirm(msg);
 }
 
-/* ── LOGIN ───────────────────────────────────── */
+/* ── LOGIN ───────────────────────────────── */
 async function doLogin() {
   const u = document.getElementById('a-user').value.trim();
   const p = document.getElementById('a-pass').value;
-  if (!u||!p) { alertError('กรุณากรอก Username และ Password'); return; }
-  loading('กำลังเข้าสู่ระบบ...');
-  const res = await api('adminLogin',{username:u,password:p});
-  closeLoading();
-  if (res?.success) { A=res.admin; startApp(); }
-  else alertError(res?.message||'Username หรือ Password ไม่ถูกต้อง');
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if (!u || !p) { errEl.textContent = 'กรุณากรอก Username และ Password'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('lbtn');
+  btn.textContent = 'กำลังเข้าระบบ...'; btn.disabled = true;
+  try {
+    const res = await api('adminLogin', { username: u, password: p });
+    if (res?.success) {
+      A = res.admin;
+      startApp();
+    } else {
+      errEl.textContent = res?.message || 'Username หรือ Password ไม่ถูกต้อง';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'เชื่อมต่อไม่ได้ กรุณาตรวจ Internet';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = '🔑 เข้าสู่ระบบ'; btn.disabled = false;
+  }
 }
 
 function startApp() {
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('admin-app').style.display='block';
-  document.getElementById('sb-name').textContent=A.name;
-  document.getElementById('sb-role').textContent=A.role==='super'?'Super Admin':A.role==='manager'?'Manager':'Staff';
-  document.getElementById('today-date').textContent='วันนี้: '+new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const now=new Date(); document.getElementById('rep-month').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  loadOverview(); loadPending(); loadSettings(); renderTutorial();
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sb-uname').textContent = A.name || A.username;
+  document.getElementById('sb-urole').textContent = A.role === 'super' ? 'Super Admin' : A.role === 'manager' ? 'Manager' : 'Staff';
+  document.getElementById('today-date').textContent = 'วันนี้: ' + new Date().toLocaleDateString('th-TH', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const now = new Date();
+  document.getElementById('rep-month').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  renderTutorial();
+  loadOverview();
+  loadPending();
+  loadSettings();
 }
 
 function logout() {
-  Swal.fire({title:'ออกจากระบบ?',icon:'question',showCancelButton:true,confirmButtonText:'ออก',cancelButtonText:'ยกเลิก',confirmButtonColor:'var(--brand)'}).then(r=>{
-    if(r.isConfirmed){A=null;document.getElementById('admin-app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('a-pass').value='';}
-  });
+  if (!confirm('ออกจากระบบ?')) return;
+  A = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('a-pass').value = '';
 }
 
-/* ── PANEL NAV ───────────────────────────────── */
-function goPanel(name) {
+/* ── PANEL NAVIGATION ───────────────────── */
+function go(name) {
   curPanel = name;
-  // 1. Remove active from all panels + nav items
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sb-nav .nav-link').forEach(i => i.classList.remove('active'));
-  // 2. Set active FIRST so DataTable can see visible elements
-  const panel = document.getElementById('panel-' + name);
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const panel = document.getElementById('p-' + name);
   if (panel) panel.classList.add('active');
-  document.getElementById('nav-' + name)?.classList.add('active');
-  document.getElementById('nav-title').textContent = TITLES[name] || name;
-  // 3. Load data AFTER panel is visible (requestAnimationFrame ensures paint)
-  requestAnimationFrame(() => {
-    loadPanel(name);
-  });
-  closeSB();
+  const sbItem = document.getElementById('sb-' + name);
+  if (sbItem) sbItem.classList.add('active');
+  document.getElementById('panel-label').textContent = PANEL_LABELS[name] || name;
   setLup();
+  closeSB();
+  loadForPanel(name);
 }
-function loadPanel(n) {
-  try {
-    if(n==='overview')       loadOverview();
-    else if(n==='approve')   loadPending();
-    else if(n==='members')   loadMembers();
-    else if(n==='classes')   loadClasses();
-    else if(n==='bookings')  loadBookings();
-    else if(n==='fines')     loadFines();
-    else if(n==='reports')   loadReports();
-    else if(n==='roomqr')    loadRoomQRs();
-    else if(n==='settings')  loadSettings();
-    else if(n==='admins')    loadAdmins();
-    // checkin, tutorial: no load needed
-  } catch(e) {
-    console.error('loadPanel error:', n, e);
-    toast('โหลดข้อมูลไม่ได้: ' + n, 'error');
-  }
+
+function loadForPanel(name) {
+  if (name === 'overview') loadOverview();
+  else if (name === 'approve')  loadPending();
+  else if (name === 'members')  loadMembers();
+  else if (name === 'classes')  loadClasses();
+  else if (name === 'bookings') loadBookings();
+  else if (name === 'fines')    loadFines();
+  else if (name === 'reports')  loadReports();
+  else if (name === 'roomqr')   loadRoomQRs();
+  else if (name === 'settings') loadSettings();
+  else if (name === 'admins')   loadAdmins();
 }
+
 function refresh() {
   const ico = document.getElementById('rfi');
-  ico.classList.add('spin');
-  setTimeout(() => ico.classList.remove('spin'), 800);
-  requestAnimationFrame(() => loadPanel(curPanel));
+  ico.style.animation = 'slideIn .6s';
+  setTimeout(() => ico.style.animation = '', 700);
+  loadForPanel(curPanel);
   setLup();
 }
-function setLup(){document.getElementById('lup').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 
-/* ── SIDEBAR ─────────────────────────────────── */
-function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-overlay').classList.toggle('d-none');}
-function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.add('d-none');}
-
-/* ── CHARTS ──────────────────────────────────── */
-function mkChart(id,type,labels,datasets,opts={}) {
-  if(charts[id]){charts[id].destroy();delete charts[id];}
-  const ctx=document.getElementById(id)?.getContext('2d');
-  if(!ctx) return;
-  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{
-    responsive:true,
-    maintainAspectRatio:true,
-    ...opts
-  }});
+function setLup() {
+  document.getElementById('lup-time').textContent = 'อัปเดต: ' + new Date().toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
-/* ── OVERVIEW ────────────────────────────────── */
+/* ── SIDEBAR ────────────────────────────── */
+function toggleSB() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sb-overlay').classList.toggle('open'); }
+function closeSB()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sb-overlay').classList.remove('open'); }
+
+/* ── CHARTS ──────────────────────────────── */
+function mkChart(id, type, labels, datasets, opts = {}) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  const ctx = document.getElementById(id)?.getContext('2d');
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, { type, data: {labels, datasets}, options: { responsive:true, plugins:{legend:{display:type==='doughnut'}}, ...opts } });
+}
+
+/* ── TABLE FILTER ───────────────────────── */
+function tblFilter(tableId, q) {
+  const tbody = document.querySelector('#' + tableId + ' tbody');
+  if (!tbody) return;
+  const lq = q.toLowerCase();
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(lq) ? '' : 'none';
+  });
+}
+
+/* ── OVERVIEW ───────────────────────────── */
 async function loadOverview() {
-  const res=await api('getStats'); if(!res) return;
-  document.getElementById('s-total').textContent  =res.totalMembers??'—';
-  document.getElementById('s-pend').textContent   =res.pendingApprovals??'0';
-  document.getElementById('s-today').textContent  =res.todayCheckins??'0';
-  document.getElementById('s-quarter').textContent=res.quarterMembers??'—';
-  document.getElementById('s-fines').textContent  ='฿'+(res.pendingFines??'0');
-  updateDot(res.pendingApprovals||0);
-  const pR=(res.recentPending||[]).map(p=>`<tr><td>${p.name||'—'}</td><td><span class="badge bg-primary">${p.plan||'—'}</span></td><td class="text-muted small">${p.time||'—'}</td></tr>`).join('');
-  document.getElementById('ov-pend').innerHTML=pR||'<tr><td colspan="3" class="text-center text-muted py-3">ไม่มีรายการ</td></tr>';
-  const cR=(res.recentCheckins||[]).map(c=>`<tr><td>${c.name||'—'}</td><td>${c.class||'—'}</td><td class="text-muted small">${c.time||'—'}</td></tr>`).join('');
-  document.getElementById('ov-ci').innerHTML=cR||'<tr><td colspan="3" class="text-center text-muted py-3">ยังไม่มี</td></tr>';
-  if(res.monthlyData?.length){
-    const lb=res.monthlyData.map(m=>m.month.slice(5)+'/'+m.month.slice(2,4));
-    mkChart('chart-members','bar',lb,[{label:'สมาชิกใหม่',data:res.monthlyData.map(m=>m.newMembers),backgroundColor:'rgba(20,0,255,.5)',borderColor:'#1400FF',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
-    mkChart('chart-revenue','bar',lb,[{label:'รายได้ (฿)',data:res.monthlyData.map(m=>m.revenue),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+  const res = await api('getStats');
+  if (!res) return;
+  document.getElementById('st-members').textContent  = res.totalMembers    ?? '—';
+  document.getElementById('st-pend').textContent     = res.pendingApprovals ?? '0';
+  document.getElementById('st-today').textContent    = res.todayCheckins   ?? '0';
+  document.getElementById('st-quarter').textContent  = res.quarterMembers  ?? '—';
+  document.getElementById('st-fines').textContent    = '฿' + (res.pendingFines ?? '0');
+  updateDot(res.pendingApprovals || 0);
+  const ovPend = (res.recentPending || []).map(p => `<tr><td>${p.name||'—'}</td><td><span class="bk bk-blue">${p.plan||'—'}</span></td><td class="text-muted small">${p.time||'—'}</td></tr>`).join('');
+  document.getElementById('ov-pend').innerHTML = ovPend || '<tr class="empty-row"><td colspan="3">ไม่มีรายการ</td></tr>';
+  const ovCi = (res.recentCheckins || []).map(c => `<tr><td>${c.name||'—'}</td><td>${c.class||'—'}</td><td class="text-muted small">${c.time||'—'}</td></tr>`).join('');
+  document.getElementById('ov-ci').innerHTML = ovCi || '<tr class="empty-row"><td colspan="3">ยังไม่มี</td></tr>';
+  if (res.monthlyData?.length) {
+    const lb = res.monthlyData.map(m => m.month.slice(5)+'/'+m.month.slice(2,4));
+    mkChart('ch-members','bar',lb,[{label:'สมาชิกใหม่',data:res.monthlyData.map(m=>m.newMembers),backgroundColor:'rgba(20,0,255,.5)',borderColor:'#1400FF',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+    mkChart('ch-revenue','bar',lb,[{label:'รายได้',data:res.monthlyData.map(m=>m.revenue),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
   }
 }
-function updateDot(n){const d=document.getElementById('pdot');d.textContent=n;d.className='notify-badge'+(n>0?' on':'');}
+function updateDot(n) { const d = document.getElementById('pdot'); d.textContent = n; d.className = 'sb-badge' + (n > 0 ? ' on' : ''); }
 
-/* ── APPROVE ─────────────────────────────────── */
+/* ── APPROVE ────────────────────────────── */
 async function loadPending() {
-  const res=await api('getPendingApprovals');
-  pendingList=res?.pending||[];
+  const res = await api('getPendingApprovals');
+  pendingList = res?.pending || [];
   renderPending(pendingList);
-  updateDot(pendingList.filter(p=>p.status==='waiting').length);
-  document.getElementById('ap-cnt').textContent=pendingList.length;
+  updateDot(pendingList.filter(p => p.status === 'waiting').length);
+  document.getElementById('ap-cnt').textContent = pendingList.length;
 }
+
 function renderPending(list) {
-  document.getElementById('ap-body').innerHTML=list.map(p=>{
-    const isQ=p.plan?.toLowerCase()==='quarter';
-    const sCls=p.status==='waiting'?'bg-warning text-dark':p.status==='approved'?'bg-success':'bg-danger';
-    const sTxt=p.status==='waiting'?'⏳ รอ':p.status==='approved'?'✅ Approved':'❌ Rejected';
+  const sCls = { waiting:'bk-yellow', approved:'bk-green', rejected:'bk-red' };
+  const sTxt = { waiting:'⏳ รอ', approved:'✅ Approved', rejected:'❌ Rejected' };
+  document.getElementById('ap-body').innerHTML = list.map(p => {
+    const isQ = p.plan?.toLowerCase() === 'quarter';
     return `<tr>
       <td><strong>${p.firstName||''} ${p.lastName||''}</strong></td>
-      <td><span class="badge ${isQ?'bg-primary':'bg-info'}">${isQ?'⭐ Quarter':'Trial'}</span></td>
+      <td><span class="bk ${isQ?'bk-blue':'bk-gray'}">${isQ?'⭐ Quarter':'Trial'}</span></td>
       <td class="text-primary fw-bold">฿${p.amount||0}</td>
-      <td class="text-muted small" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;">${p.lineId||'—'}</td>
+      <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;">${p.lineId||'—'}</td>
       <td class="text-muted small">${p.createdAt?new Date(p.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—'}</td>
-      <td><span class="badge ${sCls}">${sTxt}</span></td>
-      <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick="viewAp('${p.id}')"><i class="bi bi-search"></i></button>
-        ${p.status==='waiting'?`<button class="btn btn-success btn-sm me-1" onclick="quickAp('${p.id}','approved')">✅</button><button class="btn btn-danger btn-sm" onclick="quickAp('${p.id}','rejected')">❌</button>`:''}
+      <td><span class="bk ${sCls[p.status]||'bk-gray'}">${sTxt[p.status]||p.status}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline-secondary btn-xs me-1" onclick="viewAp('${p.id}')">🔍</button>
+        ${p.status==='waiting'?`<button class="btn btn-success btn-xs me-1" onclick="quickAp('${p.id}','approved')">✅</button><button class="btn btn-danger btn-xs" onclick="quickAp('${p.id}','rejected')">❌</button>`:''}
       </td>
     </tr>`;
-  }).join('')||'<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-check2-all fs-2"></i><div class="small mt-1">ยังไม่มีการสมัคร</div></td></tr>';
-}
-function filterAp(s){renderPending(s?pendingList.filter(p=>p.status===s):pendingList);}
-function searchAp(q){const l=q.toLowerCase();renderPending(pendingList.filter(p=>(p.firstName+' '+p.lastName+p.email).toLowerCase().includes(l)));}
-function viewAp(id) {
-  const p=pendingList.find(x=>x.id===id); if(!p) return;
-  selAp=p;
-  document.getElementById('ap-name').textContent=`${p.firstName||''} ${p.lastName||''}`;
-  document.getElementById('ap-email').textContent=p.email||'—';
-  document.getElementById('ap-phone').textContent=p.phone||'—';
-  document.getElementById('ap-line').textContent=p.lineId||'—';
-  document.getElementById('ap-plan').textContent=p.plan?.toLowerCase()==='quarter'?'⭐ Quarter (3 เดือน)':'Trial';
-  document.getElementById('ap-amt').textContent='฿'+(p.amount||0);
-  document.getElementById('ap-time').textContent=p.createdAt?new Date(p.createdAt).toLocaleString('th-TH'):'—';
-  const sv=document.getElementById('slip-viewer');
-  sv.innerHTML=p.slipUrl?`<img src="${p.slipUrl}" alt="slip" class="img-fluid rounded" onclick="window.open('${p.slipUrl}','_blank')" style="cursor:zoom-in;">`:
-    `<div class="text-center text-muted p-4"><i class="bi bi-paperclip fs-2"></i><div class="small mt-1">ไม่มีสลิป</div></div>`;
-  document.getElementById('ap-detail').style.display='block';
-  document.getElementById('ap-detail').scrollIntoView({behavior:'smooth'});
-}
-function closeApDetail(){document.getElementById('ap-detail').style.display='none';selAp=null;}
-function openSlip(){if(selAp?.slipUrl)window.open(selAp.slipUrl,'_blank');}
-async function doApprove(status){if(!selAp)return;await processAp(selAp.id,status);closeApDetail();}
-async function quickAp(id,status){await processAp(id,status);}
-async function processAp(id,status) {
-  loading(status==='approved'?'กำลัง Approve...':'กำลัง Reject...');
-  const note=document.getElementById('ap-note')?.value||'';
-  const res=await api('approveRegistration',{registrationId:id,status,note,adminId:A?.username});
-  closeLoading();
-  const item=pendingList.find(p=>p.id===id);
-  if(item) item.status=status;
-  renderPending(pendingList);
-  updateDot(pendingList.filter(p=>p.status==='waiting').length);
-  if(status==='approved'){alertSuccess('Approve สำเร็จ!','ส่ง LINE แจ้งสมาชิกแล้ว');loadOverview();}
-  else toast('Rejected แล้ว','warning');
+  }).join('') || '<tr class="empty-row"><td colspan="7">ยังไม่มีการสมัคร</td></tr>';
 }
 
-/* ── CHECK-IN ────────────────────────────────── */
+function filterAp(s)   { renderPending(s ? pendingList.filter(p => p.status === s) : pendingList); }
+function searchAp(q)   { const l = q.toLowerCase(); renderPending(pendingList.filter(p => (p.firstName+' '+p.lastName+p.email).toLowerCase().includes(l))); }
+
+function viewAp(id) {
+  const p = pendingList.find(x => x.id === id); if (!p) return;
+  selAp = p;
+  document.getElementById('ap-name').textContent  = `${p.firstName||''} ${p.lastName||''}`;
+  document.getElementById('ap-email').textContent = p.email || '—';
+  document.getElementById('ap-phone').textContent = p.phone || '—';
+  document.getElementById('ap-line').textContent  = p.lineId || '—';
+  document.getElementById('ap-plan').textContent  = p.plan?.toLowerCase()==='quarter'?'⭐ Quarter (3 เดือน)':'Trial';
+  document.getElementById('ap-amt').textContent   = '฿'+(p.amount||0);
+  const box = document.getElementById('slip-box');
+  box.innerHTML = p.slipUrl
+    ? `<img src="${p.slipUrl}" onclick="window.open('${p.slipUrl}','_blank')">`
+    : `<div class="text-muted text-center small"><i class="bi bi-paperclip fs-2 d-block mb-1"></i>ไม่มีสลิป</div>`;
+  document.getElementById('ap-detail').style.display = 'block';
+  document.getElementById('ap-detail').scrollIntoView({ behavior:'smooth' });
+}
+function closeApDetail() { document.getElementById('ap-detail').style.display = 'none'; selAp = null; }
+function openSlip() { if (selAp?.slipUrl) window.open(selAp.slipUrl,'_blank'); }
+async function doApprove(status) { if (!selAp) return; await processAp(selAp.id, status); closeApDetail(); }
+async function quickAp(id, status) { await processAp(id, status); }
+async function processAp(id, status) {
+  const note = document.getElementById('ap-note')?.value || '';
+  const res = await api('approveRegistration', { registrationId:id, status, note, adminId:A?.username });
+  const item = pendingList.find(p => p.id === id);
+  if (item) item.status = status;
+  renderPending(pendingList);
+  updateDot(pendingList.filter(p => p.status==='waiting').length);
+  toast(status==='approved' ? '✅ Approve สำเร็จ! ส่ง LINE แล้ว' : '❌ Rejected', status==='approved' ? 'ok' : 'er');
+  if (status==='approved') loadOverview();
+}
+
+/* ── CHECK-IN ────────────────────────────── */
 async function doCI() {
-  const id=document.getElementById('sc-id').value.trim().toUpperCase();
-  if(!id){toast('ใส่ Member ID','error');return;}
-  const el=document.getElementById('ci-res');
-  el.style.display='block';el.innerHTML='<div class="text-muted small">กำลังตรวจสอบ...</div>';
-  const res=await api('checkin',{memberId:id,adminId:A?.username});
-  if(res?.success){
-    el.innerHTML=`<div class="alert alert-success p-2 mb-0"><strong>✅ Check-in สำเร็จ!</strong><br><small>${res.memberName||id} — ${res.className||'—'} | ${res.checkinTime||'—'}</small></div>`;
-    addCILog(res.memberName||id,res.className||'—',true);
-    toast('✅ '+( res.memberName||id),'success');
+  const id = document.getElementById('sc-id').value.trim().toUpperCase();
+  if (!id) { toast('ใส่ Member ID','er'); return; }
+  const el = document.getElementById('ci-res');
+  el.innerHTML = '<span class="text-muted small">กำลังตรวจสอบ...</span>';
+  const res = await api('checkin', { memberId:id, adminId:A?.username });
+  if (res?.success) {
+    el.innerHTML = `<div class="alert alert-success p-2 mb-0 small"><strong>✅ Check-in สำเร็จ!</strong><br>${res.memberName||id} — ${res.checkinTime||'—'}</div>`;
+    addCILog(res.memberName||id, res.className||'—', true);
+    toast('✅ '+( res.memberName||id));
   } else {
-    el.innerHTML=`<div class="alert alert-danger p-2 mb-0"><strong>❌ ${res?.message||'ไม่พบ: '+id}</strong></div>`;
+    el.innerHTML = `<div class="alert alert-danger p-2 mb-0 small"><strong>❌ ${res?.message||'ไม่พบ: '+id}</strong></div>`;
     addCILog(id,'—',false);
-    toast(res?.message||'ไม่พบ: '+id,'error');
+    toast(res?.message||'ไม่พบ: '+id,'er');
   }
 }
-function clearCI(){document.getElementById('sc-id').value='';document.getElementById('ci-res').style.display='none';}
-function addCILog(name,cls,ok){
-  ciLog.unshift({name,cls,ok,time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})});
-  document.getElementById('ci-cnt').textContent=ciLog.filter(x=>x.ok).length+' คน';
-  document.getElementById('ci-log').innerHTML=ciLog.map(l=>`
-    <div class="d-flex align-items-center gap-2 p-2 border-bottom">
-      <span class="badge rounded-pill ${l.ok?'bg-success':'bg-danger'}" style="width:8px;height:8px;padding:0;"></span>
-      <span class="flex-grow-1 fw-bold small">${l.name}</span>
-      <span class="text-muted" style="font-size:11px;">${l.cls}</span>
-      <span class="text-muted" style="font-size:11px;">${l.time}</span>
+function clearCI() { document.getElementById('sc-id').value=''; document.getElementById('ci-res').innerHTML=''; }
+function addCILog(name, cls, ok) {
+  ciLog.unshift({ name, cls, ok, time: new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+  document.getElementById('ci-cnt').textContent = ciLog.filter(x=>x.ok).length + ' คน';
+  document.getElementById('ci-log').innerHTML = ciLog.map(l =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #e2e5f5;font-size:13px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:${l.ok?'#10b981':'#ef4444'};flex-shrink:0;"></span>
+      <span style="flex:1;font-weight:700;">${l.name}</span>
+      <span class="text-muted small">${l.cls}</span>
+      <span class="text-muted small ms-2">${l.time}</span>
     </div>`).join('');
 }
-async function searchName(){
-  const q=document.getElementById('ns-in').value.trim();if(!q) return;
-  const res=await api('searchMembers',{query:q});
-  document.getElementById('ns-res').innerHTML=(res?.members||[]).map(m=>`
-    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded mb-1">
-      <span class="fw-bold small">${m.name} <span class="badge bg-primary ms-1">${m.id}</span></span>
-      <button class="btn btn-success btn-sm" onclick="document.getElementById('sc-id').value='${m.id}';doCI()"><i class="bi bi-check-lg"></i> Check-in</button>
-    </div>`).join('')||'<div class="text-muted small p-2">ไม่พบสมาชิก</div>';
+async function searchName() {
+  const q = document.getElementById('ns-in').value.trim(); if (!q) return;
+  const res = await api('searchMembers', { query:q });
+  document.getElementById('ns-res').innerHTML = (res?.members||[]).map(m =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#f5f7ff;border-radius:8px;margin-bottom:6px;font-size:13px;">
+      <span><strong>${m.name}</strong> <span class="text-primary small">${m.id}</span></span>
+      <button class="btn btn-success btn-xs" onclick="document.getElementById('sc-id').value='${m.id}';doCI()">Check-in</button>
+    </div>`).join('') || '<div class="text-muted small p-2">ไม่พบสมาชิก</div>';
 }
 
-/* ── ROOM QR ─────────────────────────────────── */
-async function loadRoomQRs(){
-  const res=await api('getRoomQRs');
-  const qrs=res?.qrs||[];
-  const siteUrl='https://the-owner-app2.vercel.app';
-  const el=document.getElementById('qr-list');
-  if(!qrs.length){el.innerHTML='<div class="col-12 text-center text-muted py-5"><i class="bi bi-qr-code fs-1"></i><div class="mt-2">ยังไม่มี QR — กด "+ สร้าง QR"</div></div>';return;}
-  el.innerHTML=qrs.map(q=>{
-    const url=siteUrl+'/index.html?action=roomCheckin&token='+q.token;
+/* ── ROOM QR ─────────────────────────────── */
+async function loadRoomQRs() {
+  const res = await api('getRoomQRs');
+  const qrs = res?.qrs || [];
+  const siteUrl = 'https://the-owner-app2.vercel.app';
+  const el = document.getElementById('qr-list');
+  if (!qrs.length) { el.innerHTML='<div class="col-12 text-center text-muted py-4">ยังไม่มี QR — กด "+ สร้าง QR"</div>'; return; }
+  el.innerHTML = qrs.map(q => {
+    const url = siteUrl+'/index.html?action=roomCheckin&token='+q.token;
     return `<div class="col-md-6">
-      <div class="card h-100"><div class="card-body d-flex gap-3 align-items-center">
-        <div class="qr-canvas-wrap flex-shrink-0"><canvas id="qrc-${q.id}" width="80" height="80"></canvas></div>
-        <div class="flex-grow-1">
+      <div class="bg-white border rounded-3 p-3 d-flex gap-3 align-items-center" style="border-color:#e2e5f5!important;">
+        <canvas id="qrc-${q.id}" width="72" height="72" style="flex-shrink:0;background:#fff;padding:6px;border-radius:7px;"></canvas>
+        <div style="flex:1;min-width:0;">
           <div class="fw-bold">${q.className}</div>
           <div class="text-muted small">หมดอายุ: ${q.expiresAt?new Date(q.expiresAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—'}</div>
-          <div class="text-primary small mt-1" style="font-size:11px;word-break:break-all;">${url}</div>
+          <div class="text-primary small" style="font-size:11px;word-break:break-all;">${url}</div>
           <div class="d-flex gap-2 mt-2">
-            <button class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard?.writeText('${url}');toast('Copy URL แล้ว','success')"><i class="bi bi-clipboard"></i> Copy</button>
-            <button class="btn btn-brand btn-sm" onclick="printQR('qrc-${q.id}','${q.className}')"><i class="bi bi-printer"></i> Print</button>
+            <button class="btn btn-outline-secondary btn-xs" onclick="navigator.clipboard?.writeText('${url}');toast('Copy URL แล้ว')">📋 Copy</button>
+            <button class="btn btn-brand btn-xs" onclick="printQR('qrc-${q.id}','${q.className}')">🖨️ Print</button>
           </div>
         </div>
-      </div></div>
+      </div>
     </div>`;
   }).join('');
-  setTimeout(()=>qrs.forEach(q=>drawQRCanvas('qrc-'+q.id,siteUrl+'/index.html?action=roomCheckin&token='+q.token)),100);
+  setTimeout(() => qrs.forEach(q => drawQRC('qrc-'+q.id, siteUrl+'/index.html?action=roomCheckin&token='+q.token)), 100);
 }
-function drawQRCanvas(id,text){
-  const c=document.getElementById(id);if(!c) return;
-  const ctx=c.getContext('2d');const sz=80,mods=21,cell=Math.floor(sz/mods);
-  const seed=text.split('').reduce((a,ch)=>a+ch.charCodeAt(0),0);
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);ctx.fillStyle='#000';
+function drawQRC(id, text) {
+  const c = document.getElementById(id); if (!c) return;
+  const ctx = c.getContext('2d'), sz=72, mods=21, cell=Math.floor(sz/mods);
+  const seed = text.split('').reduce((a,ch) => a+ch.charCodeAt(0), 0);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,sz,sz); ctx.fillStyle='#000';
   for(let r=0;r<mods;r++) for(let col=0;col<mods;col++){
     const inF=(r<7&&col<7)||(r<7&&col>=14)||(r>=14&&col<7);
     const bit=inF?((r===0||r===6||col===0||col===6||(r>1&&r<5&&col>1&&col<5)||(r>1&&r<5&&col>8&&col<12)||(r>8&&r<12&&col>1&&col<5))?1:0):((r*7+col*13+seed)%3===0?1:0);
-    if(bit)ctx.fillRect(col*cell+1,r*cell+1,cell-1,cell-1);
+    if(bit) ctx.fillRect(col*cell+1,r*cell+1,cell-1,cell-1);
   }
-  ctx.fillStyle='#1400FF';ctx.fillRect(30,30,20,20);
-  ctx.fillStyle='#fff';ctx.font='bold 5px sans-serif';ctx.textAlign='center';
-  ctx.fillText('OWN',40,37);ctx.fillText(text.slice(-4),40,44);
+  ctx.fillStyle='#1400FF';ctx.fillRect(26,26,20,20);
+  ctx.fillStyle='#fff';ctx.font='bold 5px sans-serif';ctx.textAlign='center';ctx.fillText('OWN',36,33);ctx.fillText(text.slice(-4),36,40);
 }
-function printQR(id,name){const c=document.getElementById(id);if(!c)return;const w=window.open('','_blank','width=400,height=500');w.document.write(`<html><body style="text-align:center;font-family:sans-serif;padding:20px;"><h2>THE OWNER</h2><h3>${name}</h3><p style="color:#666;font-size:13px;">Walk-in Check-in (มีค่าปรับ)</p><img src="${c.toDataURL()}" style="width:200px;margin:16px 0;"><script>window.print();<\/script></body></html>`);}
-async function openGenQR(){
-  const sel=document.getElementById('gq-cl');
-  if(sel) sel.innerHTML='<option>กำลังโหลด...</option>';
+function printQR(id,name){const c=document.getElementById(id);if(!c)return;const w=window.open('','_blank','width=400,height=500');w.document.write(`<html><body style="text-align:center;font-family:sans-serif;padding:20px;"><h2>THE OWNER</h2><h3>${name}</h3><img src="${c.toDataURL()}" style="width:200px;"><script>window.print();<\/script></body></html>`);}
+async function openGenQR() {
+  const sel = document.getElementById('gq-cl');
+  sel.innerHTML = '<option>กำลังโหลด...</option>';
   openModal('gen-qr');
-  const res=await api('getClasses');
-  if(sel) sel.innerHTML=res?.classes?.length?res.classes.map(c=>`<option value="${c.id}">${c.name} (${c.day} ${c.time})</option>`).join(''):'<option value="">ไม่มีคลาส</option>';
+  const res = await api('getClasses');
+  sel.innerHTML = res?.classes?.length ? res.classes.map(c=>`<option value="${c.id}">${c.name} (${c.day} ${c.time})</option>`).join('') : '<option value="">ไม่มีคลาส</option>';
 }
-async function genQR(){
-  const classId=document.getElementById('gq-cl').value;
-  const hours=Number(document.getElementById('gq-hr').value)||24;
-  if(!classId){toast('เลือกคลาสก่อน','error');return;}
-  loading('กำลังสร้าง QR...');
+async function genQR() {
+  const classId=document.getElementById('gq-cl').value;const hours=Number(document.getElementById('gq-hr').value)||24;
+  if(!classId){toast('เลือกคลาสก่อน','er');return;}
   const res=await api('generateRoomQR',{classId,validHours:hours});
-  closeLoading();
-  if(res?.success){closeModal('gen-qr');loadRoomQRs();alertSuccess('สร้าง QR สำเร็จ!',res.className);}
-  else alertError(res?.message||'เกิดข้อผิดพลาด');
+  if(res?.success){closeModal('gen-qr');loadRoomQRs();toast('✅ สร้าง QR: '+res.className);}
+  else toast('❌ '+(res?.message||'เกิดข้อผิดพลาด'),'er');
 }
 
-/* ── MEMBERS ─────────────────────────────────── */
+/* ── MEMBERS ─────────────────────────────── */
 async function loadMembers() {
-  const tbody = document.getElementById('m-body');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  document.getElementById('m-body').innerHTML = '<tr class="empty-row"><td colspan="9"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
   const res = await api('getMembers');
   allMembers = res?.members || [];
-  _memberData = {};
-  allMembers.forEach(m => { _memberData[m.memberId] = m; });
-  document.getElementById('m-body').innerHTML=allMembers.map(m=>{
-    const isQ=String(m.memberId||'').startsWith('OwnP')||String(m.plan||'').toLowerCase()==='quarter';
-    const isActive=['active',''].includes(String(m.status||'').toLowerCase());
+  memberCache = {};
+  allMembers.forEach(m => { memberCache[m.memberId] = m; });
+  renderMembers(allMembers);
+}
+function renderMembers(list) {
+  document.getElementById('m-body').innerHTML = list.map(m => {
+    const isQ = String(m.memberId||'').startsWith('OwnP') || String(m.plan||'').toLowerCase()==='quarter';
+    const isActive = ['active',''].includes(String(m.status||'').toLowerCase());
     return `<tr>
-      <td class="fw-bold text-primary fw-brand small">${m.memberId}</td>
+      <td style="font-family:'Prompt',sans-serif;color:var(--brand);font-weight:700;font-size:12px;">${m.memberId}</td>
       <td><strong>${m.firstName||''} ${m.lastName||''}</strong></td>
       <td class="text-muted small">${m.email||'—'}</td>
       <td class="small">${m.phone||'—'}</td>
-      <td><span class="badge ${isQ?'bg-primary':'bg-info'}">${isQ?'⭐ Quarter':'Trial'}</span></td>
-      <td><span class="badge ${isActive?'bg-success':'bg-danger'}">● ${isActive?'Active':'Inactive'}</span></td>
+      <td><span class="bk ${isQ?'bk-blue':'bk-gray'}">${isQ?'⭐ Quarter':'Trial'}</span></td>
+      <td><span class="bk ${isActive?'bk-green':'bk-red'}">● ${isActive?'Active':'Inactive'}</span></td>
       <td class="text-muted small">${m.expiry||'—'}</td>
       <td class="text-center">${m.sessions||0}</td>
-      <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openEditMemberById('${m.memberId}')"><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-outline-danger btn-sm" onclick="delMember('${m.memberId}','${(m.firstName||'')+(m.lastName||'')}')"><i class="bi bi-trash"></i></button>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline-secondary btn-xs me-1" onclick="openEditMember('${m.memberId}')">✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="delMember('${m.memberId}','${(m.firstName||'')+(m.lastName||'')}')">🗑️</button>
       </td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr class="empty-row"><td colspan="9">ยังไม่มีสมาชิก</td></tr>';
 }
-function openEditMemberById(id){ const m=_memberData[id]; if(!m){toast('ไม่พบสมาชิก','error');return;} openEditMember(m); }
-function openEditMember(m){
-  document.getElementById('em-id').value=m.memberId;
-  document.getElementById('em-mid-lbl').textContent='Member ID: '+m.memberId;
-  document.getElementById('em-fn').value=m.firstName||'';
-  document.getElementById('em-ln').value=m.lastName||'';
-  document.getElementById('em-em').value=m.email||'';
-  document.getElementById('em-ph').value=m.phone||'';
-  document.getElementById('em-pl').value=String(m.memberId||'').startsWith('OwnP')?'quarter':'trial';
-  document.getElementById('em-st').value=['active',''].includes(String(m.status||'').toLowerCase())?'active':'inactive';
-  document.getElementById('em-exp').value=m.expiry&&m.expiry.includes('-')?m.expiry:'';
+function openEditMember(mid) {
+  const m = memberCache[mid]; if (!m) { toast('ไม่พบสมาชิก','er'); return; }
+  document.getElementById('em-id').value = m.memberId;
+  document.getElementById('em-mid-lbl').textContent = 'Member ID: '+m.memberId;
+  document.getElementById('em-fn').value  = m.firstName||'';
+  document.getElementById('em-ln').value  = m.lastName||'';
+  document.getElementById('em-em').value  = m.email||'';
+  document.getElementById('em-ph').value  = m.phone||'';
+  document.getElementById('em-pl').value  = String(m.memberId||'').startsWith('OwnP')?'quarter':'trial';
+  document.getElementById('em-st').value  = ['active',''].includes(String(m.status||'').toLowerCase())?'active':'inactive';
+  document.getElementById('em-exp').value = (m.expiry||'').includes('-')?m.expiry:'';
   openModal('edit-member');
 }
-async function saveMember(){
-  loading('กำลังบันทึก...');
-  const res=await api('updateMember',{id:document.getElementById('em-id').value,firstName:document.getElementById('em-fn').value,lastName:document.getElementById('em-ln').value,email:document.getElementById('em-em').value,phone:document.getElementById('em-ph').value,plan:document.getElementById('em-pl').value,status:document.getElementById('em-st').value,expiryDate:document.getElementById('em-exp').value});
-  closeLoading();closeModal('edit-member');await loadMembers();alertSuccess('บันทึกสำเร็จ!');
+async function saveMember() {
+  const id = document.getElementById('em-id').value;
+  await api('updateMember',{id,firstName:document.getElementById('em-fn').value,lastName:document.getElementById('em-ln').value,email:document.getElementById('em-em').value,phone:document.getElementById('em-ph').value,plan:document.getElementById('em-pl').value,status:document.getElementById('em-st').value,expiryDate:document.getElementById('em-exp').value});
+  closeModal('edit-member'); await loadMembers(); toast('💾 บันทึกสำเร็จ');
 }
-async function addMember(){
-  const fn=document.getElementById('am-fn').value.trim();const em=document.getElementById('am-em').value.trim();
-  if(!fn||!em){toast('กรอกชื่อและอีเมล','error');return;}
-  loading('กำลังเพิ่มสมาชิก...');
+async function addMember() {
+  const fn=document.getElementById('am-fn').value.trim(),em=document.getElementById('am-em').value.trim();
+  if(!fn||!em){toast('กรอกชื่อและอีเมล','er');return;}
   const res=await api('addMember',{firstName:fn,lastName:document.getElementById('am-ln').value.trim(),email:em,phone:document.getElementById('am-ph').value.trim(),lineId:document.getElementById('am-li').value.trim(),plan:document.getElementById('am-pl').value});
-  closeLoading();closeModal('add-member');await loadMembers();alertSuccess('เพิ่มสมาชิกสำเร็จ!',res?.memberId||'');
+  closeModal('add-member');await loadMembers();toast('✅ เพิ่มสมาชิก '+(res?.memberId||''));
 }
-async function delMember(id,name){
-  if(!await confirm('ลบสมาชิก "'+name+'" ('+id+')?')) return;
-  loading('กำลังลบ...');await api('deleteMember',{id});closeLoading();await loadMembers();toast('ลบสมาชิกแล้ว','success');
-}
+async function delMember(id,name){if(!await cfm('ลบสมาชิก "'+name+'" ?'))return;await api('deleteMember',{id});await loadMembers();toast('ลบสมาชิกแล้ว');}
 function exportMembersCSV(){
-  if(!allMembers.length){toast('ยังไม่มีข้อมูล','error');return;}
+  if(!allMembers.length){toast('ยังไม่มีข้อมูล','er');return;}
   const rows=[['Member ID','ชื่อ','อีเมล','แพ็กเกจ','สถานะ','หมดอายุ','ครั้ง'],...allMembers.map(m=>[m.memberId,(m.firstName||'')+' '+(m.lastName||''),m.email,m.plan,m.status,m.expiry,m.sessions])];
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent('\uFEFF'+rows.map(r=>r.join(',')).join('\n'));a.download='members_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-  toast('Export CSV แล้ว','success');
+  toast('📥 Export CSV แล้ว');
 }
 
-/* ── CLASSES ─────────────────────────────────── */
-let _classData = {}; // cache class data
-
-async function loadClasses(){
-  const res =   const _tbloadClasses = document.getElementById('cl-body');
-  if (_tbloadClasses) _tbloadClasses.innerHTML = '<tr><td colspan="7" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
-  await api('getClasses');
+/* ── CLASSES ─────────────────────────────── */
+let _clsImgFile = null;
+async function loadClasses() {
+  document.getElementById('cl-body').innerHTML = '<tr class="empty-row"><td colspan="7"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  const res = await api('getClasses');
+  classCache = {};
   const classes = res?.classes || [];
-  _classData = {};
-  classes.forEach(c => { _classData[c.id] = c; });
-
-  const tMap = {online:'🖥️ Online', onsite:'🏢 Onsite', hybrid:'⚡ Hybrid'};
-  const bCls = {online:'bg-info', onsite:'bg-success', hybrid:'bg-primary'};
-
+  classes.forEach(c => { classCache[c.id] = c; });
+  const tMap={online:'🖥️ Online',onsite:'🏢 Onsite',hybrid:'⚡ Hybrid'};
+  const bMap={online:'bk-gray',onsite:'bk-green',hybrid:'bk-blue'};
   document.getElementById('cl-body').innerHTML = classes.map(c => `
     <tr>
-      <td>${c.imageUrl
-        ? `<img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">`
-        : `<div style="width:44px;height:44px;border-radius:8px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:18px;">📚</div>`
-      }</td>
-      <td>
-        <strong>${c.name||'—'}</strong>
-        ${c.description ? `<div class="text-muted small">${c.description}</div>` : ''}
-      </td>
+      <td>${c.imageUrl?`<img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">`:
+        `<div style="width:44px;height:44px;border-radius:8px;background:#eef0ff;display:flex;align-items:center;justify-content:center;font-size:18px;">📚</div>`}</td>
+      <td><strong>${c.name||'—'}</strong>${c.description?`<div class="text-muted small">${c.description}</div>`:''}</td>
       <td class="small">${c.day||'—'} ${c.time||''}</td>
-      <td><span class="badge ${bCls[c.type]||'bg-primary'}">${tMap[c.type]||c.type}</span></td>
+      <td><span class="bk ${bMap[c.type]||'bk-blue'}">${tMap[c.type]||c.type}</span></td>
       <td class="small text-center">${c.bookedSeats}/${c.maxSeats}</td>
-      <td class="text-center">${c.zoomLink
-        ? `<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="bi bi-camera-video-fill"></i></a>`
-        : '<span class="text-muted">—</span>'
-      }</td>
-      <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openEditClass('${c.id}')"><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-outline-danger btn-sm" onclick="delClass('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="bi bi-trash"></i></button>
+      <td class="text-center">${c.zoomLink?`<a href="${c.zoomLink}" target="_blank" class="btn btn-outline-primary btn-xs"><i class="bi bi-camera-video-fill"></i></a>`:'—'}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline-secondary btn-xs me-1" onclick="openEditClass('${c.id}')">✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="delClass('${c.id}','${(c.name||'').replace(/'/g,'')}')">🗑️</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted py-3">ยังไม่มีคลาส</td></tr>';
-
+    </tr>`).join('') || '<tr class="empty-row"><td colspan="7">ยังไม่มีคลาส</td></tr>';
 }
 function openAddClass(){
-  ['ac-id','ac-date','ac-tm','ac-zid','ac-zpw','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('ac-st').value='20';document.getElementById('ac-title').textContent='📚 เพิ่มคลาสใหม่';
-  resetClassImgUpload();
+  ['ac-id','ac-date','ac-tm','ac-zl','ac-img','ac-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ac-st').value='20';
+  document.getElementById('ac-title').textContent='📚 เพิ่มคลาสใหม่';
+  resetClsUpload();
   openModal('add-class');
 }
-function openEditClass(classId){
-  const c = _classData[classId]; if (!c) { toast('ไม่พบข้อมูลคลาส','error'); return; }
-  document.getElementById('ac-id').value=c.id;
-  document.getElementById('ac-nm').value=c.name||'';
-  const parts=(c.day||'').split('+');
-  document.getElementById('ac-dy').value=parts[0];
-  document.getElementById('ac-date').value=parts[1]||'';
-  document.getElementById('ac-tm').value=c.time||'';
-  document.getElementById('ac-tp').value=c.type||'online';
-  document.getElementById('ac-st').value=c.maxSeats||20;
-  document.getElementById('ac-zl').value=c.zoomLink||'';
-  document.getElementById('ac-img').value=c.imageUrl||'';
-  document.getElementById('ac-desc').value=c.description||'';
+function openEditClass(id){
+  const c=classCache[id];if(!c){toast('ไม่พบคลาส','er');return;}
+  document.getElementById('ac-id').value=c.id;document.getElementById('ac-nm').value=c.name||'';
+  const parts=(c.day||'').split('+');document.getElementById('ac-dy').value=parts[0]||'จันทร์';document.getElementById('ac-date').value=parts[1]||'';
+  document.getElementById('ac-tm').value=c.time||'';document.getElementById('ac-tp').value=c.type||'online';
+  document.getElementById('ac-st').value=c.maxSeats||20;document.getElementById('ac-zl').value=c.zoomLink||'';
+  document.getElementById('ac-img').value=c.imageUrl||'';document.getElementById('ac-desc').value=c.description||'';
   document.getElementById('ac-title').textContent='✏️ แก้ไข: '+c.name;
-  resetClassImgUpload();
-  if (c.imageUrl) {
-    const preview=document.getElementById('class-img-preview');
-    const img=document.getElementById('class-preview-img');
-    if(preview&&img){img.src=c.imageUrl;preview.style.display='block';}
-    const status=document.getElementById('class-upload-status');
-    if(status)status.innerHTML='<span class="badge bg-success"><i class="bi bi-image me-1"></i>มีรูปเดิมอยู่แล้ว</span>';
-  }
+  resetClsUpload();
+  if(c.imageUrl){const p=document.getElementById('cls-img-preview'),i=document.getElementById('cls-preview-img');if(p&&i){i.src=c.imageUrl;p.style.display='block';}document.getElementById('cls-up-status').innerHTML='<span class="badge bg-success">มีรูปเดิมอยู่แล้ว</span>';}
   openModal('add-class');
 }
 async function saveClass(){
-  loading('กำลังบันทึก...');
-  // อัปโหลดรูปก่อนถ้ามี
-  await uploadClassImageIfNeeded();
+  // Upload image if any
+  if(_clsImgFile){
+    document.getElementById('cls-up-status').innerHTML='<span class="badge bg-primary">กำลังอัปโหลด...</span>';
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(_clsImgFile);});
+    const uRes=await api('saveClassImage',{imageBase64:b64,imageName:_clsImgFile.name});
+    if(uRes?.success){document.getElementById('ac-img').value=uRes.url;document.getElementById('cls-up-status').innerHTML='<span class="badge bg-success">อัปโหลดสำเร็จ!</span>';}
+    else{document.getElementById('cls-up-status').innerHTML='<span class="badge bg-danger">อัปโหลดไม่สำเร็จ</span>';}
+    _clsImgFile=null;
+  }
   const id=document.getElementById('ac-id').value;
-  const day=document.getElementById('ac-dy').value;const date=document.getElementById('ac-date').value;
+  const day=document.getElementById('ac-dy').value,date=document.getElementById('ac-date').value;
   const data={name:document.getElementById('ac-nm').value,day:date?`${day}+${date}`:day,time:document.getElementById('ac-tm').value,type:document.getElementById('ac-tp').value,maxSeats:Number(document.getElementById('ac-st').value),zoomLink:document.getElementById('ac-zl').value,imageUrl:document.getElementById('ac-img').value,description:document.getElementById('ac-desc').value};
-  await (id?api('updateClass',{id,...data}):api('addClass',data));
-  closeLoading();closeModal('add-class');
-  resetClassImgUpload();
-  await loadClasses();alertSuccess(id?'แก้ไขสำเร็จ!':'เพิ่มคลาสสำเร็จ!');
+  await(id?api('updateClass',{id,...data}):api('addClass',data));
+  closeModal('add-class');await loadClasses();toast(id?'💾 แก้ไขสำเร็จ':'✅ เพิ่มสำเร็จ');
 }
-async function delClass(id,name){
-  if(!await confirm('ลบคลาส "'+name+'"?')) return;
-  loading();await api('deleteClass',{id});closeLoading();await loadClasses();toast('ลบคลาสแล้ว','success');
+async function delClass(id,name){if(!await cfm('ลบคลาส "'+name+'" ?'))return;await api('deleteClass',{id});await loadClasses();toast('ลบคลาสแล้ว');}
+// Class image upload
+function onClsImgSelect(e){const f=e.target.files[0];if(f)handleClsImg(f);}
+function onClsImgDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleClsImg(f);}
+function handleClsImg(file){
+  if(file.size>5*1024*1024){toast('ไฟล์เกิน 5MB','er');return;}
+  _clsImgFile=file;
+  const zone=document.getElementById('cls-upzone');zone.classList.add('has-file');
+  document.getElementById('cls-up-icon').className='bi bi-check-circle-fill text-success d-block';
+  document.getElementById('cls-up-title').textContent=file.name;
+  document.getElementById('cls-up-sub').textContent=(file.size/1024).toFixed(0)+' KB';
+  const reader=new FileReader();reader.onload=e=>{document.getElementById('cls-preview-img').src=e.target.result;document.getElementById('cls-img-preview').style.display='block';};reader.readAsDataURL(file);
+  document.getElementById('cls-up-status').innerHTML='<span class="badge bg-warning text-dark">รอ Save เพื่ออัปโหลด</span>';
+}
+function resetClsUpload(){
+  _clsImgFile=null;
+  const zone=document.getElementById('cls-upzone');if(zone)zone.classList.remove('has-file');
+  const icon=document.getElementById('cls-up-icon');if(icon)icon.className='bi bi-cloud-arrow-up text-primary d-block';
+  const title=document.getElementById('cls-up-title');if(title)title.textContent='คลิกหรือลากรูปมาวาง';
+  const sub=document.getElementById('cls-up-sub');if(sub)sub.textContent='JPG, PNG — ≤5MB';
+  const prev=document.getElementById('cls-img-preview');if(prev)prev.style.display='none';
+  const st=document.getElementById('cls-up-status');if(st)st.innerHTML='';
 }
 
-/* ── BOOKINGS ────────────────────────────────── */
+/* ── BOOKINGS ────────────────────────────── */
 async function loadBookings(status=''){
+  document.getElementById('bk-body').innerHTML='<tr class="empty-row"><td colspan="8"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
   const res=await api('getBookings',status?{status}:{});
-  const tMap={online:'<span class="badge bg-info-subtle text-info"><i class="bi bi-display me-1"></i>Online</span>',onsite:'<span class="badge bg-success-subtle text-success"><i class="bi bi-building me-1"></i>Onsite</span>',hybrid:'<span class="badge bg-primary-subtle text-primary"><i class="bi bi-lightning-charge-fill me-1"></i>Hybrid</span>'};
+  const tMap={online:'🖥️',onsite:'🏢',hybrid:'⚡'};
   document.getElementById('bk-body').innerHTML=(res?.bookings||[]).map(b=>`
     <tr>
-      <td class="fw-brand small text-primary">${b.MemberID||'—'}</td>
+      <td style="font-family:'Prompt',sans-serif;color:var(--brand);font-size:12px;font-weight:700;">${b.MemberID||'—'}</td>
       <td class="small">${b.MemberName||'—'}</td>
-      <td>
-        <div class="fw-bold">${b.ClassName||'—'}</div>
-        <div class="text-muted small">${b.ClassID||''}</div>
-      </td>
+      <td><strong>${b.ClassName||'—'}</strong><div class="text-muted small">${b.ClassID||''}</div></td>
       <td class="small">${b.ClassDay||''} ${b.ClassTime||''}</td>
-      <td>${tMap[b.Type]||`<span class="badge bg-secondary">${b.Type||'—'}</span>`}</td>
-      <td><span class="badge ${b.CheckedIn?'bg-success':'bg-warning text-dark'}">${b.CheckedIn?'✓ เข้าเรียน':'รอ'}</span></td>
-      <td><span class="badge ${b.Status==='confirmed'?'bg-success':b.Status==='cancelled'?'bg-danger':'bg-warning text-dark'}">${b.Status==='confirmed'?'✓ ยืนยัน':b.Status==='cancelled'?'✕ ยกเลิก':b.Status||'—'}</span></td>
-      <td>
-        ${b.Status==='confirmed'&&!b.CheckedIn?`<button class="btn btn-success btn-sm me-1" onclick="checkInBk('${b.ID}','${b.MemberID}','${b.ClassName}')"><i class="bi bi-check-lg"></i></button>`:''}
-        ${b.Status==='confirmed'?`<button class="btn btn-danger btn-sm" onclick="cancelBk('${b.ID}')"><i class="bi bi-x-lg"></i></button>`:''}
+      <td>${tMap[b.Type]||''} ${b.Type||'—'}</td>
+      <td><span class="bk ${b.CheckedIn?'bk-green':'bk-yellow'}">${b.CheckedIn?'✓':'รอ'}</span></td>
+      <td><span class="bk ${b.Status==='confirmed'?'bk-green':b.Status==='cancelled'?'bk-red':'bk-yellow'}">${b.Status==='confirmed'?'✓ ยืนยัน':b.Status==='cancelled'?'✕ ยกเลิก':b.Status||'—'}</span></td>
+      <td style="white-space:nowrap;">
+        ${b.Status==='confirmed'&&!b.CheckedIn?`<button class="btn btn-success btn-xs me-1" onclick="checkInBk('${b.ID}','${b.MemberID}','${b.ClassName}')">✅</button>`:''}
+        ${b.Status==='confirmed'?`<button class="btn btn-danger btn-xs" onclick="cancelBk('${b.ID}')">✕</button>`:''}
       </td>
-    </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ยังไม่มีการจอง</td></tr>';
+    </tr>`).join('')||'<tr class="empty-row"><td colspan="8">ยังไม่มีการจอง</td></tr>';
 }
-async function checkInBk(id,mid,cls){loading();const res=await api('checkin',{memberId:mid,className:cls,adminId:A?.username});closeLoading();if(res?.success){await loadBookings();alertSuccess('Check-in สำเร็จ!',res.memberName);}else alertError(res?.message||'เกิดข้อผิดพลาด');}
-async function cancelBk(id){if(!await confirm('ยกเลิกการจอง?')) return;loading();await api('cancelBooking',{bookingId:id});closeLoading();await loadBookings();toast('ยกเลิกแล้ว','success');}
+async function checkInBk(id,mid,cls){const res=await api('checkin',{memberId:mid,className:cls,adminId:A?.username});if(res?.success){await loadBookings();toast('✅ Check-in: '+res.memberName);}else toast('❌ '+(res?.message||'เกิดข้อผิดพลาด'),'er');}
+async function cancelBk(id){if(!await cfm('ยกเลิกการจอง?'))return;await api('cancelBooking',{bookingId:id});await loadBookings();toast('ยกเลิกแล้ว');}
 
-/* ── FINES ───────────────────────────────────── */
+/* ── FINES ───────────────────────────────── */
 async function loadFines(){
-  const res=  const _tbloadFines = document.getElementById('f-body');
-  if (_tbloadFines) _tbloadFines.innerHTML = '<tr><td colspan="8" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
-  await api('getFines');const fines=res?.fines||[];
+  document.getElementById('f-body').innerHTML='<tr class="empty-row"><td colspan="8"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  const res=await api('getFines');const fines=res?.fines||[];
   const pend=fines.filter(f=>f.Status==='pending');const paid=fines.filter(f=>f.Status==='paid');
   document.getElementById('f-total').textContent='฿'+pend.reduce((s,f)=>s+Number(f.Amount||0),0);
   document.getElementById('f-cnt').textContent=pend.length;
@@ -1271,86 +1132,71 @@ async function loadFines(){
       <td>${tMap[f.Type]||''} ${f.Type||'—'}</td>
       <td class="small text-muted">${f.Reason||'—'}</td>
       <td class="text-danger fw-bold">฿${f.Amount||0}</td>
-      <td><span class="badge ${f.Status==='paid'?'bg-success':'bg-danger'}">${f.Status==='paid'?'✓ ชำระ':'⏳ ค้าง'}</span></td>
-      <td>
-        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openEditFine('${f.ID}','${f.Amount}','${(f.Reason||'').replace(/'/g,"\\'")}')"><i class="bi bi-pencil"></i></button>
-        ${f.Status!=='paid'?`<button class="btn btn-success btn-sm" onclick="payFine('${f.ID}',this)"><i class="bi bi-check-lg"></i></button>`:''}
+      <td><span class="bk ${f.Status==='paid'?'bk-green':'bk-red'}">${f.Status==='paid'?'✓ ชำระ':'⏳ ค้าง'}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline-secondary btn-xs me-1" onclick="openEditFine('${f.ID}','${f.Amount}','${(f.Reason||'').replace(/'/g,"")}')">✏️</button>
+        ${f.Status!=='paid'?`<button class="btn btn-success btn-xs" onclick="payFine('${f.ID}')">✓ รับ</button>`:''}
       </td>
-    </tr>`).join('')||'<tr><td colspan="8" class="text-center text-muted py-3">ไม่มีค่าปรับ</td></tr>';
+    </tr>`).join('')||'<tr class="empty-row"><td colspan="8">ไม่มีค่าปรับ</td></tr>';
 }
 function openEditFine(id,amount,reason){
   document.getElementById('ef-id').value=id;document.getElementById('af-amt').value=amount;document.getElementById('af-reason').value=reason;
   document.getElementById('af-mid').value='';document.getElementById('af-cls').value='';
-  document.getElementById('fine-modal-title').textContent='✏️ แก้ไขค่าปรับ';openModal('add-fine');
+  document.getElementById('fine-title').textContent='✏️ แก้ไขค่าปรับ';openModal('add-fine');
 }
 async function addFineManual(){
   const efId=document.getElementById('ef-id').value;
-  if(efId){loading();await api('updateFine',{id:efId,amount:Number(document.getElementById('af-amt').value),reason:document.getElementById('af-reason').value});closeLoading();closeModal('add-fine');await loadFines();document.getElementById('ef-id').value='';document.getElementById('fine-modal-title').textContent='⚠️ เพิ่มค่าปรับ';alertSuccess('แก้ไขค่าปรับสำเร็จ!');return;}
-  const mid=document.getElementById('af-mid').value.trim();if(!mid){toast('ใส่ Member ID','error');return;}
-  loading();await api('addFine',{memberId:mid,className:document.getElementById('af-cls').value,type:document.getElementById('af-tp').value,amount:Number(document.getElementById('af-amt').value),reason:document.getElementById('af-reason').value});
-  closeLoading();closeModal('add-fine');await loadFines();toast('เพิ่มค่าปรับแล้ว','success');
+  if(efId){await api('updateFine',{id:efId,amount:Number(document.getElementById('af-amt').value),reason:document.getElementById('af-reason').value});closeModal('add-fine');await loadFines();document.getElementById('ef-id').value='';document.getElementById('fine-title').textContent='⚠️ เพิ่มค่าปรับ';toast('💾 แก้ไขสำเร็จ');return;}
+  const mid=document.getElementById('af-mid').value.trim();if(!mid){toast('ใส่ Member ID','er');return;}
+  await api('addFine',{memberId:mid,className:document.getElementById('af-cls').value,type:document.getElementById('af-tp').value,amount:Number(document.getElementById('af-amt').value),reason:document.getElementById('af-reason').value});
+  closeModal('add-fine');await loadFines();toast('✅ เพิ่มค่าปรับแล้ว');
 }
-async function payFine(id,btn){
-  if(!await confirm('ยืนยันรับค่าปรับ?')) return;
-  loading();await api('payFine',{fineId:id});closeLoading();await loadFines();toast('รับค่าปรับแล้ว','success');
-}
+async function payFine(id){if(!await cfm('ยืนยันรับค่าปรับ?'))return;await api('payFine',{fineId:id});await loadFines();toast('✅ รับค่าปรับแล้ว');}
 
-/* ── REPORTS ─────────────────────────────────── */
+/* ── REPORTS ─────────────────────────────── */
 async function loadReports(){
   const month=document.getElementById('rep-month').value||'';
-  const res=await api('getReports',month?{month}:{});if(!res) return;
+  const res=await api('getReports',month?{month}:{});if(!res)return;
   document.getElementById('r-m').textContent='฿'+(res.memberRevenue??0).toLocaleString();
   document.getElementById('r-fine').textContent='฿'+(res.fineRevenue??0).toLocaleString();
   document.getElementById('r-total').textContent='฿'+(res.monthRevenue??0).toLocaleString();
   document.getElementById('r-n').textContent=res.newMembers??0;
   document.getElementById('r-s').textContent=res.sessions??0;
-  mkChart('chart-pie','doughnut',['Quarter','Trial','ค่าปรับ'],[{data:[res.quarterRevenue||0,res.trialRevenue||0,res.fineRevenue||0],backgroundColor:['#1400FF','#3B82F6','#EF4444'],borderWidth:2}]);
+  mkChart('ch-pie','doughnut',['Quarter','Trial','ค่าปรับ'],[{data:[res.quarterRevenue||0,res.trialRevenue||0,res.fineRevenue||0],backgroundColor:['#1400FF','#3B82F6','#EF4444'],borderWidth:2}]);
   const stats=await api('getStats');
-  if(stats?.monthlyData){const lb=stats.monthlyData.map(m=>m.month.slice(5)+'/'+m.month.slice(2,4));mkChart('chart-ci','bar',lb,[{label:'Check-in',data:stats.monthlyData.map(m=>m.checkins),backgroundColor:'rgba(245,158,11,.5)',borderColor:'#F59E0B',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});}
+  if(stats?.monthlyData){const lb=stats.monthlyData.map(m=>m.month.slice(5)+'/'+m.month.slice(2,4));mkChart('ch-ci','bar',lb,[{label:'Check-in',data:stats.monthlyData.map(m=>m.checkins),backgroundColor:'rgba(245,158,11,.5)',borderColor:'#F59E0B',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});}
 }
-function exportReportCSV(){
-  const rows=[['รายการ','จำนวน'],['รายได้สมาชิก',document.getElementById('r-m').textContent],['รายได้ค่าปรับ',document.getElementById('r-fine').textContent],['รวม',document.getElementById('r-total').textContent],['สมาชิกใหม่',document.getElementById('r-n').textContent],['ครั้งที่เรียน',document.getElementById('r-s').textContent]];
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent('\uFEFF'+rows.map(r=>r.join(',')).join('\n'));a.download='report_'+document.getElementById('rep-month').value+'.csv';a.click();
-  toast('Export CSV แล้ว','success');
-}
+function exportReportCSV(){const rows=[['รายการ','จำนวน'],['รายได้สมาชิก',document.getElementById('r-m').textContent],['จากค่าปรับ',document.getElementById('r-fine').textContent],['รวม',document.getElementById('r-total').textContent]];const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent('\uFEFF'+rows.map(r=>r.join(',')).join('\n'));a.download='report.csv';a.click();toast('📥 Export CSV แล้ว');}
 
-/* ── ADMINS ──────────────────────────────────── */
-async function loadAdmins() {
-  const res =   const _tbloadAdmins = document.getElementById('ad-body');
-  if (_tbloadAdmins) _tbloadAdmins.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
-  await api('getAdmins');
-  if (!res?.admins?.length) return;
+/* ── ADMINS ──────────────────────────────── */
+async function loadAdmins(){
+  document.getElementById('ad-body').innerHTML='<tr class="empty-row"><td colspan="5"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  const res=await api('getAdmins');if(!res?.admins)return;
   const rMap={staff:'Staff',manager:'Manager',super:'Super Admin'};
-  const rCls={staff:'bg-info',manager:'bg-warning text-dark',super:'bg-danger'};
-  document.getElementById('ad-body').innerHTML = res.admins.map(a=>`
+  const rCls={staff:'bk-gray',manager:'bk-yellow',super:'bk-red'};
+  document.getElementById('ad-body').innerHTML=res.admins.map(a=>`
     <tr>
       <td><strong>${a.username}</strong></td>
       <td>${a.name||a.username}</td>
-      <td><span class="badge ${rCls[a.role]||'bg-secondary'}">${rMap[a.role]||a.role}</span></td>
+      <td><span class="bk ${rCls[a.role]||'bk-gray'}">${rMap[a.role]||a.role}</span></td>
       <td class="text-muted small">${a.createdAt?new Date(a.createdAt).toLocaleDateString('th-TH'):'—'}</td>
       <td>${a.username==='admin'?'':
-        `<button class="btn btn-outline-danger btn-sm" onclick="delAdmin('${a.username}',this)"><i class="bi bi-trash"></i></button>`
+        `<button class="btn btn-danger btn-xs" onclick="delAdmin('${a.username}')">🗑️</button>`
       }</td>
     </tr>`).join('');
 }
-
 async function addAdmin(){
-  const u=document.getElementById('aa-us').value.trim();const p=document.getElementById('aa-pw').value;
-  if(!u||!p){toast('กรอก Username/Password','error');return;}
-  const role=document.getElementById('aa-ro').value;
-  loading();const res=await api('addAdmin',{username:u,password:p,name:document.getElementById('aa-nm').value.trim()||u,role});closeLoading();
-  if(res?.success||res===null){
-    const rMap={staff:'Staff',manager:'Manager',super:'Super Admin'};
-    const rCls={staff:'bg-info',manager:'bg-warning text-dark',super:'bg-danger'};
-    document.getElementById('ad-body').innerHTML+=`<tr><td><strong>${u}</strong></td><td>${document.getElementById('aa-nm').value||u}</td><td><span class="badge ${rCls[role]}">${rMap[role]}</span></td><td class="text-muted small">วันนี้</td><td><button class="btn btn-outline-danger btn-sm" onclick="delAdmin('${u}',this)"><i class="bi bi-trash"></i></button></td></tr>`;
-    closeModal('add-admin');mkDT('dt-admins');toast('เพิ่ม Admin: '+u,'success');
-  } else alertError(res?.message||'เกิดข้อผิดพลาด');
+  const u=document.getElementById('aa-us').value.trim(),p=document.getElementById('aa-pw').value;
+  if(!u||!p){toast('กรอก Username/Password','er');return;}
+  const res=await api('addAdmin',{username:u,password:p,name:document.getElementById('aa-nm').value.trim()||u,role:document.getElementById('aa-ro').value});
+  if(res?.success||res===null){closeModal('add-admin');await loadAdmins();toast('✅ เพิ่ม Admin: '+u);}
+  else toast('❌ '+(res?.message||'เกิดข้อผิดพลาด'),'er');
 }
-async function delAdmin(u,btn){if(!await confirm('ลบ Admin: '+u+'?')) return;loading();await api('deleteAdmin',{username:u});closeLoading();btn.closest('tr').remove();toast('ลบ Admin แล้ว','success');}
+async function delAdmin(u){if(!await cfm('ลบ Admin: '+u+'?'))return;await api('deleteAdmin',{username:u});await loadAdmins();toast('ลบ Admin แล้ว');}
 
-/* ── SETTINGS ────────────────────────────────── */
+/* ── SETTINGS ────────────────────────────── */
 async function loadSettings(){
-  const res=await api('getSettingsAll');if(!res?.settings) return;
+  const res=await api('getSettingsAll');if(!res?.settings)return;
   const s=res.settings;
   const sv=(id,key)=>{const el=document.getElementById(id);if(el&&s[key]!==undefined)el.value=s[key];};
   sv('zm-id','zoom_id');sv('zm-pw','zoom_pw');sv('bk-nm','bank_name');sv('bk-ac','bank_acc');sv('bk-ow','bank_owner');
@@ -1362,127 +1208,52 @@ async function saveSetting(group){
   if(group==='bank')  settings={bank_name:document.getElementById('bk-nm').value,bank_acc:document.getElementById('bk-ac').value,bank_owner:document.getElementById('bk-ow').value};
   if(group==='fines') settings={fine_online:document.getElementById('fn-on').value,fine_onsite:document.getElementById('fn-os').value,fine_hybrid:document.getElementById('fn-hy').value,cancel_hours:document.getElementById('fn-ch').value};
   if(group==='line')  settings={line_token:document.getElementById('line-tok').value};
-  loading('กำลังบันทึก...');const res=await api('saveSettings',{settings});closeLoading();
-  if(res?.success||res===null) alertSuccess('บันทึกสำเร็จ!'); else alertError('บันทึกไม่สำเร็จ');
+  const res=await api('saveSettings',{settings});
+  toast(res?.success||res===null?'💾 บันทึกสำเร็จ':'❌ บันทึกไม่สำเร็จ',res?.success||res===null?'ok':'er');
 }
-async function testReminder(){loading('ส่ง Reminder...');const res=await api('sendClassReminders');closeLoading();alertSuccess('ส่ง Reminder แล้ว!',res?.message||'');}
-async function runSetup(){loading('กำลัง Setup...');const res=await api('setupSheets');closeLoading();alertSuccess('Setup เสร็จ!',res?.message||'');}
-async function migrateClasses(){
-  loading('กำลัง Migrate Classes Columns...');
-  const res=await api('migrateClasses');
-  closeLoading();
-  Swal.fire({icon:'success',title:'Migrate สำเร็จ!',text:res?.message||'',confirmButtonColor:'var(--brand)'});
-}
-function openGS(){if(SHEET_ID)window.open('https://docs.google.com/spreadsheets/d/'+SHEET_ID,'_blank');}
-function applyTheme(c,dk){document.documentElement.style.setProperty('--brand',c);if(dk)document.documentElement.style.setProperty('--bdk',dk);document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));event?.target?.classList?.add('active');toast('เปลี่ยนธีมแล้ว','success');}
+async function testReminder(){const res=await api('sendClassReminders');toast(res?.message||'ส่ง Reminder แล้ว');}
+async function runSetup(){const res=await api('setupSheets');toast(res?.message||'Setup เสร็จ');}
+async function migrateClasses(){const res=await api('migrateClasses');toast(res?.message||'Migrate เสร็จ');}
+function openGS(){window.open('https://docs.google.com/spreadsheets/d/'+SHEET_ID,'_blank');}
 
-/* ── TUTORIAL ────────────────────────────────── */
+/* ── TUTORIAL ────────────────────────────── */
 const TUT=[
-  {icon:'bi-bar-chart-fill',title:'ภาพรวม',steps:['ดูยอดสมาชิก รอ Approve Check-in วันนี้','กราฟสมาชิกใหม่และรายได้ 6 เดือน','กด Refresh เพื่ออัปเดต','Export CSV รายชื่อสมาชิก']},
-  {icon:'bi-check2-circle',title:'Approve Slip',steps:['รายการรอ Approve จะขึ้นที่นี่','กด 🔍 ดูรายละเอียดและรูป Slip','✅ Approve — สร้าง OwnP/OwnT ส่ง LINE อัตโนมัติ','❌ Reject — ส่ง LINE แจ้งเหตุผล','กด ✅/❌ ที่ตารางได้เลย (Quick)']},
-  {icon:'bi-camera-fill',title:'Check-in',steps:['พิมพ์ Member ID กด Enter','ค้นหาด้วยชื่อแล้วกด Check-in','ระบบเริ่มนับอายุตั้งแต่วัน Check-in ครั้งแรก','Log ด้านขวาแสดงประวัติวันนี้']},
-  {icon:'bi-qr-code',title:'Room QR Code',steps:['สร้าง QR ติดหน้าห้อง','Walk-in สแกน Check-in — มีค่าปรับอัตโนมัติ','Print QR ติดหน้าห้องเรียน','QR ใหม่ยกเลิก QR เก่าอัตโนมัติ']},
-  {icon:'bi-people-fill',title:'สมาชิก',steps:['DataTable มี Search + Sort + Page อัตโนมัติ','✏️ แก้ไขชื่อ แพ็กเกจ วันหมดอายุ','Export CSV รายชื่อทั้งหมด','กรองตาม Column ได้ใน Search box']},
-  {icon:'bi-collection-fill',title:'คอร์ส & ตาราง',steps:['✏️ แก้ไขวัน เวลา ที่นั่ง Zoom','เพิ่มคลาสใหม่พร้อมกำหนดวันที่','ใส่รูป Thumbnail จาก URL','วันที่จัดแบบ "ศุกร์+20/03/2569"']},
-  {icon:'bi-exclamation-triangle-fill',title:'ค่าปรับ',steps:['✏️ แก้ไขจำนวนเงินหรือเหตุผล','เพิ่มค่าปรับด้วยตนเอง','✓ กด รับ เมื่อสมาชิกชำระแล้ว','ตั้งค่าอัตราค่าปรับใน ตั้งค่าระบบ']},
-  {icon:'bi-gear-fill',title:'ตั้งค่าระบบ',steps:['Zoom ID/Password — ส่งให้สมาชิกเมื่อ Approve','ข้อมูลธนาคาร — แสดงในหน้าสมัคร','LINE Token — เก็บใน Google Sheet ไม่ใน HTML','ทุกค่าบันทึกลง Google Sheet ทันที']},
+  {t:'📊 ภาพรวม',s:['ดูยอดสมาชิก รอ Approve Check-in วันนี้','กราฟสมาชิกใหม่และรายได้ 6 เดือน','กด Refresh เพื่ออัปเดต']},
+  {t:'✅ Approve Slip',s:['รายการรอ Approve จะขึ้นที่นี่','กด 🔍 ดูรายละเอียด Slip','✅ Approve — สร้าง OwnP/OwnT ส่ง LINE อัตโนมัติ','❌ Reject — ส่ง LINE แจ้งเหตุผล']},
+  {t:'📷 Check-in',s:['พิมพ์ Member ID กด Enter','ค้นหาด้วยชื่อแล้วกด Check-in','Log ด้านขวาแสดงประวัติวันนี้']},
+  {t:'🔲 Room QR Code',s:['สร้าง QR ติดหน้าห้อง Walk-in Check-in','Walk-in มีค่าปรับอัตโนมัติ','Print QR ติดหน้าห้องเรียน']},
+  {t:'👥 สมาชิก',s:['ดูรายชื่อสมาชิกทั้งหมด','✏️ แก้ไขข้อมูล แพ็กเกจ วันหมดอายุ','ค้นหาด้วย Search box บนตาราง','Export CSV รายชื่อทั้งหมด']},
+  {t:'📚 คอร์ส & ตาราง',s:['✏️ แก้ไขวัน เวลา ที่นั่ง','เพิ่มรูป Thumbnail จากเครื่องหรือ URL','อัปโหลดรูปไป Google Drive/Pics อัตโนมัติ']},
+  {t:'⚠️ ค่าปรับ',s:['✏️ แก้ไขจำนวนหรือเหตุผล','เพิ่มค่าปรับด้วยตนเอง','✓ กดรับเมื่อชำระแล้ว']},
+  {t:'⚙️ ตั้งค่าระบบ',s:['Zoom ID/Password — ส่งให้สมาชิกเมื่อ Approve','LINE Token — เก็บใน Google Sheet ไม่ใน HTML','Setup Sheets — รันครั้งเดียว']},
 ];
 function renderTutorial(){
   document.getElementById('tut-list').innerHTML=TUT.map((t,i)=>`
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#tut-c-${i}">
-          <i class="bi ${t.icon} text-primary me-2"></i> ${t.title}
-        </button>
+        <button class="accordion-button collapsed fw-brand" type="button" data-bs-toggle="collapse" data-bs-target="#tc${i}">${t.t}</button>
       </h2>
-      <div id="tut-c-${i}" class="accordion-collapse collapse" data-bs-parent="#tut-accordion">
+      <div id="tc${i}" class="accordion-collapse collapse" data-bs-parent="#tut-acc">
         <div class="accordion-body">
-          ${t.steps.map((s,j)=>`<div class="d-flex gap-3 py-2 border-bottom"><div class="tut-num">${j+1}</div><div class="small">${s}</div></div>`).join('')}
+          ${t.s.map((s,j)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #e2e5f5;font-size:13px;color:#4a4a6a;"><div style="width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${j+1}</div><div>${s}</div></div>`).join('')}
         </div>
       </div>
     </div>`).join('');
 }
 
-/* ── CLASS IMAGE UPLOAD ──────────────────────── */
-let _classImgFile = null;
+/* ── MODAL ───────────────────────────────── */
+function openModal(name){ new bootstrap.Modal(document.getElementById('modal-'+name)).show(); }
+function closeModal(name){ bootstrap.Modal.getInstance(document.getElementById('modal-'+name))?.hide(); }
 
-function onClassImgSelect(e) {
-  const f = e.target.files[0]; if (f) handleClassImg(f);
-}
-function onClassImgDrop(e) {
-  e.preventDefault();
-  document.getElementById('class-upload-zone').style.borderColor='#c7d2fe';
-  const f = e.dataTransfer.files[0]; if (f) handleClassImg(f);
-}
-function handleClassImg(file) {
-  if (file.size > 5*1024*1024) { Swal.fire({icon:'error',title:'ไฟล์ใหญ่เกิน 5MB',confirmButtonColor:'var(--brand)'}); return; }
-  _classImgFile = file;
-  const zone = document.getElementById('class-upload-zone');
-  zone.style.borderColor = '#10b981'; zone.style.background = 'rgba(16,185,129,.05)';
-  document.getElementById('class-up-icon').className = 'bi bi-check-circle-fill fs-2 text-success mb-2 d-block';
-  document.getElementById('class-up-title').textContent = file.name;
-  document.getElementById('class-up-sub').textContent = (file.size/1024).toFixed(0)+' KB — พร้อมอัปโหลด';
-  // Preview
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('class-preview-img').src = e.target.result;
-    document.getElementById('class-img-preview').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-  document.getElementById('class-upload-status').innerHTML =
-    '<span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>รอการ Save เพื่ออัปโหลดไป Google Drive</span>';
-}
-
-async function uploadClassImageIfNeeded() {
-  if (!_classImgFile) return null;
-  const statusEl = document.getElementById('class-upload-status');
-  statusEl.innerHTML = '<span class="badge bg-primary"><i class="bi bi-cloud-arrow-up me-1"></i>กำลังอัปโหลดไป Google Drive...</span>';
-  const base64 = await new Promise((res, rej) => {
-    const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(_classImgFile);
-  });
-  const result = await api('saveClassImage', { imageBase64: base64, imageName: _classImgFile.name });
-  if (result?.success) {
-    statusEl.innerHTML = `<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>อัปโหลดสำเร็จ! → Google Drive/Projects The Owner/Pics</span>`;
-    document.getElementById('ac-img').value = result.url;
-    _classImgFile = null;
-    return result.url;
-  } else {
-    statusEl.innerHTML = `<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>${result?.message||'อัปโหลดไม่สำเร็จ'}</span>`;
-    return null;
-  }
-}
-
-function resetClassImgUpload() {
-  _classImgFile = null;
-  const zone = document.getElementById('class-upload-zone');
-  if (zone) { zone.style.borderColor='#c7d2fe'; zone.style.background='#eef0ff'; }
-  const icon = document.getElementById('class-up-icon');
-  if (icon) icon.className='bi bi-cloud-arrow-up fs-2 text-primary mb-2 d-block';
-  const title = document.getElementById('class-up-title');
-  if (title) title.textContent='คลิกหรือลากรูปมาวาง';
-  const sub = document.getElementById('class-up-sub');
-  if (sub) sub.textContent='JPG, PNG, WEBP — สูงสุด 5MB';
-  const preview = document.getElementById('class-img-preview');
-  if (preview) preview.style.display='none';
-  const status = document.getElementById('class-upload-status');
-  if (status) status.innerHTML='';
-}
-function openModal(name){new bootstrap.Modal(document.getElementById('modal-'+name)).show();}
-function closeModal(name){bootstrap.Modal.getInstance(document.getElementById('modal-'+name))?.hide();}
-
-/* ── THEME ───────────────────────────────────── */
+/* ── THEME ───────────────────────────────── */
 function toggleTheme(){
-  const el=document.documentElement;const dark=el.getAttribute('data-bs-theme')==='dark';
-  el.setAttribute('data-bs-theme',dark?'light':'dark');
-  document.getElementById('theme-icon').className='bi '+(dark?'bi-moon-stars':'bi-sun-fill');
+  const b=document.body;const dark=b.getAttribute('data-bs-theme')==='dark';
+  b.setAttribute('data-bs-theme',dark?'light':'dark');
+  document.getElementById('thi').className='bi '+(dark?'bi-moon-stars':'bi-sun-fill');
 }
 
-/* ── STYLE (refresh spin) ───────────────────── */
-const s=document.createElement('style');
-s.textContent=`.spin{animation:spin .6s linear infinite;display:inline-block;}@keyframes spin{to{transform:rotate(360deg);}}`;
-document.head.appendChild(s);
-
-/* ── START ───────────────────────────────────── */
+/* ── INIT ────────────────────────────────── */
+document.getElementById('a-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('a-user').focus();
 </script>
 </body>
