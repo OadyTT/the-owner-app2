@@ -1172,22 +1172,155 @@ function toast(msg, type='ok') {
   _toastTimer = setTimeout(()=>{ el.style.transform='translateX(-50%) translateY(80px)'; }, 3000);
 }
 
-/* ── INIT ────────────────────────────────────── */
+/* ── INIT ────────────────────────────────────────
+   Priority:
+   1. LIFF init (authentication) → ก่อนสุด
+   2. loadSettings (bank info) → parallel
+   3. loadHomeSchedule → parallel
+   4. loadMockStats → ทีหลัง (ไม่ critical)
+──────────────────────────────────────────────── */
 async function init() {
   const params = new URLSearchParams(location.search);
+
+  // Room check-in mode
   if (params.get('action') === 'roomCheckin') {
     STATE.roomQrToken = params.get('token');
     goScreen('roomcheckin'); loadRoomCheckinInfo(); return;
   }
+
+  applyLang();
   renderStatusPill();
-  loadHomeSchedule();
-  loadMockStats();
-  initLiff();
+
+  // โหลด settings + schedule พร้อมกัน (ไม่รอ LIFF)
   loadSettings();
-  applyLang(); // โหลด language ที่เลือกไว้
+  loadHomeSchedule();
+
+  // LIFF init ทันที — สำคัญที่สุด
+  await initLiff();
+
+  // โหลด mock stats ทีหลัง (ไม่บล็อก render)
+  setTimeout(() => loadMockStats(), 800);
 }
 
-/* ── SETTINGS ────────────────────────────────── */
+/* ── LIFF ──────────────────────────────────────────
+   รองรับทั้ง:
+   ✅ LINE App (isInClient) → auto login
+   ✅ External browser (laptop/mobile) → auto login via OAuth
+   ✅ กลับจาก OAuth redirect → liff.init() handle อัตโนมัติ
+──────────────────────────────────────────────── */
+async function initLiff() {
+  if (!window.liff || !LIFF) return;
+  try {
+    // liff.init() จัดการ OAuth callback อัตโนมัติ
+    // ถ้า URL มี liff.state หรือ code → SDK process เอง
+    await window.liff.init({ liffId: LIFF });
+
+    if (window.liff.isLoggedIn()) {
+      // ✅ Login แล้ว (ทั้งใน LINE App และ external browser หลัง OAuth)
+      await handleLiffLogin();
+      return;
+    }
+
+    // ยังไม่ login
+    if (window.liff.isInClient()) {
+      // อยู่ใน LINE App → login ทันทีไม่ต้องถาม
+      window.liff.login();
+      return;
+    }
+
+    // External browser (laptop / mobile browser)
+    // Auto-login ถ้าไม่ได้ logout ไปเอง
+    const didLogout = sessionStorage.getItem('user-logged-out');
+    if (!didLogout) {
+      // Login อัตโนมัติผ่าน LINE OAuth
+      window.liff.login();
+    }
+    // ถ้า logout เอง → ไม่ auto-login ให้ user กดเอง
+
+  } catch(e) {
+    console.warn('LIFF init error:', e.message);
+    // LIFF ใช้ไม่ได้ (เปิดจาก iframe หรือ blocked) → ข้ามไป
+  }
+}
+
+async function handleLiffLogin() {
+  try {
+    const profile = await window.liff.getProfile();
+    if (!profile?.userId) return;
+    STATE.lineProfile = { userId: profile.userId, displayName: profile.displayName };
+
+    // แสดง loading indicator
+    showLiffLoading(true);
+    const res = await api('lineLogin', { lineUserId: profile.userId, displayName: profile.displayName });
+    showLiffLoading(false);
+
+    if (res?.success)          { await loadPortal(res.user); }
+    else if (res?.needApproval){ showPendingScreen(res); }
+    else if (res?.rejected)    { showRejectedScreen(res); }
+    else if (res?.needRegister){ prefillLine(); openModal('register'); }
+  } catch(e) {
+    showLiffLoading(false);
+    console.warn('handleLiffLogin error:', e.message);
+  }
+}
+
+function showLiffLoading(show) {
+  let el = document.getElementById('liff-loading-overlay');
+  if (show && !el) {
+    el = document.createElement('div');
+    el.id = 'liff-loading-overlay';
+    el.innerHTML = `
+      <div style="position:fixed;inset:0;z-index:9998;background:rgba(15,14,35,.85);
+        backdrop-filter:blur(10px);display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:14px;">
+        <div style="width:44px;height:44px;border-radius:50%;
+          background:linear-gradient(135deg,var(--pu1),var(--pu2));
+          display:flex;align-items:center;justify-content:center;
+          font-size:9px;font-weight:800;color:#fff;font-family:var(--fhd);
+          line-height:1.2;text-align:center;
+          box-shadow:0 0 20px rgba(124,58,237,.5);">THE<br>OWN</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.7);">กำลังเข้าสู่ระบบ...</div>
+        <div style="width:120px;height:3px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,var(--pu1),var(--ac1));
+            border-radius:999px;animation:liffLoadBar 1.2s ease-in-out infinite;"></div>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
+    // add keyframe
+    if (!document.getElementById('liff-kf')) {
+      const s = document.createElement('style');
+      s.id = 'liff-kf';
+      s.textContent = '@keyframes liffLoadBar{0%{width:0%;margin-left:0}60%{width:80%;margin-left:0}100%{width:0%;margin-left:120px}}';
+      document.head.appendChild(s);
+    }
+  } else if (!show && el) {
+    el.remove();
+  }
+}
+
+// กด Login ด้วย LINE button
+async function lineFlow() {
+  // ถ้า LIFF พร้อม → ใช้ liff.login()
+  if (window.liff) {
+    try {
+      if (!window.liff.isLoggedIn()) {
+        sessionStorage.removeItem('user-logged-out'); // clear logout flag
+        if (!window.liff._initialized) {
+          await window.liff.init({ liffId: LIFF });
+        }
+        if (window.liff.isLoggedIn()) {
+          await handleLiffLogin(); return;
+        }
+        window.liff.login(); return;
+      } else {
+        await handleLiffLogin(); return;
+      }
+    } catch(e) {}
+  }
+  // Fallback: redirect ไป LIFF URL โดยตรง
+  sessionStorage.removeItem('user-logged-out');
+  window.location.href = 'https://liff.line.me/' + LIFF;
+}
 async function loadSettings() {
   // ── SECURITY: getSettings ส่งเฉพาะ public info (bank, site_url) ─────
   // ❌ zoom_pw, line_token — ไม่ส่งออก GAS จะ filter ไว้ฝั่ง server
@@ -1221,47 +1354,19 @@ function downloadBankQR(){const img=document.getElementById('bank-qr-img');if(im
 
 /* ── MOCK STATS in browser window ───────────── */
 async function loadMockStats() {
-  const res = await api('getStats'); if (!res) return;
+  // ใช้ getStats แต่ไม่บล็อก render
+  // แสดง placeholder ก่อน แล้วอัปเดตทีหลัง
   const el = id => document.getElementById(id);
-  if(el('mock-members'))  el('mock-members').textContent  = res.totalMembers||'—';
-  if(el('mock-checkins')) el('mock-checkins').textContent = res.todayCheckins||'0';
+  ['mock-members','mock-checkins','mock-classes'].forEach(id => {
+    const e = el(id); if (e && e.textContent === '—') e.textContent = '...';
+  });
+  const res = await api('getStats');
+  if (!res) return;
+  if(el('mock-members'))  el('mock-members').textContent  = res.totalMembers   ?? '—';
+  if(el('mock-checkins')) el('mock-checkins').textContent = res.todayCheckins  ?? '0';
   if(el('mock-classes'))  el('mock-classes').textContent  = '4';
 }
 
-/* ── LIFF ────────────────────────────────────── */
-async function initLiff() {
-  try {
-    if (!window.liff||!LIFF) return;
-    await window.liff.init({liffId:LIFF});
-    // ถ้า logged in อยู่แล้ว → โหลด portal ทันที (ทั้งมือถือและ laptop)
-    if (!window.liff.isLoggedIn()) {
-      // ถ้าอยู่ใน LINE App → login อัตโนมัติ
-      if (window.liff.isInClient()) {
-        window.liff.login();
-      }
-      return;
-    }
-    const profile = await window.liff.getProfile(); if (!profile) return;
-    STATE.lineProfile = {userId:profile.userId, displayName:profile.displayName};
-    const res = await api('lineLogin',{lineUserId:profile.userId, displayName:profile.displayName});
-    if (res?.success)       { loadPortal(res.user); }
-    else if (res?.needApproval) { showPendingScreen(res); }
-    else if (res?.rejected)     { showRejectedScreen(res); }
-    else if (res?.needRegister) { prefillLine(); openModal('register'); }
-  } catch(e) { console.log('LIFF:',e.message); }
-}
-async function lineFlow() {
-  if (window.liff) {
-    try {
-      if (!window.liff._initialized) await window.liff.init({liffId:LIFF});
-      if (window.liff.isInClient()) {
-        if (window.liff.isLoggedIn()) { await initLiff(); return; }
-        window.liff.login(); return;
-      }
-    } catch(e) {}
-  }
-  window.location.href = 'https://liff.line.me/' + LIFF;
-}
 
 /* ── SCREEN NAV ──────────────────────────────── */
 function goScreen(name) {
@@ -1423,12 +1528,16 @@ function showRejectedScreen(res) {
 }
 async function checkPendingStatus() {
   toast('กำลังตรวจสอบ...','info');
+  sessionStorage.removeItem('user-logged-out');
   await initLiff();
-  // ถ้า LINE ไม่ได้ login ลองด้วย email
 }
 
 function logout(){
   if(!confirm('ออกจากระบบ?'))return;
+  // ✅ ตั้ง flag ไม่ให้ auto-login อีกครั้ง (เคลียร์เมื่อ user กด Login เอง)
+  sessionStorage.setItem('user-logged-out', '1');
+  // Logout จาก LIFF ด้วย (ถ้า support)
+  try { if (window.liff?.isLoggedIn()) window.liff.logout(); } catch(e) {}
   STATE.user=null;STATE.bookings=[];
   const ub=document.getElementById('menu-user-box');if(ub)ub.classList.add('d-none');
   document.getElementById('menu-guest').style.display='block';
