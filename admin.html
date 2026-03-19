@@ -70,8 +70,50 @@ body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; tra
 .panel.active { display:block; }
 
 /* STAT CARD */
-.stat-c { background:#fff;border:1.5px solid #e2e5f5;border-radius:12px;padding:12px 16px;box-shadow:0 2px 0 #e2e5f5; }
-.stat-val { font-family:'Prompt',sans-serif;font-size:22px;font-weight:800; }
+.stat-c {
+  background:#fff;border:1.5px solid #e2e5f5;border-radius:14px;
+  padding:18px 20px;box-shadow:0 3px 0 #e2e5f5;
+  transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;
+}
+.stat-c::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--stat-accent,var(--brand));border-radius:14px 14px 0 0;
+}
+.stat-c:hover { transform:translateY(-2px);box-shadow:0 6px 0 #e2e5f5; }
+.stat-c .stat-icon { font-size:28px;margin-bottom:6px;display:block; }
+.stat-lbl { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8888aa;margin-bottom:6px; }
+.stat-val { font-family:'Prompt',sans-serif;font-size:32px;font-weight:800;line-height:1; }
+.stat-sub { font-size:11px;color:#8888aa;margin-top:4px; }
+/* Overview quick action cards */
+.ov-card { background:#fff;border:1.5px solid #e2e5f5;border-radius:14px;overflow:hidden;box-shadow:0 3px 0 #e2e5f5; }
+.ov-card-head { display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1.5px solid #f0f2ff;background:linear-gradient(135deg,#f8f9ff,#fff); }
+/* Class thumbnail card grid */
+.cls-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px; }
+.cls-card {
+  background:#fff;border:1.5px solid #e2e5f5;border-radius:16px;overflow:hidden;
+  transition:all .2s;box-shadow:0 3px 0 #e2e5f5;
+}
+.cls-card:hover { transform:translateY(-3px);box-shadow:0 8px 20px rgba(20,0,255,.1);border-color:#c7d2fe; }
+.cls-thumb {
+  width:100%;height:160px;object-fit:cover;display:block;
+  background:linear-gradient(135deg,#eef0ff,#ddd6fe);
+}
+.cls-thumb-placeholder {
+  width:100%;height:160px;background:linear-gradient(135deg,#eef0ff,#ddd6fe);
+  display:flex;align-items:center;justify-content:center;font-size:48px;
+}
+.cls-body { padding:14px 16px; }
+.cls-day { font-size:12px;color:#8888aa;margin-top:4px;line-height:1.5; }
+.cls-badges { display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:10px 0 12px; }
+.cls-actions { display:flex;gap:8px;padding:12px 16px;border-top:1px solid #f0f2ff;background:#fafbff; }
+/* Dark mode */
+[data-bs-theme="dark"] .stat-c { background:#1a1a38;border-color:#2a2a55;box-shadow:0 3px 0 #2a2a55; }
+[data-bs-theme="dark"] .stat-c::before { opacity:.7; }
+[data-bs-theme="dark"] .ov-card { background:#1a1a38;border-color:#2a2a55;box-shadow:0 3px 0 #2a2a55; }
+[data-bs-theme="dark"] .ov-card-head { background:linear-gradient(135deg,#1e1e3f,#1a1a38);border-color:#2a2a55; }
+[data-bs-theme="dark"] .cls-card { background:#1a1a38;border-color:#2a2a55;box-shadow:0 3px 0 #2a2a55; }
+[data-bs-theme="dark"] .cls-actions { background:#13132b;border-color:#2a2a55; }
+[data-bs-theme="dark"] .cls-thumb-placeholder { background:linear-gradient(135deg,#1e1e3f,#2a2a55); }
 
 /* TABLE */
 .tbl-wrap { overflow-x:auto; }
@@ -219,35 +261,108 @@ table tbody tr:hover td { background:#f8f9ff; }
 
 <!-- ── OVERVIEW ───────────────────────────────────── -->
 <div id="p-overview" class="panel active">
-  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
-    <div><h4 class="fw-brand fw-bold mb-0">📊 ภาพรวมระบบ</h4><small class="text-muted" id="today-date"></small></div>
+  <!-- Header -->
+  <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-brand fw-bold mb-1" style="font-size:22px;">📊 ภาพรวมระบบ</h4>
+      <small class="text-muted" id="today-date"></small>
+    </div>
     <div class="d-flex gap-2">
-      <button class="btn btn-outline-secondary btn-sm2" onclick="exportMembersCSV()"><i class="bi bi-download"></i> CSV</button>
+      <button class="btn btn-outline-secondary btn-sm2" onclick="exportMembersCSV()"><i class="bi bi-download"></i> Export</button>
       <button class="btn btn-brand btn-sm2" onclick="go('reports')"><i class="bi bi-graph-up"></i> รายงาน</button>
     </div>
   </div>
-  <div class="row g-2 mb-3">
-    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">สมาชิก</div><div class="stat-val text-primary" id="st-members">—</div></div></div>
-    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">รอ Approve</div><div class="stat-val text-warning" id="st-pend">—</div></div></div>
-    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">Check-in วันนี้</div><div class="stat-val text-success" id="st-today">—</div></div></div>
-    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">Quarter</div><div class="stat-val text-info" id="st-quarter">—</div></div></div>
-    <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">ค่าปรับค้าง</div><div class="stat-val text-danger" id="st-fines">—</div></div></div>
-  </div>
+
+  <!-- Stat Cards 5 ใบ -->
   <div class="row g-3 mb-4">
-    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">📈 สมาชิกใหม่ 6 เดือน</div><canvas id="ch-members" height="160"></canvas></div></div>
-    <div class="col-md-6"><div class="chart-box"><div class="fw-bold small mb-3">💰 รายได้ 6 เดือน (฿)</div><canvas id="ch-revenue" height="160"></canvas></div></div>
+    <div class="col-6 col-md col-lg">
+      <div class="stat-c" style="--stat-accent:#1400FF;" onclick="go('members')" role="button">
+        <span class="stat-icon">👥</span>
+        <div class="stat-lbl">สมาชิกทั้งหมด</div>
+        <div class="stat-val text-primary" id="st-members">—</div>
+        <div class="stat-sub">คน</div>
+      </div>
+    </div>
+    <div class="col-6 col-md col-lg">
+      <div class="stat-c" style="--stat-accent:#F59E0B;" onclick="go('approve')" role="button">
+        <span class="stat-icon">⏳</span>
+        <div class="stat-lbl">รอ Approve</div>
+        <div class="stat-val text-warning" id="st-pend">—</div>
+        <div class="stat-sub">รายการ</div>
+      </div>
+    </div>
+    <div class="col-6 col-md col-lg">
+      <div class="stat-c" style="--stat-accent:#10B981;" onclick="go('checkin')" role="button">
+        <span class="stat-icon">✅</span>
+        <div class="stat-lbl">Check-in วันนี้</div>
+        <div class="stat-val text-success" id="st-today">—</div>
+        <div class="stat-sub">ครั้ง</div>
+      </div>
+    </div>
+    <div class="col-6 col-md col-lg">
+      <div class="stat-c" style="--stat-accent:#06B6D4;">
+        <span class="stat-icon">⭐</span>
+        <div class="stat-lbl">Quarter</div>
+        <div class="stat-val text-info" id="st-quarter">—</div>
+        <div class="stat-sub">สมาชิก</div>
+      </div>
+    </div>
+    <div class="col-6 col-md col-lg">
+      <div class="stat-c" style="--stat-accent:#EF4444;" onclick="go('fines')" role="button">
+        <span class="stat-icon">⚠️</span>
+        <div class="stat-lbl">ค่าปรับค้าง</div>
+        <div class="stat-val text-danger" id="st-fines">—</div>
+        <div class="stat-sub">บาท</div>
+      </div>
+    </div>
   </div>
-  <div class="row g-3">
+
+  <!-- Charts row -->
+  <div class="row g-3 mb-4">
     <div class="col-md-6">
-      <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
-        <div class="d-flex justify-content-between align-items-center p-3 border-bottom"><strong class="small">⏳ รอ Approve</strong><button class="btn btn-warning btn-xs" onclick="go('approve')">ดูทั้งหมด</button></div>
-        <table><thead><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead><tbody id="ov-pend"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody></table>
+      <div class="chart-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="fw-bold">📈 สมาชิกใหม่ 6 เดือน</div>
+          <span class="badge bg-primary-subtle text-primary" id="ov-new-badge">—</span>
+        </div>
+        <canvas id="ch-members" height="170"></canvas>
       </div>
     </div>
     <div class="col-md-6">
-      <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
-        <div class="p-3 border-bottom"><strong class="small">✅ Check-in วันนี้</strong></div>
-        <table><thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead><tbody id="ov-ci"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody></table>
+      <div class="chart-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="fw-bold">💰 รายได้ 6 เดือน (฿)</div>
+          <span class="badge bg-success-subtle text-success" id="ov-rev-badge">—</span>
+        </div>
+        <canvas id="ch-revenue" height="170"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent tables row -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="ov-card">
+        <div class="ov-card-head">
+          <strong class="small">⏳ รอ Approve</strong>
+          <button class="btn btn-warning btn-xs" onclick="go('approve')">ดูทั้งหมด →</button>
+        </div>
+        <table>
+          <thead><tr><th>ชื่อ</th><th>แพ็กเกจ</th><th>เวลา</th></tr></thead>
+          <tbody id="ov-pend"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="ov-card">
+        <div class="ov-card-head">
+          <strong class="small">✅ Check-in วันนี้</strong>
+          <button class="btn btn-success btn-xs" onclick="go('checkin')">ดู Log →</button>
+        </div>
+        <table>
+          <thead><tr><th>สมาชิก</th><th>คอร์ส</th><th>เวลา</th></tr></thead>
+          <tbody id="ov-ci"><tr class="empty-row"><td colspan="3">กำลังโหลด...</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -375,20 +490,18 @@ table tbody tr:hover td { background:#f8f9ff; }
 
 <!-- ── CLASSES ─────────────────────────────────────── -->
 <div id="p-classes" class="panel">
-  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+  <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
     <div><h4 class="fw-brand fw-bold mb-0">📚 คอร์ส & ตาราง</h4><small class="text-muted">ดึงข้อมูลจาก Google Sheet</small></div>
-    <div class="d-flex gap-2">
-      <input type="text" class="tbl-search" placeholder="🔍 ค้นหา..." oninput="tblFilter('tbl-classes',this.value)">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <input type="text" class="tbl-search" id="cls-search" placeholder="🔍 ค้นหาคอร์ส..." oninput="filterClassCards(this.value)">
       <button class="btn btn-outline-secondary btn-sm2" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
       <button class="btn btn-brand btn-sm2" onclick="openAddClass()"><i class="bi bi-plus-lg"></i> เพิ่มคลาส</button>
     </div>
   </div>
-  <div class="bg-white border rounded-3 overflow-hidden" style="border-color:#e2e5f5!important;">
-    <div class="tbl-wrap">
-      <table id="tbl-classes">
-        <thead><tr><th>รูป</th><th>คอร์ส</th><th>วัน/เวลา</th><th>ประเภท</th><th>ที่นั่ง</th><th>Zoom</th><th>Actions</th></tr></thead>
-        <tbody id="cl-body"><tr class="empty-row"><td colspan="7">กำลังโหลด...</td></tr></tbody>
-      </table>
+  <!-- Card Grid -->
+  <div class="cls-grid" id="cls-grid-wrap">
+    <div style="grid-column:1/-1;text-align:center;padding:40px;color:#8888aa;">
+      <div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...
     </div>
   </div>
 </div>
@@ -822,20 +935,68 @@ function tblFilter(tableId, q) {
 async function loadOverview() {
   const res = await api('getStats');
   if (!res) return;
+
+  // Stat cards
   document.getElementById('st-members').textContent  = res.totalMembers    ?? '—';
   document.getElementById('st-pend').textContent     = res.pendingApprovals ?? '0';
   document.getElementById('st-today').textContent    = res.todayCheckins   ?? '0';
   document.getElementById('st-quarter').textContent  = res.quarterMembers  ?? '—';
   document.getElementById('st-fines').textContent    = '฿' + (res.pendingFines ?? '0');
   updateDot(res.pendingApprovals || 0);
-  const ovPend = (res.recentPending || []).map(p => `<tr><td>${p.name||'—'}</td><td><span class="bk bk-blue">${p.plan||'—'}</span></td><td class="text-muted small">${p.time||'—'}</td></tr>`).join('');
-  document.getElementById('ov-pend').innerHTML = ovPend || '<tr class="empty-row"><td colspan="3">ไม่มีรายการ</td></tr>';
-  const ovCi = (res.recentCheckins || []).map(c => `<tr><td>${c.name||'—'}</td><td>${c.class||'—'}</td><td class="text-muted small">${c.time||'—'}</td></tr>`).join('');
-  document.getElementById('ov-ci').innerHTML = ovCi || '<tr class="empty-row"><td colspan="3">ยังไม่มี</td></tr>';
+
+  // Chart badges
+  const totalNew = res.monthlyData ? res.monthlyData.reduce((s,m)=>s+(m.newMembers||0),0) : 0;
+  const totalRev = res.monthlyData ? res.monthlyData.reduce((s,m)=>s+(m.revenue||0),0) : 0;
+  const nb = document.getElementById('ov-new-badge');
+  const rb = document.getElementById('ov-rev-badge');
+  if (nb) nb.textContent = `+${totalNew} คน (6 เดือน)`;
+  if (rb) rb.textContent = `฿${totalRev.toLocaleString()} (6 เดือน)`;
+
+  // Recent pending table
+  const ovPend = (res.recentPending || []).map(p => `
+    <tr>
+      <td><strong>${p.name||'—'}</strong></td>
+      <td><span class="bk ${p.plan?.toLowerCase()==='quarter'?'bk-blue':'bk-gray'}">${p.plan||'—'}</span></td>
+      <td class="text-muted small">${p.time||'—'}</td>
+    </tr>`).join('');
+  document.getElementById('ov-pend').innerHTML = ovPend || '<tr class="empty-row"><td colspan="3">ไม่มีรายการรอ 🎉</td></tr>';
+
+  // Recent check-in table
+  const ovCi = (res.recentCheckins || []).map(ci => `
+    <tr>
+      <td><strong>${ci.name||'—'}</strong></td>
+      <td class="text-muted small">${ci.class||'—'}</td>
+      <td class="text-muted small">${ci.time||'—'}</td>
+    </tr>`).join('');
+  document.getElementById('ov-ci').innerHTML = ovCi || '<tr class="empty-row"><td colspan="3">ยังไม่มีวันนี้</td></tr>';
+
+  // Charts
   if (res.monthlyData?.length) {
     const lb = res.monthlyData.map(m => m.month.slice(5)+'/'+m.month.slice(2,4));
-    mkChart('ch-members','bar',lb,[{label:'สมาชิกใหม่',data:res.monthlyData.map(m=>m.newMembers),backgroundColor:'rgba(20,0,255,.5)',borderColor:'#1400FF',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
-    mkChart('ch-revenue','bar',lb,[{label:'รายได้',data:res.monthlyData.map(m=>m.revenue),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:2,borderRadius:6}],{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+    mkChart('ch-members','bar',lb,[{
+      label:'สมาชิกใหม่',
+      data:res.monthlyData.map(m=>m.newMembers),
+      backgroundColor:'rgba(20,0,255,.4)',
+      borderColor:'#1400FF',
+      borderWidth:2,
+      borderRadius:8,
+      borderSkipped:false,
+    }],{
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false}}}
+    });
+    mkChart('ch-revenue','bar',lb,[{
+      label:'รายได้ (฿)',
+      data:res.monthlyData.map(m=>m.revenue),
+      backgroundColor:'rgba(16,185,129,.4)',
+      borderColor:'#10B981',
+      borderWidth:2,
+      borderRadius:8,
+      borderSkipped:false,
+    }],{
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false}}}
+    });
   }
 }
 function updateDot(n) { const d = document.getElementById('pdot'); d.textContent = n; d.className = 'sb-badge' + (n > 0 ? ' on' : ''); }
