@@ -1764,14 +1764,12 @@ function applyLang() {
 function applyLangStatic() {
   const texts = {
     'hero-sub-text': {
-      th: '4 คอร์สพรีเมียม Online & Onsite
-โดยผู้เชี่ยวชาญที่ทำจริง มาพัฒนาธุรกิจของคุณด้วยกัน',
-      en: '4 Premium courses Online & Onsite
-by real business practitioners — grow your business with us'
+      th: '4 คอร์สพรีเมียม Online & Onsite โดยผู้เชี่ยวชาญที่ทำจริง',
+      en: '4 Premium courses Online & Onsite by real business practitioners'
     },
     'open-badge-text': { th: 'Open — เปิดรับสมาชิกแล้ว!', en: 'Open — Now accepting members!' },
-    'pending-title': { th: 'รอการอนุมัติ', en: 'Pending Approval' },
-    'pending-sub':   { th: 'Admin กำลังตรวจสอบ Slip ของคุณ', en: 'Admin is reviewing your payment slip' },
+    'pending-title':   { th: 'รอการอนุมัติ', en: 'Pending Approval' },
+    'pending-sub':     { th: 'Admin กำลังตรวจสอบ Slip ของคุณ', en: 'Admin is reviewing your payment slip' },
   };
   Object.entries(texts).forEach(([id, t]) => {
     const el = document.getElementById(id);
