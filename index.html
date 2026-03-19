@@ -25,10 +25,44 @@
 }
 [data-theme="light"]{
   --pu5:#F5F3FF; --pu4:#EDE9FE; --pu3:#DDD6FE;
-  --wh:#1E1B4B; --wh70:rgba(30,27,75,.7); --wh40:rgba(30,27,75,.4);
-  --wh15:rgba(109,40,217,.12); --wh08:rgba(109,40,217,.06);
-  --tx:#1E1B4B; --tx2:#5B21B6; --gr1:#059669;
+  --wh:#1E1B4B; --wh70:#4a3a8a; --wh40:rgba(30,27,75,.5);
+  --wh15:rgba(109,40,217,.15); --wh08:rgba(109,40,217,.07);
+  --tx:#1E1B4B; --tx2:#5B21B6; --gr1:#059669; --gr2:#047857;
+  --ac1:#6D28D9; --ac2:#7C3AED;
 }
+/* Light mode overrides */
+[data-theme="light"] body {
+  background: linear-gradient(180deg, #EDE9FE 0%, #F5F3FF 40%, #fff 100%) !important;
+}
+[data-theme="light"] .hero {
+  background: linear-gradient(180deg, #EDE9FE 0%, #F5F3FF 60%, #fff 100%);
+}
+[data-theme="light"] .hero-title { color: #1E1B4B !important; }
+[data-theme="light"] .hero-sub   { color: #4a3a8a; }
+[data-theme="light"] .open-badge { background: rgba(109,40,217,.1); color: #5B21B6; border-color: rgba(109,40,217,.3); }
+[data-theme="light"] .sched-card,
+[data-theme="light"] .step-card,
+[data-theme="light"] .course-card,
+[data-theme="light"] .price-card,
+[data-theme="light"] .sec-card,
+[data-theme="light"] .bk-item,
+[data-theme="light"] .ps-card { background: #fff; border-color: #DDD6FE; }
+[data-theme="light"] .menu-drawer { background: linear-gradient(180deg,#EDE9FE 0%,#F5F3FF 100%); }
+[data-theme="light"] .menu-item  { color: #4a3a8a; }
+[data-theme="light"] .menu-item:hover { background: rgba(109,40,217,.1); color: var(--pu1); }
+[data-theme="light"] .sc-name,
+[data-theme="light"] .step-title,
+[data-theme="light"] .cc-name { color: #1E1B4B; }
+[data-theme="light"] .sc-meta,
+[data-theme="light"] .step-desc,
+[data-theme="light"] .cc-desc  { color: #4a3a8a; }
+[data-theme="light"] .nav { background: rgba(245,243,255,.95); border-color: #DDD6FE; }
+[data-theme="light"] .nav-icon { background: rgba(109,40,217,.08); border-color: rgba(109,40,217,.2); color: #5B21B6; }
+[data-theme="light"] .modal    { background: #F5F3FF; border-color: #DDD6FE; }
+[data-theme="light"] .modal-title { color: #1E1B4B; }
+[data-theme="light"] .bank-card { box-shadow: 0 5px 0 #5B21B6, 0 8px 20px rgba(109,40,217,.2); }
+[data-theme="light"] .zoom-card { background: linear-gradient(135deg,rgba(109,40,217,.2),rgba(91,33,182,.15)); border-color: rgba(109,40,217,.3); }
+[data-theme="light"] .footer    { background: #1E1B4B; }
 
 /* ══ RESET ════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -89,13 +123,14 @@ button,input,select,textarea{font-family:inherit;}
 .nav-title{font-family:var(--fhd);font-size:15px;font-weight:800;color:var(--tx);}
 .nav-status-pill{
   margin-left:4px;display:none;
-  padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;
-  background:rgba(16,185,129,.15);color:var(--gr2);
-  border:1px solid rgba(16,185,129,.3);
+  padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;
+  background:rgba(16,185,129,.2);color:#fff;
+  border:1.5px solid rgba(16,185,129,.5);
+  box-shadow:0 0 12px rgba(16,185,129,.3);
 }
-.nav-status-pill.show{display:inline-flex;align-items:center;gap:5px;}
+.nav-status-pill.show{display:inline-flex;align-items:center;gap:6px;}
 .nav-status-guest{
-  padding:4px 12px;border-radius:999px;font-size:11px;
+  padding:5px 14px;border-radius:999px;font-size:11px;
   background:var(--wh08);color:var(--wh70);border:1px solid var(--wh15);
   display:inline-flex;align-items:center;gap:5px;
 }
@@ -188,7 +223,8 @@ button,input,select,textarea{font-family:inherit;}
 .hero-title .hl{color:var(--ac1);}
 [data-theme="light"] .hero-title{color:var(--pu4);}
 .hero-sub{font-size:14px;color:var(--wh70);line-height:1.7;margin-bottom:24px;max-width:480px;}
-.hero-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;}
+@media(min-width:900px){ .hero-ctas{ flex-wrap:nowrap; } }
 .btn-main{
   background:linear-gradient(135deg,var(--pu1),var(--pu2));color:#fff;
   padding:14px 28px;border-radius:14px;font-size:15px;font-weight:700;
@@ -645,8 +681,8 @@ button,input,select,textarea{font-family:inherit;}
         </div>
       </div>
       <!-- Floating badges -->
-      <div style="position:absolute;top:-16px;right:-16px;background:linear-gradient(135deg,var(--pu1),var(--pu2));border-radius:12px;padding:10px 14px;font-size:12px;font-weight:700;color:#fff;box-shadow:0 8px 30px rgba(124,58,237,.4);animation:float 4s ease-in-out infinite 1s;">⚡ Hybrid Learning</div>
-      <div style="position:absolute;bottom:30px;left:-20px;background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(5,150,105,.2));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--gr2);backdrop-filter:blur(10px);animation:float 5s ease-in-out infinite .5s;">✓ 150฿/ครั้ง</div>
+      <div style="position:absolute;top:-16px;right:-16px;background:linear-gradient(135deg,var(--pu1),var(--pu2));border-radius:12px;padding:10px 14px;font-size:12px;font-weight:700;color:#fff;box-shadow:0 8px 30px rgba(124,58,237,.4);animation:float 4s ease-in-out infinite 1s;font-family:'Prompt',sans-serif;">⚡ Hybrid Learning</div>
+      <div style="position:absolute;bottom:30px;left:-20px;background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(5,150,105,.2));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--gr2);backdrop-filter:blur(10px);animation:float 5s ease-in-out infinite .5s;" style="font-family:'Sarabun',sans-serif;">✅ เริ่มต้น ฿150/ครั้ง</div>
     </div>
   </section>
 
@@ -671,7 +707,7 @@ button,input,select,textarea{font-family:inherit;}
       <span style="font-family:var(--fhd);font-size:15px;font-weight:800;color:#fff;">THE OWNER</span>
     </div>
     <p class="footer-text">LINE OA: @theowner &nbsp;·&nbsp; © 2025 The Owner</p>
-    <p class="version-tap" onclick="adminTap()">v5.0 — i am because we are</p>
+    <p class="version-tap" onclick="adminTap()">v5.1 — i am because we are</p>
   </footer>
 </div>
 
@@ -1088,7 +1124,14 @@ async function initLiff() {
   try {
     if (!window.liff||!LIFF) return;
     await window.liff.init({liffId:LIFF});
-    if (!window.liff.isLoggedIn()) return;
+    // ถ้า logged in อยู่แล้ว → โหลด portal ทันที (ทั้งมือถือและ laptop)
+    if (!window.liff.isLoggedIn()) {
+      // ถ้าอยู่ใน LINE App → login อัตโนมัติ
+      if (window.liff.isInClient()) {
+        window.liff.login();
+      }
+      return;
+    }
     const profile = await window.liff.getProfile(); if (!profile) return;
     STATE.lineProfile = {userId:profile.userId, displayName:profile.displayName};
     const res = await api('lineLogin',{lineUserId:profile.userId, displayName:profile.displayName});
@@ -1177,8 +1220,17 @@ function renderScoreBadge(u){
 /* ── STATUS PILL ─────────────────────────────── */
 function renderStatusPill(){
   const el=document.getElementById('nav-status-pill'); if(!el) return;
-  if(!STATE.user){el.innerHTML='<span class="nav-status-guest">👤 ยังไม่ได้สมัคร</span>';}
-  else{const isQ=String(STATE.user.memberId||'').startsWith('OwnP');el.innerHTML=`<span class="nav-status-pill show">✅ ${STATE.user.firstName||'สมาชิก'}${isQ?' ⭐':''}</span>`;}
+  if(!STATE.user){
+    el.innerHTML='<span class="nav-status-guest"><span style="opacity:.6">👤</span> ยังไม่ได้ Login</span>';
+  } else {
+    const isQ=String(STATE.user.memberId||'').startsWith('OwnP');
+    const name=STATE.user.firstName||'สมาชิก';
+    el.innerHTML=`<span class="nav-status-pill show">
+      <span style="font-size:16px;">✅</span>
+      <span>${name}${isQ?' <span style=\"font-size:14px;\">⭐</span>':''}</span>
+      <span style="font-size:11px;opacity:.8;">${STATE.user.memberId||''}</span>
+    </span>`;
+  }
 }
 
 /* ── ADMIN SHORTCUT ──────────────────────────── */
@@ -1433,11 +1485,45 @@ function copyBankAcc(){navigator.clipboard?.writeText(STATE.bankAcc.replace(/-/g
 const FS=[['','A'],['md','A+'],['lg','A++'],['xl','A+++']]; let fsIdx=0;
 function cycleFontSize(){fsIdx=(fsIdx+1)%FS.length;const[sz,lb]=FS[fsIdx];document.documentElement.setAttribute('data-fs',sz);document.getElementById('font-btn').textContent=lb;toast('ขนาด: '+lb,'info');}
 const _fsStyle=document.createElement('style');
-_fsStyle.textContent='[data-fs="md"] body{font-size:17px!important;}[data-fs="lg"] body{font-size:19px!important;}[data-fs="xl"] body{font-size:21px!important;}';
+_fsStyle.textContent=`
+:root { --base-fs: 15px; }
+[data-fs="md"] { --base-fs: 17px; }
+[data-fs="lg"] { --base-fs: 19px; }
+[data-fs="xl"] { --base-fs: 21px; }
+[data-fs="md"] body,
+[data-fs="lg"] body,
+[data-fs="xl"] body { font-size: var(--base-fs) !important; }
+[data-fs="md"] .hero-title { font-size: clamp(32px, 4.5vw, 60px) !important; }
+[data-fs="lg"] .hero-title { font-size: clamp(34px, 5vw, 64px) !important; }
+[data-fs="xl"] .hero-title { font-size: clamp(36px, 5.5vw, 68px) !important; }
+[data-fs="md"] .sec-title  { font-size: clamp(28px, 5vw, 40px) !important; }
+[data-fs="lg"] .sec-title  { font-size: clamp(30px, 5.5vw, 44px) !important; }
+[data-fs="xl"] .sec-title  { font-size: clamp(32px, 6vw, 48px) !important; }
+`;
 document.head.appendChild(_fsStyle);
 
 /* ── THEME ───────────────────────────────────── */
-function toggleTheme(){const el=document.documentElement;const dark=el.getAttribute('data-theme')==='dark';el.setAttribute('data-theme',dark?'light':'dark');document.getElementById('theme-btn').textContent=dark?'🌙':'☀️';}
+function toggleTheme(){
+  const el = document.documentElement;
+  const isDark = el.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  el.setAttribute('data-theme', newTheme);
+  localStorage.setItem('the-owner-theme', newTheme);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = isDark ? '🌙' : '☀️';
+  // อัปเดต body background ทันที
+  document.body.style.transition = 'background .4s, color .4s';
+}
+// โหลด theme จาก localStorage ตอนเริ่ม
+(function(){
+  const saved = localStorage.getItem('the-owner-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  // อัปเดต icon ตอนโหลด
+  window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+  });
+})();
 
 /* ── START ───────────────────────────────────── */
 document.addEventListener('DOMContentLoaded',init);
