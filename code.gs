@@ -56,7 +56,7 @@ function route(p) {
     // Admin
     adminLogin:           ()=>adminLogin(p),
     adminLogout:          ()=>adminLogout(p),
-    getStats:             ()=>getStats(),
+    getStats:             ()=>getStats(p),
     getPendingApprovals:  ()=>getPendingApprovals(),
     approveRegistration:  ()=>approveRegistration(p),
     getMembers:           ()=>getMembers(),
@@ -820,7 +820,8 @@ function getRoomQRs() {
 }
 
 // ── STATS ─────────────────────────────────────────
-function getStats() {
+function getStats(p) {
+  const numMonths = Math.min(Math.max(Number(p?.months)||6, 1), 12);
   const members=rows(getSheet(SHEET.MEMBERS)).filter(m=>String(m.Status).toLowerCase()!=='deleted');
   const checkins=rows(getSheet(SHEET.CHECKINS));
   const fines=rows(getSheet(SHEET.FINES));
@@ -832,7 +833,7 @@ function getStats() {
   // Monthly data for chart
   const now=new Date();
   const monthlyData=[];
-  for(let i=5;i>=0;i--){
+  for(let i=numMonths-1;i>=0;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1);
     const m=Utilities.formatDate(d,'Asia/Bangkok','yyyy-MM');
     const newM=regs.filter(r=>String(r.CreatedAt).startsWith(m)&&r.Status==='approved').length;

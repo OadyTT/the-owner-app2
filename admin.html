@@ -95,8 +95,11 @@ body { font-family:'Sarabun',sans-serif; font-size:14px; background:#f5f7ff; tra
 }
 .cls-card:hover { transform:translateY(-3px);box-shadow:0 8px 20px rgba(20,0,255,.1);border-color:#c7d2fe; }
 .cls-thumb {
-  width:100%;height:160px;object-fit:cover;display:block;
+  width:100%;max-height:200px;min-height:140px;
+  object-fit:contain;  /* contain = เต็มภาพ ไม่ครอป */
+  display:block;
   background:linear-gradient(135deg,#eef0ff,#ddd6fe);
+  padding:4px;
 }
 .cls-thumb-placeholder {
   width:100%;height:160px;background:linear-gradient(135deg,#eef0ff,#ddd6fe);
@@ -319,22 +322,31 @@ table tbody tr:hover td { background:#f8f9ff; }
 
   <!-- Charts row -->
   <div class="row g-3 mb-4">
+    <div class="col-12 mb-2 d-flex align-items-center gap-2 flex-wrap">
+      <span class="text-muted small fw-bold">แสดงข้อมูล:</span>
+      <div class="btn-group btn-group-sm" id="month-selector">
+        <button class="btn btn-outline-primary active" data-m="1" onclick="setOvMonths(1,this)">1 เดือน</button>
+        <button class="btn btn-outline-primary" data-m="3" onclick="setOvMonths(3,this)">3 เดือน</button>
+        <button class="btn btn-outline-primary" data-m="6" onclick="setOvMonths(6,this)">6 เดือน</button>
+      </div>
+      <span class="text-muted small" id="ov-period-label">กำลังโหลด...</span>
+    </div>
     <div class="col-md-6">
-      <div class="chart-box">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="fw-bold">📈 สมาชิกใหม่ 6 เดือน</div>
+      <div class="chart-box" style="padding:14px;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold small">📈 สมาชิกใหม่</div>
           <span class="badge bg-primary-subtle text-primary" id="ov-new-badge">—</span>
         </div>
-        <canvas id="ch-members" height="170"></canvas>
+        <canvas id="ch-members" height="130"></canvas>
       </div>
     </div>
     <div class="col-md-6">
-      <div class="chart-box">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="fw-bold">💰 รายได้ 6 เดือน (฿)</div>
+      <div class="chart-box" style="padding:14px;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold small">💰 รายได้ (฿)</div>
           <span class="badge bg-success-subtle text-success" id="ov-rev-badge">—</span>
         </div>
-        <canvas id="ch-revenue" height="170"></canvas>
+        <canvas id="ch-revenue" height="130"></canvas>
       </div>
     </div>
   </div>
@@ -490,10 +502,16 @@ table tbody tr:hover td { background:#f8f9ff; }
 
 <!-- ── CLASSES ─────────────────────────────────────── -->
 <div id="p-classes" class="panel">
-  <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
     <div><h4 class="fw-brand fw-bold mb-0">📚 คอร์ส & ตาราง</h4><small class="text-muted">ดึงข้อมูลจาก Google Sheet</small></div>
     <div class="d-flex gap-2 flex-wrap align-items-center">
-      <input type="text" class="tbl-search" id="cls-search" placeholder="🔍 ค้นหาคอร์ส..." oninput="filterClassCards(this.value)">
+      <input type="text" class="tbl-search" id="cls-search" placeholder="🔍 ค้นหาชื่อ..." oninput="filterClassCards(this.value)">
+      <select class="form-select form-select-sm" style="width:120px;" onchange="filterClassType(this.value)">
+        <option value="">ทุกประเภท</option>
+        <option value="online">🖥️ Online</option>
+        <option value="onsite">🏢 Onsite</option>
+        <option value="hybrid">⚡ Hybrid</option>
+      </select>
       <button class="btn btn-outline-secondary btn-sm2" onclick="openGS()"><i class="bi bi-table"></i> Sheet</button>
       <button class="btn btn-brand btn-sm2" onclick="openAddClass()"><i class="bi bi-plus-lg"></i> เพิ่มคลาส</button>
     </div>
@@ -567,8 +585,8 @@ table tbody tr:hover td { background:#f8f9ff; }
     <div class="col-6 col-md"><div class="stat-c"><div class="text-muted small fw-bold mb-1">ครั้งที่เรียน</div><div class="stat-val text-warning" id="r-s">—</div></div></div>
   </div>
   <div class="row g-3">
-    <div class="col-md-5"><div class="chart-box"><div class="fw-bold small mb-3">💰 สัดส่วนรายได้</div><canvas id="ch-pie" height="220"></canvas></div></div>
-    <div class="col-md-7"><div class="chart-box"><div class="fw-bold small mb-3">📊 Check-in 6 เดือน</div><canvas id="ch-ci" height="220"></canvas></div></div>
+    <div class="col-md-5"><div class="chart-box" style="padding:14px;"><div class="fw-bold small mb-2">💰 สัดส่วนรายได้</div><canvas id="ch-pie" height="160"></canvas></div></div>
+    <div class="col-md-7"><div class="chart-box" style="padding:14px;"><div class="fw-bold small mb-2">📊 Check-in 6 เดือน</div><canvas id="ch-ci" height="160"></canvas></div></div>
   </div>
 </div>
 
@@ -932,9 +950,20 @@ function tblFilter(tableId, q) {
 }
 
 /* ── OVERVIEW ───────────────────────────── */
+let _ovMonths = 6; // default 6 เดือน
+
+function setOvMonths(n, btn) {
+  _ovMonths = n;
+  document.querySelectorAll('#month-selector .btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadOverview();
+}
+
 async function loadOverview() {
-  const res = await api('getStats');
+  const res = await api('getStats', {months: _ovMonths});
   if (!res) return;
+  const label = document.getElementById('ov-period-label');
+  if (label) label.textContent = _ovMonths + ' เดือนล่าสุด';
 
   // Stat cards
   document.getElementById('st-members').textContent  = res.totalMembers    ?? '—';
@@ -1286,13 +1315,21 @@ function renderClassCards(classes) {
   }).join('');
 }
 
+let _clsFilterQ = '', _clsFilterType = '';
 function filterClassCards(q) {
-  var lq = q.toLowerCase();
-  renderClassCards(lq ? _allClasses.filter(function(c) {
-    return (c.name||'').toLowerCase().includes(lq)
-        || (c.day||'').toLowerCase().includes(lq)
-        || (c.type||'').toLowerCase().includes(lq);
-  }) : _allClasses);
+  _clsFilterQ = q.toLowerCase();
+  applyClassFilter();
+}
+function filterClassType(t) {
+  _clsFilterType = t.toLowerCase();
+  applyClassFilter();
+}
+function applyClassFilter() {
+  renderClassCards(_allClasses.filter(function(cl) {
+    var matchQ    = !_clsFilterQ    || (cl.name||'').toLowerCase().includes(_clsFilterQ) || (cl.day||'').toLowerCase().includes(_clsFilterQ);
+    var matchType = !_clsFilterType || (cl.type||'').toLowerCase() === _clsFilterType;
+    return matchQ && matchType;
+  }));
 }
 
 async function loadClasses() {
@@ -1366,14 +1403,26 @@ function resetClsUpload(){
 /* ── BOOKINGS ────────────────────────────── */
 async function loadBookings(status=''){
   document.getElementById('bk-body').innerHTML='<tr class="empty-row"><td colspan="8"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
+  // โหลด classes ก่อนถ้ายังไม่มี cache
+  if (Object.keys(classCache).length === 0) {
+    const cls = await api('getClasses');
+    (cls?.classes||[]).forEach(function(cl){ classCache[cl.id] = cl; });
+  }
   const res=await api('getBookings',status?{status}:{});
   const tMap={online:'🖥️',onsite:'🏢',hybrid:'⚡'};
-  document.getElementById('bk-body').innerHTML=(res?.bookings||[]).map(b=>`
-    <tr>
+  // Enrich class names from classCache
+  document.getElementById('bk-body').innerHTML=(res?.bookings||[]).map(b=>{
+    // หาชื่อคลาสจาก cache ก่อน ถ้าไม่มีใช้จาก data
+    const cls = classCache[b.ClassID] || {};
+    const clsName = cls.name || b.ClassName || b.ClassID || '—';
+    const clsDay  = cls.day  || b.ClassDay  || '';
+    const clsTime = cls.time || b.ClassTime || '';
+    const dayFmt  = clsDay ? formatClassDay(clsDay) : '—';
+    return `<tr>
       <td style="font-family:'Prompt',sans-serif;color:var(--brand);font-size:12px;font-weight:700;">${b.MemberID||'—'}</td>
       <td class="small">${b.MemberName||'—'}</td>
-      <td><strong>${b.ClassName||'—'}</strong><div class="text-muted small">${b.ClassID||''}</div></td>
-      <td class="small">${b.ClassDay||''} ${b.ClassTime||''}</td>
+      <td><strong>${clsName}</strong><div class="text-muted small">${b.ClassID||''}</div></td>
+      <td style="font-size:13px;"><div>${dayFmt}</div><div class="text-muted small">⏰ ${clsTime}</div></td>
       <td>${tMap[b.Type]||''} ${b.Type||'—'}</td>
       <td><span class="bk ${b.CheckedIn?'bk-green':'bk-yellow'}">${b.CheckedIn?'✓':'รอ'}</span></td>
       <td><span class="bk ${b.Status==='confirmed'?'bk-green':b.Status==='cancelled'?'bk-red':'bk-yellow'}">${b.Status==='confirmed'?'✓ ยืนยัน':b.Status==='cancelled'?'✕ ยกเลิก':b.Status||'—'}</span></td>
@@ -1381,7 +1430,7 @@ async function loadBookings(status=''){
         ${b.Status==='confirmed'&&!b.CheckedIn?`<button class="btn btn-success btn-xs me-1" onclick="checkInBk('${b.ID}','${b.MemberID}','${b.ClassName}')">✅</button>`:''}
         ${b.Status==='confirmed'?`<button class="btn btn-danger btn-xs" onclick="cancelBk('${b.ID}')">✕</button>`:''}
       </td>
-    </tr>`).join('')||'<tr class="empty-row"><td colspan="8">ยังไม่มีการจอง</td></tr>';
+    </tr>`;}).join('')||'<tr class="empty-row"><td colspan="8">ยังไม่มีการจอง</td></tr>';
 }
 async function checkInBk(id,mid,cls){const res=await api('checkin',{memberId:mid,className:cls,adminId:A?.username});if(res?.success){await loadBookings();toast('✅ Check-in: '+res.memberName);}else toast('❌ '+(res?.message||'เกิดข้อผิดพลาด'),'er');}
 async function cancelBk(id){if(!await cfm('ยกเลิกการจอง?'))return;await api('cancelBooking',{bookingId:id});await loadBookings();toast('ยกเลิกแล้ว');}
